@@ -143,3 +143,27 @@ Ce rapport documente la construction pas à pas d'une application web de gestion
 
 *Liste des étudiants enregistrés :*
 ![Students List Screenshot](./capture_admin_students.png)
+
+## 7. Partie 6 : Vues CRUD pour la Gestion des Étudiants
+
+**6.1 Mise à jour de student/views.py**
+* **Action :** Création des fonctions de vues (CRUD) pour chaque opération : `student_list`, `add_student`, `edit_student`, `view_student`, `delete_student`.
+* **Objectif :** Gérer les requêtes HTTP pour l'affichage, l'ajout, la consultation, la modification et la suppression d'étudiants.
+
+**6.2 Mise à jour des routes dans student/urls.py**
+* **Action :** Ajout des routes correspondant à chaque vue CRUD, en utilisant des paramètres tels que `<str:student_id>` pour identifier précisément quel étudiant ou parent est ciblé.
+* **Objectif :** Associer les URLs appropriées (listes de données ou actions spécifiques) aux vues.
+
+**6.3 Implémentation de la vue d'ajout d'un étudiant**
+* **Action :** Développement de la logique POST dans `add_student` pour récupérer les données du formulaire HTML, créer d'abord un enregistrement `Parent`, puis l'instance `Student` liée au parent, et rediriger l'utilisateur vers la liste des étudiants avec un message de succès (via le module messages de Django).
+* **Objectif :** Permettre l'enregistrement conjoint d'un parent et d'un étudiant de manière fluide et sécurisée dans la base de données.
+
+**6.4 Liaison des menus aux routes**
+* **Action :** Modification du fichier de template partagé `templates/Home/base.html` pour utiliser les balises locales `{% url 'nom_route' %}` comme `{% url 'student_list' %}` et `{% url 'add_student' %}` dans les attributs HTML `href` du menu de navigation.
+* **Objectif :** Lier dynamiquement les liens du menu latéral du tableau de bord aux vues et URLs du projet, s'assurant ainsi que toute mise à jour de route côté backend est répercutée automatiquement côté front.
+
+*Aperçu de la page listant les étudiants (Student List) :*
+![Student List Screenshot](./capture_student_list.png)
+
+*Aperçu du formulaire d'ajout d'étudiant (Add Student) :*
+![Student Add Screenshot](./capture_student_add.png)
