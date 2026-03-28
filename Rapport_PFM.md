@@ -168,7 +168,28 @@ Ce rapport documente la construction pas à pas d'une application web de gestion
 *Aperçu du formulaire d'ajout d'étudiant (Add Student) :*
 ![Student Add Screenshot](./capture_student_add.png)
 
-## 8. Partie 7 : Module d'Authentification personnalisé
+## 8. Partie 7 : Conception et Modélisation (UML)
+
+La réussite d'un projet complexe comme PreSkool repose sur une phase de conception rigoureuse. Nous avons utilisé le langage UML pour modéliser les différents aspects du système.
+
+### 7.1 Diagramme de Cas d'Utilisation (Use Case Diagram)
+Ce diagramme illustre les interactions entre les trois acteurs principaux (Admin, Enseignant, Étudiant) et les fonctionnalités du système. Il met en évidence la séparation des responsabilités et les services offerts à chaque profil.
+![UML Use Case](./diag_usecase.png)
+
+### 7.2 Diagramme de Classes
+Le diagramme de classes représente la structure statique du système. Il détaille les modèles Django (entités), leurs attributs et surtout les relations (One-to-One, Foreign Key) qui lient les étudiants aux parents, et les enseignants aux départements.
+![UML Class Diagram](./diag_classe.png)
+
+### 7.3 Diagramme de Séquence
+Ce diagramme détaille le flux dynamique des messages lors d'une opération critique, comme l'authentification ou la création d'un étudiant. Il montre comment les requêtes circulent entre le navigateur, le routeur d'URL, la vue Django et la base de données.
+![UML Sequence Diagram](./diag_sequence.png)
+
+### 7.4 Diagramme d'Activité
+Le diagramme d'activité modélise le flux de contrôle. Il représente ici le processus de connexion, incluant les vérifications de sécurité et la redirection conditionnelle vers le tableau de bord approprié selon le rôle de l'utilisateur.
+![UML Activity Diagram](./diag_activite.png)
+
+## 9. Partie 8 : Module d'Authentification personnalisé
+
 
 Dans cette section, un système complet d'authentification a été conçu avec un modèle d'utilisateur personnalisé capable de gérer trois rôles distincts (Administrateur, Enseignant, Étudiant) et équipé de fonctionnalités avancées telles que la réinitialisation de mot de passe par mail.
 
@@ -201,7 +222,7 @@ Dans cette section, un système complet d'authentification a été conçu avec u
 *Aperçu de la page de connexion (Login) :*
 ![Login Screenshot](./capture_login.png)
 
-## 9. Partie 8 : Système de Gestion des Enseignants (CRUD)
+## 10. Partie 9 : Système de Gestion des Enseignants (CRUD)
 
 Le module Enseignants est essentiel pour structurer l'équipe pédagogique. Il permet non seulement de stocker les informations personnelles, mais aussi de lier chaque professeur à sa spécialité académique.
 
@@ -211,7 +232,7 @@ Le module Enseignants est essentiel pour structurer l'équipe pédagogique. Il p
 *Aperçu de la liste des enseignants (Gestion centralisée du corps professoral) :*
 ![Teachers List](./capture_teachers_list.png)
 
-## 10. Partie 9 : Gestion des Départements et des Matières
+## 11. Partie 10 : Gestion des Départements et des Matières
 
 Afin d'organiser les enseignements, nous avons mis en place une structure hiérarchique stricte.
 
@@ -225,7 +246,7 @@ Les matières sont le cœur de l'enseignement. Chaque matière est liée dynamiq
 *Aperçu du catalogue des matières :*
 ![Subjects List](./capture_subjects_list.png)
 
-## 11. Partie 10 : Tableaux de Bord Spécifiques (Dashboards)
+## 12. Partie 11 : Tableaux de Bord Spécifiques (Dashboards)
 
 ### 10.1 Dashboard Administrateur
 L'administrateur dispose d'une vue "360 degrés". Des graphiques (via Chart.js) affichent la répartition hommes/femmes des étudiants et le volume des effectifs par département. C'est ici que les décisions stratégiques sont prises.
@@ -239,7 +260,7 @@ Le tableau de bord enseignant est focalisé sur l'animation pédagogique. Il aff
 L'étudiant accède à un espace personnel "Self-Service". Il peut y voir sa progression, son assiduité et ses prochains examens. C'est également le point de départ pour toutes ses démarches administratives.
 ![Student Dashboard](./capture_dashboard_student.png)
 
-## 12. Partie 11 : Fonctionnalités Avancées (Cartes et Certificats)
+## 13. Partie 12 : Fonctionnalités Avancées (Cartes et Certificats)
 
 Cette partie automatise le bureau de la scolarité, réduisant les délais et le papier.
 
@@ -263,6 +284,6 @@ L'administration traite les demandes par lot. Pour chaque certificat approuvé, 
 *Résultat final : Exemple d'un certificat officiel prêt à être imprimé ou envoyé :*
 ![Official Certificate Result](./capture_official_certificate.png)
 
-## 13. Conclusion
+## 14. Conclusion
 Le projet PreSkool ne se limite pas à une simple base de données d'étudiants. C'est un véritable écosystème numérique qui simplifie la vie scolaire. L'utilisation de Django a permis d'intégrer des fonctionnalités complexes comme la génération de PDF à la volée et une gestion fine des droits d'accès, garantissant ainsi sécurité et efficacité.
 
