@@ -200,3 +200,69 @@ Dans cette section, un système complet d'authentification a été conçu avec u
 
 *Aperçu de la page de connexion (Login) :*
 ![Login Screenshot](./capture_login.png)
+
+## 9. Partie 8 : Système de Gestion des Enseignants (CRUD)
+
+Le module Enseignants permet un suivi rigoureux du corps professoral, incluant leurs spécialités, départements et coordonnées.
+
+*   **Gestion des Enseignants :** Implémentation complète des opérations de création, lecture, mise à jour et suppression (CRUD).
+*   **Affectation Académique :** Chaque enseignant est lié à un département spécifique, permettant une organisation structurelle claire.
+*   **Interface Intuitive :** Utilisation de tables dynamiques pour une recherche rapide et une gestion simplifiée.
+
+*Aperçu de la liste des enseignants :*
+![Teachers List](./capture_teachers_list.png)
+
+## 10. Partie 9 : Gestion des Départements et des Matières
+
+La structure académique repose sur la hiérarchie des départements et le catalogue des matières.
+
+*   **Départements :** Regroupement des ressources pédagogiques par faculté ou discipline (Mathématiques, Physique, etc.).
+*   **Matières (Subjects) :** Création d'un catalogue de cours complet, chaque matière étant rattachée à un département et à une classe spécifique.
+*   **Flexibilité :** Possibilité d'ajouter, modifier ou supprimer des entités académiques selon l'évolution du programme scolaire.
+
+*Aperçu des départements :*
+![Departments List](./capture_departments_list.png)
+
+*Aperçu des matières :*
+![Subjects List](./capture_subjects_list.png)
+
+## 11. Partie 10 : Tableaux de Bord Spécifiques (Dashboards)
+
+L'application propose des tableaux de bord personnalisés selon le rôle de l'utilisateur connecté, maximisant ainsi l'utilité des données affichées.
+
+*   **Dashboard Administrateur :** Vue d'ensemble avec statistiques globales (nombre d'étudiants, enseignants, graphiques de répartition).
+*   **Dashboard Enseignant :** Accès direct à son emploi du temps, à la liste de ses étudiants et à ses performances de classe.
+*   **Dashboard Étudiant :** Suivi personnel, progression des notes et documents importants.
+
+*Aperçu du Tableau de bord Administrateur :*
+![Admin Dashboard](./capture_dashboard_admin.png)
+
+*Aperçu du Tableau de bord Enseignant :*
+![Teacher Dashboard](./capture_dashboard_teacher.png)
+
+*Aperçu du Tableau de bord Étudiant :*
+![Student Dashboard](./capture_dashboard_student.png)
+
+## 12. Partie 11 : Fonctionnalités Avancées (Cartes et Certificats)
+
+Cette partie représente la valeur ajoutée du projet, automatisant des processus administratifs souvent lents et manuels.
+
+*   **Génération de Cartes d'Étudiant :** Système permettant aux étudiants de demander leur badge. L'administrateur valide la photo et génère instantanément une carte d'identité scolaire formatée.
+*   **Demandes de Certificats Officiels :** Les étudiants peuvent demander des attestations de scolarité, des certificats de réussite ou des relevés de notes directement depuis leur espace.
+*   **Workflow d'Approbation :** L'administration dispose d'une interface dédiée pour approuver les demandes et générer des documents PDF officiels avec signature et tampon numérique.
+
+*Aperçu de la Carte d'Étudiant générée :*
+![Student Card](./capture_student_card.png)
+
+*Aperçu de la gestion des demandes (Admin) :*
+![Certificate Approval](./capture_admin_certificate_approval.png)
+
+*Exemple de certificat officiel généré :*
+![Official Certificate](./capture_official_certificate.png)
+
+## 13. Conclusion
+
+Ce projet de gestion scolaire (PFM) démontre la puissance et la flexibilité de Django pour le développement d'applications web complexes. En suivant une approche modulaire et en mettant l'accent sur l'expérience utilisateur (UX) et la sécurité, nous avons réussi à bâtir une base solide pour la transformation numérique d'un établissement d'enseignement.
+
+L'intégration réussie de la gestion des identités, des flux académiques et des services administratifs automatisés positionne cette application comme un outil complet et évolutif pour l'avenir.
+
