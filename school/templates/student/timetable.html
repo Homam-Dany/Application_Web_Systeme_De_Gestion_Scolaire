@@ -1,0 +1,138 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title">Emploi du Temps Universitaire</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Time Table</li>
+                    </ul>
+                </div>
+                {% if request.user.is_admin %}
+                <div class="col-auto text-right float-right ml-auto">
+                    <a href="{% url 'add_timetable' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Event</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white text-center border-bottom-0 pb-0">
+                        <h4 class="card-title text-uppercase font-weight-bold" style="color: #2c3e50; letter-spacing: 1px;">
+                            Emploi du Temps {% if is_teacher %}Professeur{% else %}Étudiant{% endif %}
+                        </h4>
+                        <p class="text-muted"><small>Semestre en Cours - <i>Sciences et Techniques</i></small></p>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if is_admin %}
+                        <!-- ADMIN MULTI-TAB VIEW -->
+                        <ul class="nav nav-tabs nav-tabs-solid nav-justified mb-4" id="timetableTabs" role="tablist">
+                            {% for cname, data in admin_matrices.items %}
+                            <li class="nav-item">
+                                <a class="nav-link font-weight-bold text-uppercase {% if forloop.first %}active{% endif %}" id="tab-{{ cname }}-link" data-toggle="tab" href="#tab-{{ cname }}" role="tab" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" style="letter-spacing: 1px;">
+                                    {{ cname }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        
+                        <div class="tab-content" id="timetableTabsContent">
+                            {% for cname, cluster in admin_matrices.items %}
+                            {% with matrix=cluster.data colors=cluster.colors %}
+                            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-{{ cname }}" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped text-center align-middle" style="table-layout: fixed; width: 100%; border-color: #dee2e6;">
+                                        <thead class="text-white" style="background-color: {{ colors.header }};">
+                                            <tr>
+                                                <th style="width: 12%; border: 1px solid {{ colors.hborder }}; font-size: 14px;">Jours / Heures</th>
+                                                {% for h in slot_headers %}
+                                                    <th style="border: 1px solid {{ colors.hborder }}; font-size: 14px;">{{ h }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                        </thead>
+                                        <tbody style="background-color: #f8f9fa;">
+                                            {% for row in matrix %}
+                                            <tr>
+                                                <td class="font-weight-bold text-white align-middle shadow-sm" style="background-color: {{ colors.main }}; border: 1px solid {{ colors.border }}; letter-spacing: 1px; font-size: 13px;">
+                                                    {{ row.day_name }}
+                                                </td>
+                                                {% for cell in row.slots %}
+                                                    <td style="border: 1px solid #dfe6e9; padding: 10px; vertical-align: middle;">
+                                                        {% if cell.events %}
+                                                            {% for ev in cell.events %}
+                                                            <div class="p-2 mb-1 shadow-sm rounded" style="background-color: {{ colors.cell }}; border-left: 4px solid {{ colors.border }};">
+                                                                <strong style="color: #2d3436; font-size: 12px; display: block;">{{ ev.subject.name|upper }}</strong>
+                                                                <span class="badge badge-primary badge-pill mb-1" style="font-size: 10px; background-color: {{ colors.main }};">{{ ev.room_no }}</span><br>
+                                                                <small class="text-muted font-weight-bold"><i class="fas fa-user-tie"></i> Pr. {{ ev.teacher.last_name }}</small>
+                                                            </div>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            <span class="text-muted" style="opacity: 0.2;">-</span>
+                                                        {% endif %}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endwith %}
+                            {% endfor %}
+                        </div>
+
+                        {% else %}
+                        <!-- REGULAR STUDENT/TEACHER VIEW -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped text-center align-middle" style="table-layout: fixed; width: 100%; border-color: #dee2e6;">
+                                <thead class="text-white" style="background-color: {% if is_teacher %}#c0392b{% else %}#3b5998{% endif %};">
+                                    <tr>
+                                        <th style="width: 12%; border: 1px solid {% if is_teacher %}#922b21{% else %}#2a4175{% endif %}; font-size: 14px;">Jours / Heures</th>
+                                        {% for h in slot_headers %}
+                                            <th style="border: 1px solid {% if is_teacher %}#922b21{% else %}#2a4175{% endif %}; font-size: 14px;">{{ h }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody style="background-color: #f8f9fa;">
+                                    {% for row in timetable_data %}
+                                    <tr>
+                                        <td class="font-weight-bold text-white align-middle shadow-sm" style="background-color: {% if is_teacher %}#e74c3c{% else %}#74b9ff{% endif %}; border: 1px solid {% if is_teacher %}#c0392b{% else %}#0984e3{% endif %}; letter-spacing: 1px; font-size: 13px;">
+                                            {{ row.day_name }}
+                                        </td>
+                                        {% for cell in row.slots %}
+                                            <td style="border: 1px solid #dfe6e9; padding: 10px; vertical-align: middle;">
+                                                {% if cell.events %}
+                                                    {% for ev in cell.events %}
+                                                    <div class="p-2 mb-1 shadow-sm rounded" style="background-color: {% if is_teacher %}#fadbd8{% else %}#e3f2fd{% endif %}; border-left: 4px solid {% if is_teacher %}#e74c3c{% else %}#0984e3{% endif %};">
+                                                        <strong style="color: #2d3436; font-size: 12px; display: block;">{{ ev.subject.name|upper }}</strong>
+                                                        <span class="badge badge-primary badge-pill mb-1" style="font-size: 10px;">{{ ev.room_no }}</span><br>
+                                                        {% if is_teacher %}
+                                                            <small class="text-muted font-weight-bold">{{ ev.subject.class_name }}</small>
+                                                        {% else %}
+                                                            <small class="text-muted font-weight-bold"><i class="fas fa-user-tie"></i> Pr. {{ ev.teacher.last_name }}</small>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <span class="text-muted" style="opacity: 0.2;">-</span>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

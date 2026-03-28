@@ -1,0 +1,87 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <h3 class="page-title">Request Official Certificate</h3>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-header"><h5 class="card-title">New Request</h5></div>
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label>Document Type</label>
+                                <select name="certificate_type" class="form-control" required>
+                                    <option value="">Select Document...</option>
+                                    <option value="Attestation de Scolarité">Attestation de Scolarité</option>
+                                    <option value="Relevé de Notes (Transcript)">Relevé de Notes (Transcript)</option>
+                                    <option value="Certificat de Réussite">Certificat de Réussite</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit Request to Admin</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <div class="card card-table">
+                    <div class="card-header"><h5 class="card-title">My Verification History</h5></div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Document Type</th>
+                                        <th>Date Requested</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for req in requests %}
+                                    <tr>
+                                        <td><strong>{{ req.certificate_type }}</strong></td>
+                                        <td>{{ req.date_requested|date:"d M Y, H:i" }}</td>
+                                        <td>
+                                            {% if req.status == 'Pending' %}
+                                                <span class="badge badge-warning">Pending Review</span>
+                                            {% elif req.status == 'Approved' %}
+                                                <span class="badge badge-success">Approved / Ready</span>
+                                            {% else %}
+                                                <span class="badge badge-danger">Rejected</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if req.status == 'Approved' %}
+                                                <a href="{% url 'print_attestation' req.id %}" target="_blank" class="btn btn-sm bg-success-light">
+                                                    <i class="fas fa-print"></i> Print PDF
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted"><i class="fas fa-clock"></i> Processing</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="4" class="text-center">No certificates requested yet.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

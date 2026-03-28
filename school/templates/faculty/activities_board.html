@@ -1,0 +1,70 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <h3 class="page-title">Faculty Event Timeline</h3>
+            <p class="text-muted">Stay connected with upcoming activities, seminars, and clubs.</p>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            {% if request.user.is_admin %}
+            <div class="col-md-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white"><h5 class="card-title text-white mb-0"><i class="fas fa-plus"></i> Schedule New Activity</h5></div>
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <input type="text" name="title" class="form-control" placeholder="Event Title" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="datetime-local" name="date" class="form-control" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="location" class="form-control" placeholder="Location (e.g. Amphitheater A)" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-broadcast-tower"></i> Publish & Notify All</button>
+                                </div>
+                                <div class="col-md-12 mt-3">
+                                    <textarea name="description" class="form-control" rows="2" placeholder="Detailed event description..." required></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="col-md-12">
+                <div class="row">
+                    {% for act in activities %}
+                    <div class="col-md-6 col-lg-4 d-flex">
+                        <div class="card flex-fill shadow-sm" style="border-top: 4px solid #3b82f6;">
+                            <div class="card-body">
+                                <h4 class="card-title">{{ act.title }}</h4>
+                                <h6 class="card-subtitle text-muted mb-3"><i class="fas fa-map-marker-alt"></i> {{ act.location }} &bull; <i class="fas fa-clock"></i> {{ act.date|date:"d M Y, H:i" }}</h6>
+                                <p class="card-text">{{ act.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center text-muted p-5">
+                        <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                        <h5>No upcoming activities planned.</h5>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

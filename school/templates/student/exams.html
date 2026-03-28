@@ -1,0 +1,117 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title"><i class="fas fa-clipboard-list text-primary mr-2"></i>Liste des Examens</h3>
+                </div>
+                <div class="col-auto text-right">
+                    <a href="{% url 'add_exam' %}" class="btn btn-primary">
+                        <i class="fas fa-plus mr-1"></i> Ajouter un examen
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0 datatable">
+                                <thead style="background: #2c3e50; color: white;">
+                                    <tr>
+                                        <th>Nom de l'examen</th>
+                                        <th>Matière</th>
+                                        <th><i class="fas fa-graduation-cap mr-1"></i>Filière</th>
+                                        <th>Date</th>
+                                        <th>Début</th>
+                                        <th>Fin</th>
+                                        <th>/ Points</th>
+                                        <th>Statut</th>
+                                        {% if not request.user.is_student %}
+                                        <th class="text-center">Actions</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for d in exams_data %}
+                                    <tr>
+                                        <td class="font-weight-bold">{{ d.exam.name }}</td>
+                                        <td>{{ d.exam.subject.name }}</td>
+                                        <td>
+                                            <span class="badge badge-info py-1 px-2">{{ d.class_name }}</span>
+                                        </td>
+                                        <td>{{ d.exam.date }}</td>
+                                        <td>{{ d.exam.start_time|default:"—" }}</td>
+                                        <td>{{ d.exam.end_time|default:"—" }}</td>
+                                        <td>
+                                            <strong class="text-secondary">{{ d.exam.total_marks }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if d.status == 'done' %}
+                                                <span class="badge badge-danger py-1 px-2">
+                                                    <i class="fas fa-check-circle mr-1"></i>Terminé
+                                                </span>
+                                            {% elif d.status == 'ongoing' %}
+                                                <span class="badge badge-success py-1 px-2">
+                                                    <i class="fas fa-circle-notch fa-spin mr-1"></i>En cours
+                                                </span>
+                                            {% else %}
+                                                <span class="badge badge-{{ d.badge }} py-1 px-2">
+                                                    <i class="fas fa-clock mr-1"></i>{{ d.label }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        {% if not request.user.is_student %}
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center">
+                                                {% if d.status == 'done' %}
+                                                <!-- Saisie des notes shortcut -->
+                                                <a href="{% url 'teacher_enter_grades' %}?class_name={{ d.class_name }}&exam_id={{ d.exam.id }}"
+                                                   class="btn btn-sm btn-danger mr-1" title="Saisir les notes">
+                                                    <i class="fas fa-pen"></i> Notes
+                                                </a>
+                                                {% endif %}
+                                                <form action="{% url 'delete_exam' d.exam.id %}" method="POST" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('Supprimer cet examen ?');">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                        {% endif %}
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="9" class="text-center py-5 text-muted">
+                                            <i class="fas fa-clipboard fa-2x mb-2"></i>
+                                            <p>Aucun examen créé. <a href="{% url 'add_exam' %}">Ajouter le premier examen</a>.</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Légende des statuts -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <small class="text-muted">
+                    <span class="badge badge-success mr-2">En cours</span> Examen actuellement en salle &nbsp;|&nbsp;
+                    <span class="badge badge-danger mr-2">Terminé</span> Notes en attente de saisie &nbsp;|&nbsp;
+                    <span class="badge badge-warning mr-2">Bientôt</span> Moins de 3 jours &nbsp;|&nbsp;
+                    <span class="badge badge-primary mr-2">Programmé</span> Plus de 3 jours
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

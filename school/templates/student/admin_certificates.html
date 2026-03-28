@@ -1,0 +1,76 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <h3 class="page-title">Administration: Pending Certificate Approvals</h3>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card card-table">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0 datatable">
+                                <thead>
+                                    <tr>
+                                        <th>Student ID</th>
+                                        <th>Name</th>
+                                        <th>Document Requested</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th class="text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for req in requests %}
+                                    <tr>
+                                        <td>{{ req.student.student_id }}</td>
+                                        <td>
+                                            <h2 class="table-avatar">
+                                                <a href="#">{{ req.student.first_name }} {{ req.student.last_name }}</a>
+                                            </h2>
+                                        </td>
+                                        <td><strong>{{ req.certificate_type }}</strong></td>
+                                        <td>{{ req.date_requested|date:"d M Y, H:i" }}</td>
+                                        <td>
+                                            {% if req.status == 'Pending' %}
+                                                <span class="badge badge-warning">Awaiting Approval</span>
+                                            {% else %}
+                                                <span class="badge badge-success">Generated</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-right">
+                                            {% if req.status == 'Pending' %}
+                                                <form action="{% url 'approve_certificate' req.id %}" method="POST" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-stamp"></i> Approve & Generate PDF
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <a href="{% url 'print_attestation' req.id %}" target="_blank" class="btn btn-sm bg-success-light">
+                                                    <i class="fas fa-eye"></i> View Generated PDF
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="6" class="text-center text-muted">No pending requests in the queue.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

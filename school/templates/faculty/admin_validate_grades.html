@@ -1,0 +1,236 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <h3 class="page-title"><i class="fas fa-gavel text-danger"></i> Bureau de Validation des Notes</h3>
+            <p class="text-muted">Aperçu et Publication des Notes (Access Administrateur)</p>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success shadow-sm font-weight-bold"><i class="fas fa-check-circle"></i> {{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-body bg-light">
+                        <form method="GET" class="form-inline">
+                            <label class="font-weight-bold mr-3">Filtrer par Filière :</label>
+                            <select name="class_name" class="form-control mr-3" onchange="this.form.submit()">
+                                <option value="">Toutes les filières</option>
+                                {% for c in class_names %}
+                                    <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>{{ c }}</option>
+                                {% endfor %}
+                            </select>
+                            <a href="{% url 'admin_validate_grades' %}" class="btn btn-secondary btn-sm">Réinitialiser</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                {% if not groups_list %}
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-folder-open fa-3x mb-3 text-secondary"></i>
+                    <h5>Aucune note trouvée</h5>
+                    <p>Aucun résultat correspondant aux critères.</p>
+                </div>
+                {% endif %}
+                
+                <div class="accordion" id="accordionExams">
+                    {% for group in groups_list %}
+                    <form method="POST" id="validationForm_{{ forloop.counter }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="class_name_hidden" value="{{ selected_class|default_if_none:'' }}">
+                        <div class="card shadow-sm border-0 mb-3">
+                            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center" id="heading{{ forloop.counter }}" data-toggle="collapse" data-target="#collapse{{ forloop.counter }}" aria-expanded="{% if group.pending_count > 0 %}true{% else %}false{% endif %}" style="cursor: pointer;">
+                                <div>
+                                    <h5 class="card-title mb-0 d-inline-block">
+                                        <i class="fas fa-book mr-2"></i> {{ group.exam.subject.name|upper }} <small class="text-muted">({{ group.exam.subject.class_name }})</small>
+                                    </h5>
+                                    <span class="badge {% if group.session_name == 'Rattrapage' %}badge-warning{% else %}badge-info{% endif %} ml-2 p-2">
+                                        Session {{ group.session_name }}
+                                    </span>
+                                </div>
+                                <div class="text-right d-flex align-items-center">
+                                    {% if group.pending_count > 0 %}
+                                    <span class="badge badge-danger p-2"><i class="fas fa-exclamation-circle"></i> {{ group.pending_count }} en attente</span>
+                                    {% else %}
+                                    <span class="badge badge-success p-2"><i class="fas fa-check-double"></i> Toutes terminées</span>
+                                    {% endif %}
+                                    <i class="fas fa-chevron-down ml-3 text-muted"></i>
+                                </div>
+                            </div>
+                            
+                            <div id="collapse{{ forloop.counter }}" class="collapse {% if group.pending_count > 0 %}show{% endif %}" aria-labelledby="heading{{ forloop.counter }}" data-parent="#accordionExams">
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-striped text-center align-middle mb-0">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th><input type="checkbox" id="selectAll_{{ forloop.counter }}" checked onclick="let boxes = this.closest('table').querySelectorAll('.grade-checkbox'); for(let b of boxes) { b.checked = this.checked; }"></th>
+                                                    <th>Filière</th>
+                                                    <th>ID Étudiant</th>
+                                                    <th>Nom & Prénom</th>
+                                                    <th>Note Acquise{% if group.session_name == 'Rattrapage' %} (Normale){% endif %}</th>
+                                                    {% if group.session_name == 'Rattrapage' %}
+                                                    <th>Note Rattrapage</th>
+                                                    {% endif %}
+                                                    <th>Statut</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for res in group.results %}
+                                                <tr>
+                                                    <td>
+                                                        {% if not res.is_published and not res.proposed_marks %}
+                                                            <input type="checkbox" name="result_ids" value="{{ res.id }}" class="grade-checkbox" checked>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="font-weight-bold text-secondary">{{ res.exam.subject.class_name }}</td>
+                                                    <td>{{ res.student.student_id }}</td>
+                                                    <td class="text-left"><i class="fas fa-user-graduate text-muted"></i> {{ res.student.last_name|upper }} {{ res.student.first_name }}</td>
+                                                    
+                                                    <!-- NORMAL GRADES -->
+                                                    <td class="align-middle">
+                                                        <div class="text-secondary font-weight-bold" style="font-size:16px;">
+                                                            {{ res.marks_obtained|floatformat:2 }} <small class="text-muted">/ {{ res.exam.total_marks }}</small>
+                                                        </div>
+                                                    </td>
+                                                    
+                                                    <!-- RATTRAPAGE GRADES -->
+                                                    {% if group.session_name == 'Rattrapage' %}
+                                                    <td class="align-middle">
+                                                        <div class="text-danger font-weight-bold" style="font-size:16px;">
+                                                            {{ res.rattrapage_marks|floatformat:2 }} <small class="text-muted">/ {{ res.exam.total_marks }}</small>
+                                                        </div>
+                                                    </td>
+                                                    {% endif %}
+                                                    
+                                                    <!-- STATUS AND INPUTS -->
+                                                    {% if res.is_published %}
+                                                        <td><span class="badge badge-success p-2"><i class="fas fa-check-circle"></i> Publiée</span></td>
+                                                        <td>
+                                                            <button type="submit" name="action" value="unpublish_{{ res.id }}" class="btn btn-sm btn-outline-primary" formnovalidate onclick="return confirm('Voulez-vous déverrouiller cette note pour la modifier à nouveau ?');">
+                                                                <i class="fas fa-edit"></i> Modifier
+                                                            </button>
+                                                        </td>
+                                                    {% elif res.proposed_marks %}
+                                                        <td>
+                                                            <!-- Admin proposal view if exists -->
+                                                            <div class="input-group input-group-sm mx-auto" style="width: 120px;">
+                                                                <input type="number" step="0.25" min="0" max="{{ res.exam.total_marks }}" name="marks_{{ res.id }}" value="{{ res.proposed_marks|stringformat:'.2f' }}" class="form-control text-center font-weight-bold" style="background:#fff3cd; color:#856404; border: 1px solid #ffeeba;">
+                                                            </div>
+                                                        </td>
+                                                        <td><span class="badge badge-warning p-2 text-dark"><i class="fas fa-hourglass-half"></i> En attente du prof</span></td>
+                                                    {% else %}
+                                                        <!-- IF NORMALE, show editable proposals -->
+                                                        <!-- IF RATTRAPAGE, just show wait -->
+                                                        {% if group.session_name == 'Normale' %}
+                                                        <td>
+                                                            <div class="input-group input-group-sm mx-auto" style="width: 90px;">
+                                                                <input type="number" step="0.25" min="0" max="{{ res.exam.total_marks }}" name="marks_{{ res.id }}" value="{{ res.marks_obtained|stringformat:'.2f' }}" class="form-control text-center font-weight-bold" oninput="this.closest('tr').querySelector('.grade-checkbox').checked = true;">
+                                                            </div>
+                                                        </td>
+                                                        <td><span class="badge badge-secondary p-2"><i class="fas fa-lock"></i> En Attente</span></td>
+                                                        {% else %}
+                                                        <td><span class="badge badge-secondary p-2"><i class="fas fa-lock"></i> En Attente</span></td>
+                                                        <td></td>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-light text-right">
+                                    {% if group.pending_count > 0 %}
+                                    <button type="submit" class="btn btn-success font-weight-bold px-4" onclick="return confirm('Êtes-vous sûr de vouloir publier ces notes ? Les étudiants recevront une notification immédiate.')">
+                                        <i class="fas fa-bullhorn mr-1"></i> Approuver la Sélection ({{ group.exam.subject.name }})
+                                    </button>
+                                    {% elif group.published_count > 0 %}
+                                    <button type="submit" name="action" value="unpublish_all" class="btn btn-outline-primary font-weight-bold" formnovalidate onclick="return confirm('Voulez-vous déverrouiller toutes les notes publiées de ce module pour les modifier ?');">
+                                        <i class="fas fa-edit mr-1"></i> Tout Déverrouiller
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+<!-- HISTORIQUE DES DECISIONS POUR ADMIN -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-secondary"><i class="fas fa-history mr-2"></i>Historique des Décisions des Professeurs</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr class="bg-light text-dark">
+                                        <th>Date</th>
+                                        <th>Professeur</th>
+                                        <th>Étudiant</th>
+                                        <th>Matière (Examen)</th>
+                                        <th>Décision</th>
+                                        <th>Score Initial</th>
+                                        <th>Score Proposé par l'Admin</th>                                
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in history_logs %}
+                                    <tr>
+                                        <td>{{ log.date_decided|date:"d/m/Y H:i" }}</td>
+                                        <td class="font-weight-bold text-primary">{{ log.teacher.first_name }} {{ log.teacher.last_name }}</td>
+                                        <td class="font-weight-bold">{{ log.result.student.first_name }} {{ log.result.student.last_name }}</td>
+                                        <td>{{ log.result.exam.name }}</td>
+                                        <td>
+                                            {% if log.action == 'Accepté' %}
+                                                <span class="badge badge-success px-3 py-2"><i class="fas fa-check"></i> Accepté</span>
+                                            {% else %}
+                                                <span class="badge badge-danger px-3 py-2"><i class="fas fa-times"></i> Refusé</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ log.original_mark|floatformat:2 }}</td>
+                                        <td>{{ log.proposed_mark|floatformat:2 }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-muted">
+                                            <i class="fas fa-info-circle mb-2"></i><br>
+                                            Aucun historique disponible.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('selectAll').addEventListener('change', function(e) {
+        var checkboxes = document.querySelectorAll('.grade-checkbox');
+        checkboxes.forEach(function(cb) {
+            cb.checked = e.target.checked;
+        });
+    });
+</script>
+{% endblock %}

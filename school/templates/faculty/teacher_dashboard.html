@@ -1,0 +1,134 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+
+
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <h3 class="page-title">Welcome {{ request.user.first_name }}!</h3>
+            <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+                <li class="breadcrumb-item active">Teacher Dashboard</li>
+            </ul>
+        </div>
+        
+        <!-- 3 Stat Cards -->
+        <div class="row">
+            <div class="col-xl-4 d-flex">
+                <div class="card bg-nine w-100 text-white">
+                    <div class="card-body">
+                        <div class="db-widgets d-flex justify-content-between align-items-center">
+                            <div class="db-info"><h3>{{ student_count }}</h3><h6>Total Students in School</h6></div>
+                            <div class="db-icon"><i class="fas fa-user-graduate fa-2x"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 d-flex">
+                <div class="card bg-six w-100 text-white">
+                    <div class="card-body">
+                        <div class="db-widgets d-flex justify-content-between align-items-center">
+                            <div class="db-info"><h3>{{ class_count }}</h3><h6>Classes Taught</h6></div>
+                            <div class="db-icon"><i class="fas fa-chalkboard-teacher fa-2x"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 d-flex">
+                <div class="card bg-ten w-100 text-white" style="background-color:#ff5a5f;">
+                    <div class="card-body">
+                        <div class="db-widgets d-flex justify-content-between align-items-center">
+                            <div class="db-info"><h3>{{ upcoming_exams.count }}</h3><h6>Upcoming Supervisions</h6></div>
+                            <div class="db-icon"><i class="fas fa-eye fa-2x"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row">
+            <div class="col-md-12 col-lg-8">
+                <div class="card card-chart">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col-6"><h5 class="card-title">Class Performance Averages</h5></div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <canvas id="performanceChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 col-lg-4">
+                 <div class="card flex-fill">
+                    <div class="card-header"><h5 class="card-title">Timetable (Classes Today)</h5></div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0">
+                                <thead><tr><th>Time</th><th>Subject</th><th>Room</th></tr></thead>
+                                <tbody>
+                                    {% for t in timetables %}
+                                    <tr><td>{{t.start_time|time:"H:i"}}</td><td>{{t.subject.name}}</td><td>{{t.room_no}}</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables Row -->
+        <div class="row">
+            <div class="col-12 col-md-12 d-flex">
+                <div class="card flex-fill">
+                    <div class="card-header"><h5 class="card-title">Upcoming Exams to Supervise</h5></div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center">
+                                <thead><tr><th>Exam Name</th><th>Subject</th><th>Date</th><th>Length</th></tr></thead>
+                                <tbody>
+                                    {% for exam in upcoming_exams %}
+                                    <tr>
+                                       <td>{{exam.name}}</td>
+                                       <td>{{exam.subject.name}}</td>
+                                       <td>{{exam.date|date:"d M Y"}}</td>
+                                       <td>{{exam.start_time|time:"H:i"}} - {{exam.end_time|time:"H:i"}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var ctx2 = document.getElementById('performanceChart').getContext('2d');
+    var performanceChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: ['Physics 101', 'Maths 201', 'Chemistry Advanced', 'English Lit'],
+            datasets: [{
+                label: 'Average Score (%)',
+                data: [78, 85, 62, 91],
+                backgroundColor: ['#28a745', '#18aefa', '#ef4444', '#f6b116'],
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, max: 100 }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

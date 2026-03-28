@@ -1,0 +1,27 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <h3 class="page-title">Feature Under Development</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Coming Soon</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12 text-center mt-5">
+                <i class="fas fa-tools fa-5x text-muted mb-4"></i>
+                <h2>This Feature is Coming Soon</h2>
+                <p class="text-muted">We are working hard to bring this feature to you in the next update.</p>
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-primary mt-3">Return to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

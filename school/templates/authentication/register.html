@@ -1,25 +1,23 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-<title>Preskool - Register</title>
-
-<!-- Favicon -->
+<title>Inscription — Université</title>
 <link rel="shortcut icon" href="{% static 'assets/img/favicon.png' %}">
-<!-- Google Fonts -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&display=swap">
-<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="{% static 'assets/plugins/bootstrap/css/bootstrap.min.css' %}">
-<!-- Font Awesome CSS -->
 <link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/fontawesome.min.css' %}">
 <link rel="stylesheet" href="{% static 'assets/plugins/fontawesome/css/all.min.css' %}">
-<!-- Custom CSS -->
 <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+<style>
+  .role-extra { display: none; }
+  .role-badge { font-size: 0.85em; margin-top: 6px; }
+  .info-box { background: #f0f4ff; border-left: 4px solid #4e73df; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.92em; color: #2c3e50; }
+</style>
 </head>
 <body>
-
 <div class="main-wrapper login-body">
     <div class="login-wrapper">
         <div class="container">
@@ -29,54 +27,79 @@
                 </div>
                 <div class="login-right">
                     <div class="login-right-wrap">
-                        <h1>Register</h1>
-                        <p class="account-subtitle">Access to our dashboard</p>
-                        
-                        <!-- Error and success messages -->
+                        <h1>Inscription</h1>
+                        <p class="account-subtitle">Créez votre compte universitaire</p>
+
                         {% if messages %}
                         <div class="alert alert-info">
-                            {% for message in messages %}
-                                <p>{{ message }}</p>
-                            {% endfor %}
+                            {% for message in messages %}<p class="mb-0">{{ message }}</p>{% endfor %}
                         </div>
                         {% endif %}
-                        
-                        <!-- Registration Form -->
-                        <form method="POST" action="{% url 'signup' %}">
+
+                        <form method="POST" action="{% url 'signup' %}" id="registerForm">
                             {% csrf_token %}
                             <div class="form-group">
-                                <input class="form-control" type="text" name="first_name" placeholder="First Name" required>
+                                <input class="form-control" type="text" name="first_name" placeholder="Prénom" required>
                             </div>
                             <div class="form-group">
-                                <input class="form-control" type="text" name="last_name" placeholder="Last Name" required>
+                                <input class="form-control" type="text" name="last_name" placeholder="Nom de famille" required>
                             </div>
                             <div class="form-group">
-                                <input class="form-control" type="email" name="email" placeholder="Email" required>
+                                <input class="form-control" type="email" name="email" placeholder="Email universitaire" required>
                             </div>
                             <div class="form-group">
-                                <input class="form-control" type="password" name="password" placeholder="Password" required>
+                                <input class="form-control" type="password" name="password" placeholder="Mot de passe" required>
                             </div>
+
+                            <!-- Sélection du Rôle -->
                             <div class="form-group">
-                                <input class="form-control" type="password" name="confirm_password" placeholder="Confirm Password" required>
+                                <label class="font-weight-bold text-secondary" style="font-size:0.9em;">Je suis :</label>
+                                <select class="form-control" name="role" id="roleSelect" required>
+                                    <option value="">-- Sélectionner mon rôle --</option>
+                                    <option value="student">🎓 Étudiant(e)</option>
+                                    <option value="teacher">📚 Enseignant(e)</option>
+                                </select>
                             </div>
+
+                            <!-- Champ Filière — affiché uniquement pour Étudiant -->
+                            <div class="form-group role-extra" id="studentExtra">
+                                <div class="info-box">
+                                    <i class="fas fa-info-circle text-primary mr-1"></i>
+                                    Choisissez votre filière. L'administration vérifiera votre inscription.
+                                </div>
+                                <label class="font-weight-bold text-secondary" style="font-size:0.9em;">Filière souhaitée :</label>
+                                <select class="form-control" name="extra_info" id="filiereSelect">
+                                    <option value="">-- Sélectionnez votre filière --</option>
+                                    {% for c in class_names %}
+                                    <option value="{{ c }}">{{ c }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Champ Module — affiché uniquement pour Enseignant -->
+                            <div class="form-group role-extra" id="teacherExtra">
+                                <div class="info-box">
+                                    <i class="fas fa-info-circle text-primary mr-1"></i>
+                                    Choisissez la matière que vous souhaitez enseigner. L'administration devra valider votre demande.
+                                </div>
+                                <label class="font-weight-bold text-secondary" style="font-size:0.9em;">Module demandé :</label>
+                                <select class="form-control" name="extra_info" id="moduleSelect">
+                                    <option value="">-- Sélectionnez un module --</option>
+                                    {% for sub in subjects %}
+                                    <option value="{{ sub.name }} ({{ sub.class_name }})">{{ sub.name }} — {{ sub.class_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
                             <div class="form-group mb-0">
-                                <button class="btn btn-primary btn-block" type="submit">Register</button>
+                                <button class="btn btn-primary btn-block" type="submit">
+                                    <i class="fas fa-paper-plane mr-1"></i> Envoyer la demande
+                                </button>
                             </div>
                         </form>
 
-                        <div class="login-or">
-                            <span class="or-line"></span>
-                            <span class="span-or">or</span>
-                        </div>
-
-                        <div class="social-login">
-                            <span>Register with</span>
-                            <a href="#" class="facebook"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#" class="google"><i class="fab fa-google"></i></a>
-                        </div>
-
-                        <div class="text-center dont-have">Already have an account? 
-                            <a href="{% url 'login' %}">Login</a>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">Déjà un compte ? <a href="{% url 'login' %}">Connexion</a></small>
                         </div>
                     </div>
                 </div>
@@ -85,12 +108,35 @@
     </div>
 </div>
 
-<!-- jQuery -->
 <script src="{% static 'assets/js/jquery-3.6.0.min.js' %}"></script>
-<!-- Bootstrap Core JS -->
 <script src="{% static 'assets/js/popper.min.js' %}"></script>
 <script src="{% static 'assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
-<!-- Custom JS -->
-<script src="{% static 'assets/js/script.js' %}"></script>
+<script>
+document.getElementById('roleSelect').addEventListener('change', function() {
+    var role = this.value;
+    var studentExtra = document.getElementById('studentExtra');
+    var teacherExtra = document.getElementById('teacherExtra');
+
+    // Hide both first
+    studentExtra.style.display = 'none';
+    teacherExtra.style.display = 'none';
+
+    // Reset required and name
+    document.getElementById('filiereSelect').removeAttribute('required');
+    document.getElementById('moduleSelect').removeAttribute('required');
+    document.getElementById('filiereSelect').name = '';
+    document.getElementById('moduleSelect').name = '';
+
+    if (role === 'student') {
+        studentExtra.style.display = 'block';
+        document.getElementById('filiereSelect').setAttribute('required', '');
+        document.getElementById('filiereSelect').name = 'extra_info';
+    } else if (role === 'teacher') {
+        teacherExtra.style.display = 'block';
+        document.getElementById('moduleSelect').setAttribute('required', '');
+        document.getElementById('moduleSelect').name = 'extra_info';
+    }
+});
+</script>
 </body>
 </html>

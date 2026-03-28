@@ -1,0 +1,111 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <h3 class="page-title"><i class="fas fa-file-invoice text-info mr-2"></i> Relevé de Notes</h3>
+            <button class="btn btn-sm btn-outline-primary" onclick="window.print()"><i class="fas fa-print"></i> Imprimer</button>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0" style="border-collapse: collapse;">
+                                <thead>
+                                    <tr class="text-center font-weight-bold align-middle" style="background-color: #f8f9fa;">
+                                        <th class="text-left" style="width: 50%; color: #6c757d; font-size: 13px; letter-spacing: 1px;">ÉLÉMENT</th>
+                                        <th style="width: 15%; color: #6c757d; font-size: 13px; letter-spacing: 1px;">NOTE NORMALE</th>
+                                        <th style="width: 15%; color: #6c757d; font-size: 13px; letter-spacing: 1px;">NOTE RATT.</th>
+                                        <th style="width: 20%; color: #6c757d; font-size: 13px; letter-spacing: 1px;">RÉSULTAT</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cname, data in grouped_results.items %}
+                                    <!-- En-tête de Semestre/Filière -->
+                                    <tr style="background-color: #e2e3e5; border-top: 2px solid #dee2e6;">
+                                        <td class="font-weight-bold text-secondary text-left align-middle" style="font-size: 16px; letter-spacing: 1px;">
+                                            SEMESTRE : {{ cname|upper }}
+                                        </td>
+                                        <td class="font-weight-bold text-center align-middle" style="font-size: 16px; color: #495057;">
+                                            {{ data.average|stringformat:".3f" }}
+                                        </td>
+                                        <td class="text-center align-middle bg-light">
+                                            <!-- Ratt Moyenne Globale -->
+                                        </td>
+                                        <td class="font-weight-bold text-center align-middle" style="font-size: 15px; letter-spacing: 1px;">
+                                            {% if data.semester_status == 'VALIDÉ' %}
+                                                <span class="text-success">{{ data.semester_status }}</span>
+                                            {% else %}
+                                                <span class="text-danger">{{ data.semester_status }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Lignes des modules -->
+                                    {% for res in data.results %}
+                                    <tr>
+                                        <td class="font-weight-bold text-secondary text-left align-middle pl-4" style="font-size: 13px;">
+                                            {{ res.element }} <br>
+                                            <small class="text-muted font-weight-normal"><i class="fas fa-caret-right"></i> {{ res.exam_name }}</small>
+                                        </td>
+                                        <td class="text-center align-middle" style="font-size: 15px;">
+                                            {{ res.note|stringformat:".2f" }}
+                                        </td>
+                                        <td class="text-center align-middle font-weight-bold" style="font-size: 15px; color: #d35400;">
+                                            {% if res.note_rattrapage != None %}{{ res.note_rattrapage|stringformat:".2f" }}{% else %}-{% endif %}
+                                        </td>
+                                        <td class="text-center align-middle font-weight-bold" style="font-size: 14px;">
+                                            {% if res.status == 'V' %}
+                                                <span class="text-success">{{ res.status }}</span>
+                                            {% elif res.status == 'VC' %}
+                                                <span class="text-primary">{{ res.status }}</span>
+                                            {% elif res.status == 'RAT' %}
+                                                <span class="text-warning text-dark">{{ res.status }}</span>
+                                            {% else %}
+                                                <span class="text-danger">{{ res.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5 text-muted">
+                                            <i class="fas fa-folder-open fa-3x mb-3 text-light"></i>
+                                            <h5>Aucun résultat officiel</h5>
+                                            <p>Vos notes ne sont pas encore publiées par l'administration.</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12 text-muted small">
+                <strong>Critères de Validation :</strong><br>
+                - <strong class="text-success">V</strong> : Composante Validée (Note finale &ge; 10/20)<br>
+                - <strong class="text-primary">VC</strong> : Validé par Compensation (Note finale entre 7 et 10, Moyenne Semestre &ge; 10)<br>
+                - <strong class="text-warning text-dark">RAT</strong> : Rattrapage requis (En attente de rattrapage)<br>
+                - <strong class="text-danger">NV</strong> : Non Validé (Note finale &lt; 7, ou Note finale &lt; 10 avec Moyenne Semestre &lt; 10)
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .header, .sidebar, .btn, .page-header button { display: none !important; }
+        .page-wrapper { margin: 0 !important; padding: 0 !important; }
+        .card { border: none !important; box-shadow: none !important; }
+        body { background-color: white !important; }
+        .table-bordered th, .table-bordered td { border: 1px solid #dee2e6 !important; }
+    }
+</style>
+{% endblock %}

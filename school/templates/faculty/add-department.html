@@ -1,0 +1,25 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+   <div class="content container-fluid">
+      <div class="page-header">
+         <div class="row align-items-center"><div class="col"><h3 class="page-title">{% if department %}Edit{% else %}Add{% endif %} Department</h3></div></div>
+      </div>
+      <div class="row">
+         <div class="col-sm-12"><div class="card"><div class="card-body">
+            <form method="POST">
+               {% csrf_token %}
+               <div class="row">
+                  <div class="col-12"><h5 class="form-title"><span>Department Details</span></h5></div>
+                  <div class="col-12 col-sm-6"><div class="form-group"><label>ID</label><input type="text" class="form-control" name="department_id" value="{{ department.department_id }}" required></div></div>
+                  <div class="col-12 col-sm-6"><div class="form-group"><label>Name</label><input type="text" class="form-control" name="name" value="{{ department.name }}" required></div></div>
+                  <div class="col-12 col-sm-6"><div class="form-group"><label>Started Year</label><input type="number" class="form-control" name="started_year" value="{{ department.started_year }}" required></div></div>
+                  <div class="col-12 col-sm-6"><div class="form-group"><label>No. of Students</label><input type="number" class="form-control" name="no_of_students" value="{{ department.no_of_students }}" required></div></div>
+                  <div class="col-12"><button type="submit" class="btn btn-primary">Save</button></div>
+               </div>
+            </form>
+         </div></div></div>
+      </div>
+   </div>
+</div>
+{% endblock %}

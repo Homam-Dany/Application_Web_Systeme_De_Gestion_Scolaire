@@ -1,0 +1,151 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <h3 class="page-title"><i class="fas fa-handshake text-warning"></i> Modifications Administratives</h3>
+            <p class="text-muted">Gérez les changements de notes proposés par l'administration.</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="card-title mb-0">Demandes de Modification en Attente</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped text-center align-middle mb-0">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Examen</th>
+                                        <th>Étudiant</th>
+                                        <th>Votre Note Initiale</th>
+                                        <th>Note Proposée (Admin)</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for res in pending_reviews %}
+                                    <tr style="border-left: 4px solid #ffc107;">
+                                        <td class="font-weight-bold text-secondary text-left pl-3">
+                                            {{ res.exam.subject.name|upper }} <br>
+                                            <span class="badg badge-light px-2 py-1 text-muted border" style="font-size: 11px;">{{ res.exam.name }}</span>
+                                        </td>
+                                        <td class="text-left">
+                                            <i class="fas fa-user-graduate text-muted"></i> {{ res.student.last_name|upper }} {{ res.student.first_name }} <br>
+                                            <small class="text-muted">ID: {{ res.student.student_id }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-secondary px-3 py-2" style="font-size: 14px;">
+                                                <i class="fas fa-pencil-alt"></i> {{ res.marks_obtained|stringformat:".2f" }} / {{ res.exam.total_marks }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-warning px-3 py-2 text-dark font-weight-bold" style="font-size: 14px; border: 1px solid #ffeeba;">
+                                                <i class="fas fa-arrow-right"></i> {{ res.proposed_marks|stringformat:".2f" }} / {{ res.exam.total_marks }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex justify-content-center">
+                                                <form method="POST" class="mr-2">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="accept">
+                                                    <input type="hidden" name="result_id" value="{{ res.id }}">
+                                                    <button type="submit" class="btn btn-sm btn-success px-3 font-weight-bold" onclick="return confirm('D\'accord pour valider et publier la note modifiée de {{ res.proposed_marks|floatformat:2 }} ?');">
+                                                        <i class="fas fa-check"></i> Accepter
+                                                    </button>
+                                                </form>
+                                                <form method="POST">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="reject">
+                                                    <input type="hidden" name="result_id" value="{{ res.id }}">
+                                                    <button type="submit" class="btn btn-sm btn-danger px-3 font-weight-bold" onclick="return confirm('Refuser cette modification et conserver votre note initiale de {{ res.marks_obtained|floatformat:2 }} ?');">
+                                                        <i class="fas fa-times"></i> Rejeter
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-muted">
+                                            <i class="fas fa-check-double fa-3x mb-3 text-success"></i>
+                                            <h5>Vous êtes à jour !</h5>
+                                            <p>L'administration n'a suggéré aucune modification sur vos notes récentes.</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORIQUE DES DECISIONS -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-secondary"><i class="fas fa-history mr-2"></i>Historique de vos Décisions Administratives</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-center" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr class="bg-light text-dark">
+                                        <th>Date</th>
+                                        <th>Étudiant</th>
+                                        <th>Examen</th>
+                                        <th>Décision</th>
+                                        <th>Score Initial</th>
+                                        <th>Score Proposé par l'Admin</th>                                
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in history_logs %}
+                                    <tr>
+                                        <td>{{ log.date_decided|date:"d/m/Y H:i" }}</td>
+                                        <td class="font-weight-bold">{{ log.result.student.first_name }} {{ log.result.student.last_name }}</td>
+                                        <td>{{ log.result.exam.name }}</td>
+                                        <td>
+                                            {% if log.action == 'Accepté' %}
+                                                <span class="badge badge-success px-3 py-2"><i class="fas fa-check"></i> Accepté</span>
+                                            {% else %}
+                                                <span class="badge badge-danger px-3 py-2"><i class="fas fa-times"></i> Refusé</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ log.original_mark|floatformat:2 }}</td>
+                                        <td>{{ log.proposed_mark|floatformat:2 }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">
+                                            <i class="fas fa-info-circle mb-2"></i><br>
+                                            Aucun historique disponible.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

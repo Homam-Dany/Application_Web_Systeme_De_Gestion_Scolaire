@@ -1,0 +1,45 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+   <div class="content container-fluid">
+      <div class="page-header">
+         <div class="row align-items-center">
+            <div class="col">
+               <h3 class="page-title">Teachers</h3>
+            </div>
+            <div class="col-auto text-right float-right ml-auto">
+               <a href="{% url 'add_teacher' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Teacher</a>
+            </div>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-sm-12"><div class="card card-table"><div class="card-body">
+            <div class="table-responsive">
+               <table class="table table-hover table-center mb-0 datatable">
+                  <thead>
+                     <tr><th>ID</th><th>Name</th><th>Department</th><th>Mobile</th><th>Joining Date</th><th class="text-right">Action</th></tr>
+                  </thead>
+                  <tbody>
+                     {% for teacher in teachers %}
+                     <tr>
+                        <td>{{ teacher.teacher_id }}</td>
+                        <td>{{ teacher.first_name }} {{ teacher.last_name }}</td>
+                        <td>{{ teacher.department.name }}</td>
+                        <td>{{ teacher.mobile_number }}</td>
+                        <td>{{ teacher.joining_date|date:"d M Y" }}</td>
+                        <td class="text-right">
+                           <div class="actions">
+                              <a href="{% url 'edit_teacher' teacher.teacher_id %}" class="btn btn-sm bg-success-light mr-2"><i class="fas fa-pen"></i></a>
+                              <form action="{% url 'delete_teacher' teacher.teacher_id %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" class="btn btn-sm bg-danger-light"><i class="fas fa-trash"></i></button></form>
+                           </div>
+                        </td>
+                     </tr>
+                     {% endfor %}
+                  </tbody>
+               </table>
+            </div>
+         </div></div></div>
+      </div>
+   </div>
+</div>
+{% endblock %}

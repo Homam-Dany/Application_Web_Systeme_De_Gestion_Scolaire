@@ -1,0 +1,22 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper"><div class="content container-fluid">
+   <div class="page-header"><div class="row align-items-center"><div class="col"><h3 class="page-title">Add Time Table</h3></div></div></div>
+   <div class="row"><div class="col-sm-12"><div class="card"><div class="card-body">
+      <form method="POST">{% csrf_token %}
+         <div class="row">
+            <div class="col-12"><h5 class="form-title"><span>Time Table Details</span></h5></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>Class</label><input type="text" class="form-control" name="class_name" required></div></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>Section</label><input type="text" class="form-control" name="section" required></div></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>Subject ID</label><select class="form-control" name="subject_id" required>{% for sub in subjects %}<option value="{{sub.subject_id}}">{{sub.name}}</option>{% endfor %}</select></div></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>Teacher ID</label><select class="form-control" name="teacher_id" required>{% for t in teachers %}<option value="{{t.teacher_id}}">{{t.first_name}} {{t.last_name}}</option>{% endfor %}</select></div></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>Day</label><select class="form-control" name="day_of_week" required><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option></select></div></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>Start Time</label><input type="time" class="form-control" name="start_time" required></div></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>End Time</label><input type="time" class="form-control" name="end_time" required></div></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>Room No</label><input type="text" class="form-control" name="room_no" required></div></div>
+            <div class="col-12"><button type="submit" class="btn btn-primary">Save</button></div>
+         </div>
+      </form>
+   </div></div></div></div>
+</div></div>
+{% endblock %}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ student.first_name }} {{ student.last_name }} - ID Card</title>
+    <style>
+        body { margin: 0; padding: 0; background: #e2e8f0; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .id-card { width: 54mm; height: 86mm; background: white; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden; page-break-inside: avoid; }
+        .header { width: 100%; height: 25mm; background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .header::after { content: ''; position: absolute; bottom: -10px; left: 0; width: 100%; height: 20px; background: white; transform: skewY(-5deg); }
+        .school-name { font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; border-bottom: none; display:block; z-index: 1;}
+        .subtitle { font-size: 8px; font-weight: 500; opacity: 0.9; z-index: 1;}
+        .photo-container { width: 28mm; height: 28mm; border-radius: 50%; background: white; padding: 3px; position: absolute; top: 15mm; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .photo { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .details { margin-top: 22mm; width: 100%; text-align: center; padding: 0 5mm; box-sizing: border-box; }
+        .name { font-size: 15px; font-weight: 700; color: #0f172a; margin: 0 0 2px 0; }
+        .role { font-size: 10px; font-weight: 600; color: #3b82f6; text-transform: uppercase; margin: 0 0 8px 0; }
+        .info-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px; text-align: left; font-size: 9px; margin-top: 5px; }
+        .label { color: #64748b; font-weight: 600; }
+        .value { color: #334155; font-weight: 500; }
+        .barcode { margin-top: auto; margin-bottom: 6mm; width: 40mm; height: 8mm; background: repeating-linear-gradient(90deg, #000 0, #000 1px, transparent 1px, transparent 3px, #000 3px, #000 5px, transparent 5px, transparent 6px); }
+        .footer { position: absolute; bottom: 0; width: 100%; height: 4mm; background: #1e3a8a; }
+        @media print {
+            body { background: white; display: block; padding: 0; align-items: flex-start; justify-content: flex-start; }
+            .id-card { box-shadow: none; border: 1px solid #ccc; margin: 0; border-radius: 0; }
+            @page { margin: 0; size: 54mm 86mm; }
+        }
+    </style>
+</head>
+<body onload="window.print()">
+    <div class="id-card">
+        <div class="header">
+            <div class="school-name">PreSkool Academy</div>
+            <div class="subtitle">Student Identity Card</div>
+        </div>
+        <div class="photo-container">
+            <img src="https://ui-avatars.com/api/?name={{ student.first_name }}+{{ student.last_name }}&background=e2e8f0&color=334155&size=150" class="photo" alt="Student Photo">
+        </div>
+        <div class="details">
+            <h2 class="name">{{ student.first_name }} {{ student.last_name }}</h2>
+            <p class="role">Student</p>
+            <div class="info-grid">
+                <span class="label">ID N°:</span> <span class="value">{{ student.student_id }}</span>
+                <span class="label">Class:</span> <span class="value">{{ student.student_class }}</span>
+                <span class="label">DOB:</span> <span class="value">{{ student.dob|date:"m/d/Y" }}</span>
+                <span class="label">Phone:</span> <span class="value">{{ student.mobile_number }}</span>
+            </div>
+        </div>
+        <div class="barcode"></div>
+        <div class="footer"></div>
+    </div>
+</body>
+</html>

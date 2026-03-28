@@ -1,0 +1,44 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+   <div class="content container-fluid">
+      <div class="page-header">
+         <div class="row align-items-center">
+            <div class="col">
+               <h3 class="page-title">Subjects</h3>
+            </div>
+            <div class="col-auto text-right float-right ml-auto">
+               <a href="{% url 'add_subject' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Subject</a>
+            </div>
+         </div>
+      </div>
+      <div class="row">
+         <div class="col-sm-12"><div class="card card-table"><div class="card-body">
+            <div class="table-responsive">
+               <table class="table table-hover table-center mb-0 datatable">
+                  <thead>
+                     <tr><th>ID</th><th>Name</th><th>Class</th><th>Department</th><th class="text-right">Action</th></tr>
+                  </thead>
+                  <tbody>
+                     {% for sub in subjects %}
+                     <tr>
+                        <td>{{ sub.subject_id }}</td>
+                        <td>{{ sub.name }}</td>
+                        <td>{{ sub.class_name }}</td>
+                        <td>{{ sub.department.name }}</td>
+                        <td class="text-right">
+                           <div class="actions">
+                              <a href="{% url 'edit_subject' sub.subject_id %}" class="btn btn-sm bg-success-light mr-2"><i class="fas fa-pen"></i></a>
+                              <form action="{% url 'delete_subject' sub.subject_id %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" class="btn btn-sm bg-danger-light"><i class="fas fa-trash"></i></button></form>
+                           </div>
+                        </td>
+                     </tr>
+                     {% endfor %}
+                  </tbody>
+               </table>
+            </div>
+         </div></div></div>
+      </div>
+   </div>
+</div>
+{% endblock %}

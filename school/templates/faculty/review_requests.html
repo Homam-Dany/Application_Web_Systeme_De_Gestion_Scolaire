@@ -1,0 +1,100 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <h3 class="page-title">Account Registrations</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Review Requests</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card card-table">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0 datatable">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Requested Role</th>
+                                        <th>Filière / Poste</th>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for req in requests %}
+                                    <tr>
+                                        <td>{{ req.user.first_name }} {{ req.user.last_name }}</td>
+                                        <td>{{ req.user.email }}</td>
+                                        <td><span class="badge badge-info">{{ req.requested_role }}</span></td>
+                                        <td>
+                                            {% if req.extra_info %}
+                                                <span class="text-secondary font-weight-bold">{{ req.extra_info }}</span>
+                                            {% else %}
+                                                <span class="text-muted">Non spécifié</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ req.created_at|date:"d M Y" }}</td>
+                                        <td>
+                                            <form method="POST" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="request_id" value="{{ req.id }}">
+                                                <button type="submit" name="action" value="approve" class="btn btn-sm btn-success mr-2">Approve</button>
+                                            </form>
+                                            <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#rejectModal{{ req.id }}">Reject</button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Reject Modal -->
+                                    <div class="modal fade" id="rejectModal{{ req.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                      <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                          <div class="modal-header">
+                                            <h5 class="modal-title">Reject Registration Request</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                              <span aria-hidden="true">&times;</span>
+                                            </button>
+                                          </div>
+                                          <form method="POST">
+                                              {% csrf_token %}
+                                              <div class="modal-body">
+                                                <input type="hidden" name="request_id" value="{{ req.id }}">
+                                                <input type="hidden" name="action" value="reject">
+                                                <div class="form-group">
+                                                    <label>Please provide a justification for rejection:</label>
+                                                    <textarea class="form-control" name="justification" rows="4" required placeholder="e.g. Identity not verified, invalid email, etc."></textarea>
+                                                </div>
+                                              </div>
+                                              <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-danger">Confirm Rejection</button>
+                                              </div>
+                                          </form>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No pending registration requests.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

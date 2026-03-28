@@ -1,0 +1,25 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+   <div class="content container-fluid">
+      <div class="page-header">
+         <div class="row align-items-center"><div class="col"><h3 class="page-title">{% if subject %}Edit{% else %}Add{% endif %} Subject</h3></div></div>
+      </div>
+      <div class="row">
+         <div class="col-sm-12"><div class="card"><div class="card-body">
+            <form method="POST">
+               {% csrf_token %}
+               <div class="row">
+                  <div class="col-12"><h5 class="form-title"><span>Subject Details</span></h5></div>
+                  <div class="col-12 col-sm-6"><div class="form-group"><label>ID</label><input type="text" class="form-control" name="subject_id" value="{{ subject.subject_id }}" required></div></div>
+                  <div class="col-12 col-sm-6"><div class="form-group"><label>Name</label><input type="text" class="form-control" name="name" value="{{ subject.name }}" required></div></div>
+                  <div class="col-12 col-sm-6"><div class="form-group"><label>Class</label><input type="text" class="form-control" name="class_name" value="{{ subject.class_name }}" required></div></div>
+                  <div class="col-12 col-sm-6"><div class="form-group"><label>Department ID</label><select class="form-control" name="department_id" required>{% for dept in departments %}<option value="{{ dept.department_id }}" {% if subject.department.department_id == dept.department_id %}selected{% endif %}>{{ dept.name }}</option>{% endfor %}</select></div></div>
+                  <div class="col-12"><button type="submit" class="btn btn-primary">Save</button></div>
+               </div>
+            </form>
+         </div></div></div>
+      </div>
+   </div>
+</div>
+{% endblock %}

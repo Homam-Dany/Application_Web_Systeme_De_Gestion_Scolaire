@@ -1,0 +1,133 @@
+{% extends 'faculty/admin_dashboard.html' %}
+{% load static %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <h3 class="page-title"><i class="fas fa-id-badge text-primary"></i> Demandes de Cartes d'Étudiant</h3>
+            <p class="text-muted">Gérez les demandes de cartes physiques, validez les photos et générez les badges.</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped text-center align-middle mb-0">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Date Demande</th>
+                                        <th>Étudiant</th>
+                                        <th>ID & Filière</th>
+                                        <th>Photo Soumise</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for req in requests %}
+                                    <tr>
+                                        <td>{{ req.request_date|date:"d/m/Y H:i" }}</td>
+                                        <td class="font-weight-bold">{{ req.student.first_name }} {{ req.student.last_name }}</td>
+                                        <td>
+                                            <span class="badge badge-info">{{ req.student.student_id }}</span><br>
+                                            <small class="text-muted">{{ req.student.student_class }}</small>
+                                        </td>
+                                        <td>
+                                            {% if req.photo %}
+                                                <a href="{{ req.photo.url }}" target="_blank">
+                                                    <img src="{{ req.photo.url }}" alt="Photo" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if req.status == 'En attente' %}
+                                                <span class="badge badge-warning text-white px-3 py-2"><i class="fas fa-hourglass-half"></i> En attente</span>
+                                            {% elif req.status == 'Générée' %}
+                                                <span class="badge badge-success px-3 py-2"><i class="fas fa-check-circle"></i> Générée</span>
+                                            {% else %}
+                                                <span class="badge badge-danger px-3 py-2"><i class="fas fa-times-circle"></i> Refusée</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if req.status == 'En attente' %}
+                                                <form method="POST" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="request_id" value="{{ req.id }}">
+                                                    
+                                                    <!-- Decline Button triggers modal -->
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#rejectModal{{ req.id }}" title="Refuser">
+                                                        <i class="fas fa-times"></i> Refuser
+                                                    </button>
+                                                    
+                                                    <!-- Generate Button -->
+                                                    <button type="submit" name="action" value="generate" class="btn btn-sm btn-success font-weight-bold ml-1" title="Valider & Générer la Carte">
+                                                        <i class="fas fa-magic"></i> Générer
+                                                    </button>
+                                                </form>
+
+                                                <!-- Reject Modal -->
+                                                <div class="modal fade" id="rejectModal{{ req.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                    <form method="POST" class="modal-dialog" role="document">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="action" value="reject">
+                                                        <input type="hidden" name="request_id" value="{{ req.id }}">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header bg-danger text-white">
+                                                                <h5 class="modal-title">Refuser la demande</h5>
+                                                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body text-left">
+                                                                <p>Veuillez indiquer le motif du refus pour l'étudiant <strong>{{ req.student.first_name }}</strong> :</p>
+                                                                <textarea name="rejection_reason" class="form-control" rows="3" placeholder="Ex: La photo n'est pas claire, format non valide..." required></textarea>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                                                <button type="submit" class="btn btn-danger">Confirmer le Refus</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            {% elif req.status == 'Générée' and req.issued_card %}
+                                                <a href="{{ req.issued_card.url }}" download class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-download"></i> Voir / DL
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5 text-muted">
+                                            <i class="fas fa-inbox fa-3x mb-3 text-light"></i><br>
+                                            <strong>Aucune demande pour le moment.</strong>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

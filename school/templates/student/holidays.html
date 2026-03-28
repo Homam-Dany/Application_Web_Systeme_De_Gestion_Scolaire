@@ -1,0 +1,25 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+   <div class="content container-fluid">
+      <div class="page-header">
+         <div class="row align-items-center">
+            <div class="col"><h3 class="page-title">Holidays</h3></div>
+            <div class="col-auto text-right float-right ml-auto">
+               <a href="{% url 'add_holiday' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Holiday</a>
+            </div>
+         </div>
+      </div>
+      <div class="row"><div class="col-sm-12"><div class="card card-table"><div class="card-body"><div class="table-responsive">
+         <table class="table table-hover table-center mb-0 datatable">
+            <thead><tr><th>ID</th><th>Holiday Name</th><th>Type</th><th>Start Date</th><th>End Date</th><th class="text-right">Action</th></tr></thead>
+            <tbody>
+               {% for holi in holidays %}
+               <tr><td>{{ holi.holiday_id }}</td><td>{{ holi.name }}</td><td>{{ holi.holiday_type }}</td><td>{{ holi.start_date }}</td><td>{{ holi.end_date }}</td><td class="text-right"><div class="actions"><form action="{% url 'delete_holiday' holi.holiday_id %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('Delete this?');"><i class="fas fa-trash"></i></button></form></div></td></tr>
+               {% endfor %}
+            </tbody>
+         </table>
+      </div></div></div></div></div>
+   </div>
+</div>
+{% endblock %}

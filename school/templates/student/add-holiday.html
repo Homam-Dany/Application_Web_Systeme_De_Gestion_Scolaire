@@ -1,0 +1,19 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper"><div class="content container-fluid">
+   <div class="page-header"><div class="row align-items-center"><div class="col"><h3 class="page-title">Add Holiday</h3></div></div></div>
+   <div class="row"><div class="col-sm-12"><div class="card"><div class="card-body">
+      <form method="POST">{% csrf_token %}
+         <div class="row">
+            <div class="col-12"><h5 class="form-title"><span>Holiday Information</span></h5></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>Holiday ID</label><input type="text" class="form-control" name="holiday_id" required></div></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>Holiday Name</label><input type="text" class="form-control" name="name" required></div></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>Type</label><select class="form-control" name="holiday_type" required><option>Public Holiday</option><option>School Holiday</option></select></div></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>Start Date</label><input type="date" class="form-control" name="start_date" required></div></div>
+            <div class="col-12 col-sm-6"><div class="form-group"><label>End Date</label><input type="date" class="form-control" name="end_date" required></div></div>
+            <div class="col-12"><button type="submit" class="btn btn-primary">Save</button></div>
+         </div>
+      </form>
+   </div></div></div></div>
+</div></div>
+{% endblock %}

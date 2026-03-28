@@ -1,0 +1,107 @@
+{% extends 'Home/base.html' %}
+{% load static %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <h3 class="page-title"><i class="fas fa-id-card text-primary"></i> Demande de Carte d'Étudiant</h3>
+            <p class="text-muted">Remplissez le formulaire ci-dessous pour commander votre badge étudiant officiel.</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        {% if card_req and card_req.status == 'En attente' %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-hourglass-half fa-4x text-warning mb-3"></i>
+                                <h4>Demande en cours de traitement</h4>
+                                <p class="text-muted">Votre demande du {{ card_req.request_date|date:"d M Y" }} est en cours d'examen par l'administration.</p>
+                                <p>Veuillez patienter pendant la génération de votre carte.</p>
+                            </div>
+                        {% elif card_req and card_req.status == 'Générée' %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                                <h4>Carte Générée !</h4>
+                                <p class="text-muted">La scolarité a validé votre photo et généré votre carte d'étudiant.</p>
+                                {% if card_req.issued_card %}
+                                    <a href="{{ card_req.issued_card.url }}" download class="btn btn-primary mt-3 btn-lg">
+                                        <i class="fas fa-download mr-2"></i> Télécharger Ma Carte
+                                    </a>
+                                {% else %}
+                                    <!-- Dynamic view generation link? For now, assume physical or dynamically printable view -->
+                                    <a href="#" class="btn btn-primary mt-3 btn-lg">
+                                        <i class="fas fa-print mr-2"></i> Imprimer / Voir Ma Carte
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            {% if card_req and card_req.status == 'Refusée' %}
+                                <div class="alert alert-danger mb-4">
+                                    <h5><i class="fas fa-exclamation-triangle"></i> Demande précédente refusée</h5>
+                                    <p>Motif de l'administration : <strong>{{ card_req.admin_notes|default:"Photo non conforme" }}</strong></p>
+                                    <p>Veuillez soumettre une nouvelle demande.</p>
+                                </div>
+                            {% endif %}
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="form-group mb-4">
+                                    <label class="font-weight-bold">Photo d'Identité <span class="text-danger">*</span></label>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="photo" name="photo" accept="image/*" required>
+                                        <label class="custom-file-label" for="photo">Choisir une image...</label>
+                                    </div>
+                                    <small class="form-text text-muted">Format passeport, visage dégagé, fond neutre.</small>
+                                </div>
+                                <div class="form-group mb-4">
+                                    <label class="font-weight-bold">Détails de la carte (Pré-remplis)</label>
+                                    <div class="row">
+                                        <div class="col-sm-6 mb-2">
+                                            <input type="text" class="form-control" value="{{ student.last_name }} {{ student.first_name }}" disabled title="Nom & Prénom">
+                                        </div>
+                                        <div class="col-sm-6 mb-2">
+                                            <input type="text" class="form-control" value="{{ student.student_class }}" disabled title="Filière">
+                                        </div>
+                                        <div class="col-sm-6 mb-2">
+                                            <input type="text" class="form-control" value="Faculté" disabled title="Faculté">
+                                        </div>
+                                        <div class="col-sm-6 mb-2">
+                                            <input type="text" class="form-control" value="2025/2026" disabled title="Année Universitaire">
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">Ces informations seront automatiquement imprimées sur votre badge avec votre photo.</small>
+                                </div>
+                                <div class="text-center mt-5">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                                        <i class="fas fa-paper-plane mr-2"></i> Soumettre la Demande
+                                    </button>
+                                </div>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // To show selected file name in custom file input
+    document.querySelector('.custom-file-input').addEventListener('change',function(e){
+      var fileName = document.getElementById("photo").files[0].name;
+      var nextSibling = e.target.nextElementSibling
+      nextSibling.innerText = fileName
+    })
+</script>
+{% endblock %}

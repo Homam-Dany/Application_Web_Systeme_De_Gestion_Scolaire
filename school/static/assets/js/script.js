@@ -26,8 +26,11 @@ Version      : 1.0
 				e.preventDefault();
 			}
 			if(!$(this).hasClass('subdrop')) {
-				$('ul', $(this).parents('ul:first')).slideUp(350);
-				$('a', $(this).parents('ul:first')).removeClass('subdrop');
+				// Slide up *other* open submenus only
+				$(this).parent().siblings().children('ul').slideUp(350);
+				$(this).parent().siblings().children('a').removeClass('subdrop');
+				
+				// Slide down this submenu
 				$(this).next('ul').slideDown(350);
 				$(this).addClass('subdrop');
 			} else if($(this).hasClass('subdrop')) {
@@ -113,7 +116,15 @@ Version      : 1.0
 
     if ($('.datatable').length > 0) {
         $('.datatable').DataTable({
-            "bFilter": false,
+            "bFilter": true,
+            "dom": 'Bfrtip',
+            "buttons": [
+                { extend: 'copy', className: 'btn btn-primary btn-sm' },
+                { extend: 'csv', className: 'btn btn-primary btn-sm' },
+                { extend: 'excel', className: 'btn btn-primary btn-sm' },
+                { extend: 'pdf', className: 'btn btn-primary btn-sm' },
+                { extend: 'print', className: 'btn btn-primary btn-sm' }
+            ]
         });
     }
 

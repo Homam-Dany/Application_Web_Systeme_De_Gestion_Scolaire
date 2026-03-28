@@ -2,334 +2,715 @@
 
 <!DOCTYPE html>
 <html lang="en">
+   
+   <head>
+<script>
+window.onerror = function(msg, url, line) {
+    fetch('/log_error/?msg=' + encodeURIComponent(msg + ' at line ' + line));
+}
+</script>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+      <title>Preskool - Dashboard</title>
+      <link rel="shortcut icon" href="{%static 'assets/img/favicon.png' %}">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap">
+      <link rel="stylesheet" href="{%static 'assets/plugins/bootstrap/css/bootstrap.min.css' %}">
+      <link rel="stylesheet" href="{%static 'assets/plugins/fontawesome/css/fontawesome.min.css' %}">
+      <link rel="stylesheet" href="{%static 'assets/plugins/fontawesome/css/all.min.css' %}">
+      <link rel="stylesheet" href="{%static 'assets/plugins/datatables/datatables.min.css' %}">
+      <link rel="stylesheet" href="{%static 'assets/css/style.css' %}">
 
-<head>
-   <meta charset="utf-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-   <title>Preskool - Dashboard</title>
-   <link rel="shortcut icon" href="{%static 'assets/img/favicon.png' %}">
-   <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap">
-   <link rel="stylesheet" href="{%static 'assets/plugins/bootstrap/css/bootstrap.min.css' %}">
-   <link rel="stylesheet" href="{%static 'assets/plugins/fontawesome/css/fontawesome.min.css' %}">
-   <link rel="stylesheet" href="{%static 'assets/plugins/fontawesome/css/all.min.css' %}">
-   <link rel="stylesheet" href="{%static 'assets/css/style.css' %}">
-</head>
-
-<body>
-   <div class="main-wrapper">
-      <div class="header">
-         <div class="header-left">
-            <a href="index.html" class="logo">
+      <style>
+         body {
+            background-color: #f8fafc !important;
+            font-family: 'Poppins', sans-serif !important;
+            color: #334155;
+         }
+         .header {
+            background-color: #ffffff !important;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border-bottom: none;
+         }
+         .sidebar {
+            background-color: #ffffff !important;
+            border-right: 1px solid #e2e8f0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+         }
+         .sidebar-menu li a {
+            color: #64748b;
+            border-radius: 8px;
+            margin: 2px 10px;
+            padding: 10px 15px;
+            transition: all 0.3s;
+         }
+         .sidebar-menu li a:hover, .sidebar-menu li.active > a {
+            background-color: #eff6ff !important;
+            color: #2563eb !important;
+         }
+         .card {
+            border: none !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+            background-color: #ffffff !important;
+            transition: transform 0.2s ease-in-out;
+         }
+         .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04) !important;
+         }
+         .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+            border: none !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3) !important;
+            transition: all 0.3s ease !important;
+         }
+         .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+            box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.4) !important;
+            transform: translateY(-1px);
+         }
+         .page-title {
+            color: #1e293b !important;
+            font-weight: 600 !important;
+         }
+         .table {
+            border-collapse: separate;
+            border-spacing: 0 8px;
+         }
+         .table thead th {
+            border-bottom: none !important;
+            color: #64748b !important;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            background: #f8fafc !important;
+         }
+         .table tbody tr {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+         }
+         .table tbody tr:hover {
+            box-shadow: 0 3px 6px rgba(0,0,0,0.04);
+            transform: scale(1.005);
+         }
+         .table tbody td {
+            border-top: none !important;
+            vertical-align: middle;
+         }
+      </style>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+<style>
+.dt-buttons .dt-button { background: #2563eb !important; color: white !important; border: none !important; border-radius: 5px !important; padding: 5px 12px !important; font-size: 13px; font-weight: 500; margin-bottom: 15px; transition: all 0.3s; }
+.dt-buttons .dt-button:hover { background: #1d4ed8 !important; transform: translateY(-1px); }
+.dataTables_filter { margin-bottom: 15px; }
+</style>
+         <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+<style>
+.chatbot-widget { position: fixed; bottom: 30px; right: 30px; z-index: 9999; font-family: 'Inter', sans-serif;}
+.chatbot-bubble { width: 60px; height: 60px; background: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.3s; }
+.chatbot-bubble:hover { transform: scale(1.1); }
+.chatbot-window { width: 350px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; position: absolute; bottom: 80px; right: 0; animation: slideUpChat 0.3s ease; border: 1px solid #e2e8f0; }
+.chatbot-header { background: #1e293b; color: white; padding: 15px 20px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+.close-chat { cursor: pointer; font-size: 22px; line-height: 1; }
+.chatbot-body { flex: 1; padding: 15px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; }
+.chat-msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.4; animation: popIn 0.3s ease; }
+.bot-msg { background: white; border: 1px solid #e2e8f0; align-self: flex-start; border-bottom-left-radius: 2px; }
+.user-msg { background: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+.chatbot-options { padding: 15px; background: white; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px; }
+.chat-btn { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 20px; font-size: 13px; color: #334155; cursor: pointer; text-align: left; transition: all 0.2s; }
+.chat-btn:hover { background: #e2e8f0; color: #0f172a; }
+.typing-indicator { display: flex; gap: 4px; padding: 12px 16px; background: white; border-radius: 12px; align-self: flex-start; border: 1px solid #e2e8f0; }
+.typing-dot { width: 6px; height: 6px; background: #94a3b8; border-radius: 50%; animation: typing 1.4s infinite ease-in-out; }
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes slideUpChat { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+</style>
+   
+<style>
+/* Premium Dark Mode Core */
+body.dark-mode { background-color: #121212 !important; color: #e0e0e0 !important; }
+.dark-mode .main-wrapper, .dark-mode .page-wrapper { background-color: #121212 !important; }
+.dark-mode .header, .dark-mode .header-left { background-color: #1e1e1e !important; border-bottom: 1px solid #333333 !important; border-right: 1px solid #333 !important; }
+.dark-mode .header-left .logo img { content: url("{%static 'assets/img/logo-white.png' %}"); }
+.dark-mode .sidebar, .dark-mode .sidebar-inner { background-color: #1e1e1e !important; border-right: 1px solid #333333 !important; }
+.dark-mode .sidebar-menu li a { color: #aaaaaa !important; }
+.dark-mode .sidebar-menu li a:hover { color: #ffffff !important; background-color: #333333 !important; }
+.dark-mode .sidebar-menu > ul > li > a span { color: #aaaaaa !important; }
+.dark-mode .sidebar-menu > ul > li.active > a { color: #ffffff !important; background-color: #333333 !important; }
+.dark-mode .card, .dark-mode .card-body, .dark-mode .card-header, .dark-mode .card-footer { background-color: #1e1e1e !important; border-color: #333333 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important; color: #ffffff !important;}
+.dark-mode .card-title, .dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h4, .dark-mode h5, .dark-mode h6, .dark-mode label, .dark-mode .text-muted { color: #ffffff !important; }
+.dark-mode .table { color: #dddddd !important; }
+.dark-mode .table thead th { background-color: #2c2c2c !important; border-color: #444444 !important; color: #ffffff !important; }
+.dark-mode .table tbody tr, .dark-mode .table tbody td, .dark-mode table.dataTable tbody tr, .dark-mode table.dataTable tbody td, .dark-mode table.dataTable.stripe tbody tr.odd, .dark-mode table.dataTable.display tbody tr.odd { background-color: #1e1e1e !important; color: #ffffff !important; box-shadow: none !important; }
+.dark-mode .table-hover tbody tr:hover, .dark-mode table.dataTable.hover tbody tr:hover, .dark-mode table.dataTable.display tbody tr:hover, .dark-mode table.dataTable.display tbody tr.even:hover, .dark-mode table.dataTable.display tbody tr.odd:hover { background-color: #2c2c2c !important; }
+.dark-mode .table td, .dark-mode .table th { border-color: #333333 !important; }
+.dark-mode .dataTables_wrapper .dataTables_length, .dark-mode .dataTables_wrapper .dataTables_filter, .dark-mode .dataTables_wrapper .dataTables_info, .dark-mode .dataTables_wrapper .dataTables_processing, .dark-mode .dataTables_wrapper .dataTables_paginate { color: #dddddd !important; }
+.dark-mode .page-item.disabled .page-link, .dark-mode .page-link { background-color: #1e1e1e !important; border-color: #333333 !important; color: #aaaaaa !important; }
+.dark-mode .page-item.active .page-link { background-color: #3b82f6 !important; border-color: #3b82f6 !important; color: #ffffff !important; }
+.dark-mode input, .dark-mode select, .dark-mode textarea, .dark-mode .form-control, .dark-mode .top-nav-search input { background-color: #2c2c2c !important; border-color: #444444 !important; color: #ffffff !important; }
+.dark-mode input:focus, .dark-mode .form-control:focus { background-color: #3d3d3d !important; color: #ffffff !important; border-color: #3b82f6 !important; }
+.dark-mode .chatbot-window { background: #1e1e1e !important; border-color: #333333 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important; }
+.dark-mode .chatbot-header { background: #000000 !important; color: #ffffff !important; }
+.dark-mode .chatbot-body { background: #121212 !important; }
+.dark-mode .bot-msg { background: #2c2c2c !important; border-color: #444444 !important; color: #ffffff !important; }
+.dark-mode .user-msg { background: #3b82f6 !important; color: #ffffff !important; }
+.dark-mode .chatbot-options { background: #1e1e1e !important; border-color: #333333 !important; }
+.dark-mode .chat-btn { background: #2c2c2c !important; color: #e0e0e0 !important; border-color: #444444 !important; }
+.dark-mode .chat-btn:hover { background: #444444 !important; color: #ffffff !important; }
+.dark-mode #omniSearchResults { background: #1e1e1e !important; border-color: #333333 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important; }
+.dark-mode #omniSearchResults a { color: #e0e0e0 !important; border-bottom-color: #333333 !important; }
+.dark-mode #omniSearchResults a:hover { background-color: #2c2c2c !important; }
+.dark-mode .dropdown-menu { background: #1e1e1e !important; border-color: #333333 !important; }
+.dark-mode .dropdown-item { color: #dddddd !important; }
+.dark-mode .dropdown-item:hover { background-color: #333333 !important; color: #ffffff !important; }
+.dark-mode .page-header .breadcrumb-item a { color: #aaaaaa !important; }
+.dark-mode .text-dark { color: #ffffff !important; }
+.dark-mode .text-muted { color: #aaaaaa !important; }
+.dark-mode .text-muted span { color: #aaaaaa !important; }
+#themeToggle { cursor:pointer; font-size:20px; line-height:60px; padding:0 15px; color:#64748b; transition:color 0.3s; }
+.dark-mode #themeToggle { color:#fcd34d; }
+/* Translate Override */
+.goog-te-banner-frame.skiptranslate, .goog-te-banner-frame, .goog-te-gadget-icon, iframe[id^=":"] { display: none !important; }
+body { top: 0px !important; position: static !important; }
+html { top: 0px !important; position: static !important; }
+body > .skiptranslate { display: none !important; }
+#google_translate_element { display: none !important; }
+.goog-tooltip { display: none !important; }
+.goog-tooltip:hover { display: none !important; }
+.goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
+</style>
+\n</head>
+   <body>
+      <div class="main-wrapper">
+         <div class="header">
+            <div class="header-left">
+               <a href="{% if request.user.is_admin %}{% url 'admin_dashboard' %}{% elif request.user.is_teacher %}{% url 'teacher_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}" class="logo">
                <img src="{%static 'assets/img/logo.png' %}" alt="Logo">
-            </a>
-            <a href="index.html" class="logo logo-small">
+               </a>
+               <a href="{% if request.user.is_admin %}{% url 'admin_dashboard' %}{% elif request.user.is_teacher %}{% url 'teacher_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}" class="logo logo-small">
                <img src="{%static 'assets/img/logo-small.png' %}" alt="Logo" width="30" height="30">
-            </a>
-         </div>
-         <a href="javascript:void(0);" id="toggle_btn">
-            <i class="fas fa-align-left"></i>
-         </a>
-         <div class="top-nav-search">
-            <form>
-               <input type="text" class="form-control" placeholder="Search here">
-               <button class="btn" type="submit"><i class="fas fa-search"></i></button>
-            </form>
-         </div>
-         <a class="mobile_btn" id="mobile_btn">
-            <i class="fas fa-bars"></i>
-         </a>
-         <ul class="nav user-menu">
-            <li class="nav-item dropdown noti-dropdown">
-               <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-                  {% comment %} {% if unread_notification_count > 0 %}
-                  <i class="far fa-bell"></i> <span class="badge badge-pill">{{unread_notification_count}}</span>
-                  {% endif %} {% endcomment %}
                </a>
-               <div class="dropdown-menu notifications">
-                  <div class="topnav-dropdown-header">
-                     <span class="notification-title">Notifications</span>
-                     <a href="javascript:void(0)" class="clear-noti"> Clear All </a>
-                  </div>
-                  <div class="noti-content">
-                     <ul class="notification-list">
-
-                     </ul>
-                  </div>
-                  <div class="topnav-dropdown-footer">
-                     <a href="#">View all Notifications</a>
-                  </div>
-               </div>
-            </li>
-            <li class="nav-item dropdown has-arrow">
-               <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-                  <span class="user-img"><img class="rounded-circle"
-                        src="{%static 'assets/img/profiles/avatar-01.jpg'%}" width="31" alt="Ryan Taylor"></span>
-               </a>
-               <div class="dropdown-menu">
-                  <div class="user-header">
-                     <div class="avatar avatar-sm">
-                        <img src="{%static 'assets/img/profiles/avatar-01.jpg'%}" alt="User Image"
-                           class="avatar-img rounded-circle">
-                     </div>
-                     <div class="user-text">
-                        {% comment %} <h6>{{user.username}}</h6> {% endcomment %}
-                        <p class="text-muted mb-0">Administrator</p>
-                     </div>
-                  </div>
-                  <a class="dropdown-item" href="profile.html">My Profile</a>
-                  <a class="dropdown-item" href="inbox.html">Inbox</a>
-                  <a class="dropdown-item" href="">Logout</a>
-               </div>
-            </li>
-         </ul>
-      </div>
-      <div class="sidebar" id="sidebar">
-         <div class="sidebar-inner slimscroll">
-            <div id="sidebar-menu" class="sidebar-menu">
-               <ul>
-                  <li class="menu-title">
-                     <span>Main Menu</span>
-                  </li>
-                  <li class="submenu active">
-                     <a href="#"><i class="fas fa-user-graduate"></i> <span> Dashboard</span> <span
-                           class="menu-arrow"></span></a>
-                     <ul>
-                        <li><a href="index.html" class="active">Admin Dashboard</a></li>
-                        <li><a href="teacher-dashboard.html">Teacher Dashboard</a></li>
-                        <li><a href="student-dashboard.html">Student Dashboard</a></li>
-                     </ul>
-                  </li>
-                  <li class="submenu">
-                     <a href="#"><i class="fas fa-user-graduate"></i> <span> Students</span> <span
-                           class="menu-arrow"></span></a>
-                     <ul>
-                        <li><a href="{% url 'student_list' %}">Student List</a></li>
-                        <li><a href="student-details.html">Student View</a></li>
-                        <li><a href="{% url 'add_student' %}">Student Add</a></li>
-                        <li><a href="edit-student.html">Student Edit</a></li>
-                     </ul>
-                  </li>
-                  <li class="submenu">
-                     <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Teachers</span> <span
-                           class="menu-arrow"></span></a>
-                     <ul>
-                        <li><a href="teachers.html">Teacher List</a></li>
-                        <li><a href="teacher-details.html">Teacher View</a></li>
-                        <li><a href="add-teacher.html">Teacher Add</a></li>
-                        <li><a href="edit-teacher.html">Teacher Edit</a></li>
-                     </ul>
-                  </li>
-                  <li class="submenu">
-                     <a href="#"><i class="fas fa-building"></i> <span> Departments</span> <span
-                           class="menu-arrow"></span></a>
-                     <ul>
-                        <li><a href="departments.html">Department List</a></li>
-                        <li><a href="add-department.html">Department Add</a></li>
-                        <li><a href="edit-department.html">Department Edit</a></li>
-                     </ul>
-                  </li>
-                  <li class="submenu">
-                     <a href="#"><i class="fas fa-book-reader"></i> <span> Subjects</span> <span
-                           class="menu-arrow"></span></a>
-                     <ul>
-                        <li><a href="subjects.html">Subject List</a></li>
-                        <li><a href="add-subject.html">Subject Add</a></li>
-                        <li><a href="edit-subject.html">Subject Edit</a></li>
-                     </ul>
-                  </li>
-                  <li class="menu-title">
-                     <span>Management</span>
-                  </li>
-                  <li class="submenu">
-                     <a href="#"><i class="fas fa-file-invoice-dollar"></i> <span> Accounts</span> <span
-                           class="menu-arrow"></span></a>
-                     <ul>
-                        <li><a href="fees-collections.html">Fees Collection</a></li>
-                        <li><a href="expenses.html">Expenses</a></li>
-                        <li><a href="salary.html">Salary</a></li>
-                        <li><a href="add-fees-collection.html">Add Fees</a></li>
-                        <li><a href="add-expenses.html">Add Expenses</a></li>
-                        <li><a href="add-salary.html">Add Salary</a></li>
-                     </ul>
-                  </li>
-                  <li>
-                     <a href="holiday.html"><i class="fas fa-holly-berry"></i> <span>Holiday</span></a>
-                  </li>
-                  <li>
-                     <a href="fees.html"><i class="fas fa-comment-dollar"></i> <span>Fees</span></a>
-                  </li>
-                  <li>
-                     <a href="exam.html"><i class="fas fa-clipboard-list"></i> <span>Exam list</span></a>
-                  </li>
-                  <li>
-                     <a href="event.html"><i class="fas fa-calendar-day"></i> <span>Events</span></a>
-                  </li>
-                  <li>
-                     <a href="time-table.html"><i class="fas fa-table"></i> <span>Time Table</span></a>
-                  </li>
-                  <li>
-                     <a href="library.html"><i class="fas fa-book"></i> <span>Library</span></a>
-                  </li>
-                  <li class="menu-title">
-                     <span>Pages</span>
-                  </li>
-                  <li class="submenu">
-                     <a href="#"><i class="fas fa-shield-alt"></i> <span> Authentication </span> <span
-                           class="menu-arrow"></span></a>
-                     <ul>
-                        <li><a href="">Login</a></li>
-                        <li><a href="">Register</a></li>
-                        <li><a href="">Forgot Password</a></li>
-                        <li><a href="error-404.html">Error Page</a></li>
-                     </ul>
-                  </li>
-                  <li>
-                     <a href="blank-page.html"><i class="fas fa-file"></i> <span>Blank Page</span></a>
-                  </li>
-                  <li class="menu-title">
-                     <span>Others</span>
-                  </li>
-                  <li>
-                     <a href="sports.html"><i class="fas fa-baseball-ball"></i> <span>Sports</span></a>
-                  </li>
-                  <li>
-                     <a href="hostel.html"><i class="fas fa-hotel"></i> <span>Hostel</span></a>
-                  </li>
-                  <li>
-                     <a href="transport.html"><i class="fas fa-bus"></i> <span>Transport</span></a>
-                  </li>
-                  <li class="menu-title">
-                     <span>UI Interface</span>
-                  </li>
-                  <li>
-                     <a href="components.html"><i class="fas fa-vector-square"></i> <span>Components</span></a>
-                  </li>
-                  <li class="submenu">
-                     <a href="#"><i class="fas fa-columns"></i> <span> Forms </span> <span
-                           class="menu-arrow"></span></a>
-                     <ul>
-                        <li><a href="form-basic-inputs.html">Basic Inputs </a></li>
-                        <li><a href="form-input-groups.html">Input Groups </a></li>
-                        <li><a href="form-horizontal.html">Horizontal Form </a></li>
-                        <li><a href="form-vertical.html"> Vertical Form </a></li>
-                        <li><a href="form-mask.html"> Form Mask </a></li>
-                        <li><a href="form-validation.html"> Form Validation </a></li>
-                     </ul>
-                  </li>
-                  <li class="submenu">
-                     <a href="#"><i class="fas fa-table"></i> <span> Tables </span> <span class="menu-arrow"></span></a>
-                     <ul>
-                        <li><a href="tables-basic.html">Basic Tables </a></li>
-                        <li><a href="data-tables.html">Data Table </a></li>
-                     </ul>
-                  </li>
-                  <li class="submenu">
-                     <a href="javascript:void(0);"><i class="fas fa-code"></i> <span>Multi Level</span> <span
-                           class="menu-arrow"></span></a>
-                     <ul>
-                        <li class="submenu">
-                           <a href="javascript:void(0);"> <span>Level 1</span> <span class="menu-arrow"></span></a>
-                           <ul>
-                              <li><a href="javascript:void(0);"><span>Level 2</span></a></li>
-                              <li class="submenu">
-                                 <a href="javascript:void(0);"> <span> Level 2</span> <span
-                                       class="menu-arrow"></span></a>
-                                 <ul>
-                                    <li><a href="javascript:void(0);">Level 3</a></li>
-                                    <li><a href="javascript:void(0);">Level 3</a></li>
-                                 </ul>
-                              </li>
-                              <li><a href="javascript:void(0);"> <span>Level 2</span></a></li>
-                           </ul>
-                        </li>
-                        <li>
-                           <a href="javascript:void(0);"> <span>Level 1</span></a>
-                        </li>
-                     </ul>
-                  </li>
-               </ul>
             </div>
+            <a href="javascript:void(0);" id="toggle_btn">
+            <i class="fas fa-align-left"></i>
+            </a>
+            <div class="top-nav-search" style="position: relative;">
+               <form onsubmit="return false;">
+                  <input type="text" class="form-control" id="omniSearchInput" placeholder="Global Search (Student, Teacher, Subject)..." autocomplete="off">
+                  <button class="btn" type="submit"><i class="fas fa-search"></i></button>
+               </form>
+               <div id="omniSearchResults" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.15); border:1px solid #e2e8f0; max-height:400px; overflow-y:auto; z-index:9999; margin-top:5px; padding:5px;"></div>
+            </div>
+            <a class="mobile_btn" id="mobile_btn">
+            <i class="fas fa-bars"></i>
+            </a>
+            <ul class="nav user-menu">
+               <li class="nav-item dropdown has-arrow">
+                  <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" title="Select Language">
+                     <i class="fas fa-globe" style="font-size: 20px; line-height: 60px;"></i>
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right">
+                     <a href="javascript:void(0);" class="dropdown-item" onclick="setLanguage('en')">🇬🇧 English</a>
+                     <a href="javascript:void(0);" class="dropdown-item" onclick="setLanguage('fr')">🇫🇷 Français</a>
+                     <a href="javascript:void(0);" class="dropdown-item" onclick="setLanguage('es')">🇪🇸 Español</a>
+                     <a href="javascript:void(0);" class="dropdown-item" onclick="setLanguage('ar')">🇸🇦 العربية</a>
+                  </div>
+               </li>
+               <li class="nav-item">
+                   <a href="javascript:void(0)" id="themeToggle" title="Toggle Dark Mode"><i class="fas fa-moon"></i></a>
+               </li>
+               <li class="nav-item dropdown noti-dropdown">
+                  <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+                  <i class="far fa-bell" id="bellIcon"></i> 
+                  <span class="badge badge-pill bg-danger text-white pulse" style="display:none; position: absolute; top: 0px; right: 0px;" id="notiBadge">0</span>
+                  </a>
+                  <div class="dropdown-menu notifications">
+                     <div class="topnav-dropdown-header">
+                        <span class="notification-title">Notifications</span>
+                        <a href="javascript:void(0)" class="clear-noti"> Clear All </a>
+                     </div>
+                     <div class="noti-content">
+                        <ul class="notification-list">
+                           
+                        </ul>
+                     </div>
+                     <div class="topnav-dropdown-footer">
+                        <a href="#">View all Notifications</a>
+                     </div>
+                  </div>
+               </li>
+               
+               <li class="nav-item dropdown has-arrow">
+                  <a href="{% url 'profile' %}"><span class="user-img"><img class="rounded-circle" src="{%static 'assets/img/profiles/avatar-01.jpg'%}" width="31" alt="Profile"></span></a>
+                  <div class="dropdown-menu">
+                     <div class="user-header">
+                        <div class="avatar avatar-sm">
+                           <img src="{%static 'assets/img/profiles/avatar-01.jpg'%}" alt="User Image" class="avatar-img rounded-circle">
+                        </div>
+                         <div class="user-text">
+                            <h6>{{ request.user.first_name }} {{ request.user.last_name }}</h6>
+                            <p class="text-muted mb-0">{% if request.user.is_admin %}Admin{% elif request.user.is_teacher %}Teacher{% else %}Student{% endif %}</p>
+                         </div>
+                      </div>
+                      <a class="dropdown-item" href="{% url 'profile' %}">My Profile</a>
+                      <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                  </div>
+               </li>
+            </ul>
          </div>
+         <div class="sidebar" id="sidebar">
+    <div class="sidebar-inner slimscroll">
+        <div id="sidebar-menu" class="sidebar-menu">
+            <ul>
+                <li class="menu-title">
+                    <span>Main Menu</span>
+                </li>
+                
+
+                
+                <li class="{% if request.resolver_match.url_name == 'admin_dashboard' or request.resolver_match.url_name == 'teacher_dashboard' or request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <a href="{% if request.user.is_admin %}{% url 'admin_dashboard' %}{% elif request.user.is_teacher %}{% url 'teacher_dashboard' %}{% else %}{% url 'dashboard' %}{% endif %}"><i class="fas fa-home"></i> <span> Dashboard</span></a>
+                </li>
+
+                {% if request.user.is_admin or request.user.is_teacher %}
+                <li class="{% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">
+                    <a href="{% url 'student_list' %}"><i class="fas fa-user-graduate"></i> <span> Student List</span></a>
+                </li>
+                {% endif %}
+
+                {% if request.user.is_admin or request.user.is_student %}
+                <li class="{% if request.resolver_match.url_name == 'teacher_list' %}active{% endif %}">
+                    <a href="{% url 'teacher_list' %}"><i class="fas fa-chalkboard-teacher"></i> <span> Teacher List</span></a>
+                </li>
+                {% if request.user.is_admin %}
+                <li class="{% if request.resolver_match.url_name == 'add_teacher' %}active{% endif %}">
+                    <a href="{% url 'add_teacher' %}"><i class="fas fa-user-plus"></i> <span> Add Teacher</span></a>
+                </li>
+                {% endif %}
+                {% endif %}
+
+                {% if request.user.is_admin %}
+                <li class="{% if request.resolver_match.url_name == 'department_list' %}active{% endif %}">
+                    <a href="{% url 'department_list' %}"><i class="fas fa-building"></i> <span> Department List</span></a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'add_department' %}active{% endif %}">
+                    <a href="{% url 'add_department' %}"><i class="fas fa-plus-square"></i> <span> Add Department</span></a>
+                </li>
+                {% endif %}
+
+                <li class="{% if request.resolver_match.url_name == 'subject_list' %}active{% endif %}">
+                    <a href="{% url 'subject_list' %}"><i class="fas fa-book-reader"></i> <span> Subject List</span></a>
+                </li>
+                {% if request.user.is_admin %}
+                <li class="{% if request.resolver_match.url_name == 'add_subject' %}active{% endif %}">
+                    <a href="{% url 'add_subject' %}"><i class="fas fa-plus-circle"></i> <span> Add Subject</span></a>
+                </li>
+                {% endif %}
+                
+                <li class="menu-title mt-2">
+                    <span>Management</span>
+                </li>
+                {% if request.user.is_admin %}
+                <li>
+                    <a href="{% url 'review_requests' %}"><i class="fas fa-user-check text-warning"></i> <span class="text-warning">Account Requests</span></a>
+                </li>
+                <li>
+                    <a href="{% url 'coming_soon' %}"><i class="fas fa-file-invoice-dollar"></i> <span> Accounts & Fees</span></a>
+                </li>
+                <li>
+                    <a href="{% url 'coming_soon' %}"><i class="fas fa-chart-line"></i> <span> Expenses & Salary</span></a>
+                </li>
+                {% endif %}
+                
+                <li class="{% if request.resolver_match.url_name == 'holiday_list' %}active{% endif %}">
+                    <a href="{% url 'holiday_list' %}"><i class="fas fa-holly-berry"></i> <span>Holiday List</span></a>
+                </li>
+                <li>
+                    <a href="{% url 'fees_list' %}"><i class="fas fa-comment-dollar"></i> <span>Fees</span></a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'exam_list' %}active{% endif %}">
+                    <a href="{% url 'exam_list' %}"><i class="fas fa-clipboard-list"></i> <span>Exam List</span></a>
+                </li>
+                <li>
+                    <a href="{% url 'events_list' %}"><i class="fas fa-calendar-day"></i> <span>Events</span></a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'timetable_list' %}active{% endif %}">
+                    <a href="{% url 'timetable_list' %}"><i class="fas fa-table"></i> <span>Time Table</span></a>
+                </li>
+                <li>
+                    <a href="{% url 'library_list' %}"><i class="fas fa-book"></i> <span>Library</span></a>
+                </li>
+                
+                <li class="menu-title mt-2">
+                    <span>Academic Portals</span>
+                </li>
+                {% if request.user.is_teacher or request.user.is_admin %}
+                <li class="{% if request.resolver_match.url_name == 'teacher_enter_grades' %}active{% endif %}">
+                    <a href="{% url 'teacher_enter_grades' %}"><i class="fas fa-pen-alt text-success"></i> <span> Publish Grades</span></a>
+                </li>
+                {% endif %}
+                
+                {% if request.user.is_teacher %}
+                <li class="{% if request.resolver_match.url_name == 'teacher_review_grades' %}active{% endif %}">
+                    <a href="{% url 'teacher_review_grades' %}"><i class="fas fa-handshake text-warning"></i> <span> Modifications Admin</span></a>
+                </li>
+                {% endif %}
+                
+                {% if request.user.is_student %}
+                <li class="{% if request.resolver_match.url_name == 'student_my_grades' %}active{% endif %}">
+                    <a href="{% url 'student_my_grades' %}"><i class="fas fa-graduation-cap text-primary"></i> <span> My Grades</span></a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'request_student_card' %}active{% endif %}">
+                    <a href="{% url 'request_student_card' %}"><i class="fas fa-id-card text-info"></i> <span> Demande de Carte</span></a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'request_certificate' %}active{% endif %}">
+                    <a href="{% url 'request_certificate' %}"><i class="fas fa-certificate text-warning"></i> <span> Request Certificate</span></a>
+                </li>
+                {% endif %}
+
+                {% if request.user.is_admin %}
+                <li class="{% if request.resolver_match.url_name == 'admin_validate_grades' %}active{% endif %}">
+                    <a href="{% url 'admin_validate_grades' %}"><i class="fas fa-gavel text-danger"></i> <span> Bureau de Validation (Notes)</span></a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'admin_cards' %}active{% endif %}">
+                    <a href="{% url 'admin_cards' %}"><i class="fas fa-id-badge text-primary"></i> <span> Demandes de Cartes</span></a>
+                </li>
+                <li class="{% if request.resolver_match.url_name == 'admin_certificates' %}active{% endif %}">
+                    <a href="{% url 'admin_certificates' %}"><i class="fas fa-file-signature text-danger"></i> <span> Certificate Approvals</span></a>
+                </li>
+                {% endif %}
+
+                <li class="{% if request.resolver_match.url_name == 'activities_board' %}active{% endif %}">
+                    <a href="{% url 'activities_board' %}"><i class="fas fa-bullhorn text-info"></i> <span> Faculty Activities</span></a>
+                </li>
+                
+                <li class="menu-title mt-2">
+                    <span>Session</span>
+                </li>
+                <li>
+                    <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt text-danger"></i> <span class="text-danger font-weight-bold">Déconnexion</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+         {% block body %}
+            
+         {% endblock %}
+
       </div>
 
+ 
 
-      {% block body %}
-
-      {% endblock %}
-
-   </div>
-
-
-
-
-   <script type="text/javascript">
-      document.addEventListener('DOMContentLoaded', function () {
-         // Select the notification dropdown element
-         const notiDropdown = document.querySelector('.noti-dropdown');
-         const clearAllBtn = document.querySelector('.clear-noti');
-
-         if (notiDropdown) {
-            // Add a click event listener to the notification dropdown
-            notiDropdown.addEventListener('click', function () {
-               const url = "";
-
-               // Use the Fetch API to send a POST request to mark notifications as read
-               fetch(url, {
-                  method: 'POST',
-                  headers: {
-                     'X-CSRFToken': '{{ csrf_token }}',
-                     'Content-Type': 'application/x-www-form-urlencoded',
-                  }
-               })
-                  .then(response => response.json())  // Parse the JSON response
-                  .then(data => {
-                     if (data.status === 'success') {
-                        // Remove the badge if notifications are successfully marked as read
-                        const badge = document.querySelector('.badge');
-                        if (badge) {
-                           badge.remove();
-                        }
-                     }
-                  })
-                  .catch(error => {
-                     console.error('Error:', error);  // Log any errors
+    
+      <script type="text/javascript">
+          document.addEventListener('DOMContentLoaded', function() {
+              // Select the notification dropdown element
+              const notiDropdown = document.querySelector('.noti-dropdown');
+              const clearAllBtn = document.querySelector('.clear-noti');
+      
+              if (notiDropdown) {
+                  // Add a click event listener to the notification dropdown
+                  notiDropdown.addEventListener('click', function() {
+                      const url = "";
+      
+                      // Use the Fetch API to send a POST request to mark notifications as read
+                      fetch(url, {
+                          method: 'POST',
+                          headers: {
+                              'X-CSRFToken': '{{ csrf_token }}',
+                              'Content-Type': 'application/x-www-form-urlencoded',
+                          }
+                      })
+                      .then(response => response.json())  // Parse the JSON response
+                      .then(data => {
+                          if (data.status === 'success') {
+                              // Remove the badge if notifications are successfully marked as read
+                              const badge = document.querySelector('.badge');
+                              if (badge) {
+                                  badge.remove();
+                              }
+                          }
+                      })
+                      .catch(error => {
+                          console.error('Error:', error);  // Log any errors
+                      });
                   });
-            });
-         }
-
-         if (clearAllBtn) {
-            // Add a click event listener to the "Clear All" button
-            clearAllBtn.addEventListener('click', function () {
-               const clearUrl = "";  // Ensure this URL points to the correct view
-
-               // Use Fetch to send a POST request to clear all notifications
-               fetch(clearUrl, {
-                  method: 'POST',
-                  headers: {
-                     'X-CSRFToken': '{{ csrf_token }}',
-                     'Content-Type': 'application/x-www-form-urlencoded',
-                  }
-               })
-                  .then(response => response.json())  // Parse the JSON response
-                  .then(data => {
-                     if (data.status === 'success') {
-                        // Clear all notifications from the dropdown
-                        const notificationList = document.querySelector('.notification-list');
-                        if (notificationList) {
-                           notificationList.innerHTML = '<li>No new notifications</li>';  // Optionally show a "No new notifications" message
-                        }
-                     }
-                  })
-                  .catch(error => {
-                     console.error('Error:', error);  // Log any errors
+              }
+      
+              if (clearAllBtn) {
+                  // Add a click event listener to the "Clear All" button
+                  clearAllBtn.addEventListener('click', function() {
+                      const clearUrl = "";  // Ensure this URL points to the correct view
+      
+                      // Use Fetch to send a POST request to clear all notifications
+                      fetch(clearUrl, {
+                          method: 'POST',
+                          headers: {
+                              'X-CSRFToken': '{{ csrf_token }}',
+                              'Content-Type': 'application/x-www-form-urlencoded',
+                          }
+                      })
+                      .then(response => response.json())  // Parse the JSON response
+                      .then(data => {
+                          if (data.status === 'success') {
+                              // Clear all notifications from the dropdown
+                              const notificationList = document.querySelector('.notification-list');
+                              if (notificationList) {
+                                  notificationList.innerHTML = '<li>No new notifications</li>';  // Optionally show a "No new notifications" message
+                              }
+                          }
+                      })
+                      .catch(error => {
+                          console.error('Error:', error);  // Log any errors
+                      });
                   });
-            });
-         }
+              }
+          });
+      </script>
+
+      <script src="{%static 'assets/js/jquery-3.6.0.min.js' %}?v=2.0"></script>
+      <script src="{%static 'assets/js/popper.min.js' %}?v=2.0"></script>
+      <script src="{%static 'assets/plugins/bootstrap/js/bootstrap.min.js' %}?v=2.0"></script>
+      <script src="{%static 'assets/plugins/slimscroll/jquery.slimscroll.min.js' %}?v=2.0"></script>
+      <script src="{%static 'assets/plugins/datatables/jquery.dataTables.min.js' %}?v=2.0"></script>
+      <script src="{%static 'assets/plugins/datatables/datatables.min.js' %}?v=2.0"></script>
+      <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+      <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+      <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+      <script src="{%static 'assets/js/script.js' %}?v=2.0"></script>
+
+      <script>
+      function fetchNotifications() {
+          fetch('/authentication/api/notifications/')
+              .then(response => response.json())
+              .then(data => {
+                  const badge = document.getElementById('notiBadge');
+                  const list = document.querySelector('.notification-list');
+                  
+                  if(data.count > 0) {
+                      badge.style.display = 'block';
+                      badge.innerText = data.count;
+                  } else {
+                      badge.style.display = 'none';
+                  }
+                  
+                  list.innerHTML = '';
+                  data.notifications.forEach(n => {
+                      list.innerHTML += `
+                      <li class="notification-message">
+                         <a href="javascript:void(0)" onclick="markRead(${n.id})">
+                            <div class="media">
+                               <span class="avatar avatar-sm">
+                                  <img class="avatar-img rounded-circle" alt="User Image" src="{%static 'assets/img/profiles/avatar-02.jpg'%}">
+                               </span>
+                               <div class="media-body">
+                                  <p class="noti-details"><span class="noti-title">System Alert</span> <span class="text-dark">${n.title}</span> - ${n.message}</p>
+                                  <p class="noti-time"><span class="notification-time">${n.time}</span></p>
+                               </div>
+                            </div>
+                         </a>
+                      </li>`;
+                  });
+              });
+      }
+      function markRead(id) {
+          fetch('/authentication/api/notifications/read/' + id + '/')
+              .then(() => fetchNotifications());
+      }
+      document.querySelector('.clear-noti').addEventListener('click', function() {
+          fetch('/authentication/api/notifications/clear/')
+              .then(() => fetchNotifications());
       });
-   </script>
+      setInterval(fetchNotifications, 10000);
+      setTimeout(fetchNotifications, 500);
+      </script>
 
+<div class="chatbot-widget" id="chatbotWidget">
+    <div class="chatbot-window" id="chatbotWindow" style="display:none;">
+        <div class="chatbot-header">
+            <span>{% if request.user.is_admin %}Admin Support{% elif request.user.is_teacher %}Faculty Assistant{% else %}Student Guide{% endif %}</span>
+            <span class="close-chat" onclick="toggleChatbot()">&times;</span>
+        </div>
+        <div class="chatbot-body" id="chatBody">
+            <div class="chat-msg bot-msg">Hello {{ request.user.first_name }}! How can I help you today?</div>
+        </div>
+        <div class="chatbot-options" id="chatOptions">
+            <!-- options appended here -->
+        </div>
+    </div>
+    <div class="chatbot-bubble pulse" onclick="toggleChatbot()">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+</div>
+
+<script>
+    const userRole = "{% if request.user.is_admin %}admin{% elif request.user.is_teacher %}teacher{% else %}student{% endif %}";
+    
+    const botScenarios = {
+        'admin': [
+            { text: "How do I review new accounts?", answer: "Go to Management > Account Requests in the sidebar. You can approve or reject pending users there." },
+            { text: "What are the system stats?", answer: "Currently the system acts as a dashboard. Check the main page for live student/teacher ratios." },
+            { text: "How do I add a Holiday?", answer: "Navigate to the Holiday List module and click 'Add Holiday' at the top right." }
+        ],
+        'teacher': [
+            { text: "Where are my students?", answer: "Click 'Student List' in the sidebar to view all students enrolled in your department." },
+            { text: "How do I add grades?", answer: "The Exam List module allows you to track exams. Grade entry is coming in the next update!" },
+            { text: "View my schedule?", answer: "Your classes are listed in the 'Time Table' section of the dashboard." }
+        ],
+        'student': [
+            { text: "What's my next holiday?", answer: "Check the 'Holiday List' on your sidebar to see all upcoming school breaks!" },
+            { text: "Where do I view my courses?", answer: "Your assigned subjects are visible in the 'Subject List' menu." },
+            { text: "How do I borrow a book?", answer: "The digital 'Library' module lets you browse available books. Contact the librarian to issue one." }
+        ]
+    };
+
+    function toggleChatbot() {
+        const win = document.getElementById('chatbotWindow');
+        win.style.display = win.style.display === 'none' ? 'flex' : 'none';
+        if(win.style.display === 'flex') {
+            const optionsBox = document.getElementById('chatOptions');
+            if (optionsBox.children.length === 0) {
+                renderOptions();
+            }
+        }
+    }
+
+    function renderOptions() {
+        const optionsBox = document.getElementById('chatOptions');
+        optionsBox.innerHTML = '';
+        const questions = botScenarios[userRole];
+        questions.forEach((q, index) => {
+            optionsBox.innerHTML += `<button class="chat-btn" onclick="askQuestion(${index})">${q.text}</button>`;
+        });
+    }
+
+    function askQuestion(index) {
+        const q = botScenarios[userRole][index];
+        const body = document.getElementById('chatBody');
+        
+        body.innerHTML += `<div class="chat-msg user-msg">${q.text}</div>`;
+        body.scrollTop = body.scrollHeight;
+        document.getElementById('chatOptions').innerHTML = ''; 
+        
+        const typingId = 'typing-' + Date.now();
+        body.innerHTML += `
+        <div class="typing-indicator" id="${typingId}">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>`;
+        body.scrollTop = body.scrollHeight;
+        
+        setTimeout(() => {
+            const typingEl = document.getElementById(typingId);
+            if(typingEl) typingEl.remove();
+            body.innerHTML += `<div class="chat-msg bot-msg">${q.answer}</div>`;
+            body.scrollTop = body.scrollHeight;
+            
+            setTimeout(renderOptions, 500);
+        }, 1500);
+    }
+</script>
+
+<script>
+    const omniInput = document.getElementById('omniSearchInput');
+    const omniResults = document.getElementById('omniSearchResults');
+    
+    if(omniInput) {
+        let timeout = null;
+        omniInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const q = this.value.trim();
+            if(q.length < 2) {
+                omniResults.style.display = 'none';
+                return;
+            }
+            timeout = setTimeout(() => {
+                fetch('/authentication/api/search/?q=' + encodeURIComponent(q))
+                    .then(r => r.json())
+                    .then(data => {
+                        if(data.results.length > 0) {
+                            omniResults.style.display = 'block';
+                            omniResults.innerHTML = data.results.map(res => `
+                                <a href="${res.url}" style="display:block; padding:8px; border-bottom:1px solid #eee; text-decoration:none; color:#333; transition:background 0.2s;" onmouseover="this.style.backgroundColor='#f8fafc'" onmouseout="this.style.backgroundColor='transparent'">
+                                    <div style="font-weight:600; font-size:14px; display:flex; justify-content:space-between;">
+                                        <span>${res.name}</span>
+                                        <span class="badge ${res.type === 'Student' ? 'bg-primary' : (res.type === 'Teacher' ? 'bg-success' : 'bg-warning')} text-white" style="font-size:10px;">${res.type}</span>
+                                    </div>
+                                    <div style="font-size:12px; color:#64748b; margin-top:2px;">ID: ${res.id}</div>
+                                </a>
+                            `).join('');
+                        } else {
+                            omniResults.style.display = 'block';
+                            omniResults.innerHTML = '<div style="padding:10px; color:#64748b; font-size:13px; text-align:center;">No results found matching "' + q + '".</div>';
+                        }
+                    });
+            }, 300);
+        });
+        
+        document.addEventListener('click', function(e) {
+            if(!omniInput.contains(e.target) && !omniResults.contains(e.target)) {
+                omniResults.style.display = 'none';
+            }
+        });
+    }
+</script>
+
+<script>
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const themeIcon = themeToggleBtn.querySelector('i');
+    
+    function setTheme(isDark) {
+        if(isDark) {
+            document.body.classList.add('dark-mode');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark-mode');
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+            localStorage.setItem('theme', 'light');
+        }
+    }
+
+    if(localStorage.getItem('theme') === 'dark') {
+        setTheme(true);
+    } else {
+        setTheme(false);
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+        setTheme(!document.body.classList.contains('dark-mode'));
+    });
+</script>
+
+<!-- Google Translate i18n Engine -->
+<div id="google_translate_element"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'en', autoDisplay: false}, 'google_translate_element');
+}
+function setLanguage(langCode) {
+    document.cookie = `googtrans=/en/${langCode}; path=/; domain=${window.location.hostname};`;
+    document.cookie = `googtrans=/en/${langCode}; path=/;`;
+    window.location.reload();
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 </body>
-
-</html>
+  </html>
+  
