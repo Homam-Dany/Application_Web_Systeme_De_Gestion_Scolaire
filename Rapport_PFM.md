@@ -143,3 +143,60 @@ Ce rapport documente la construction pas à pas d'une application web de gestion
 
 *Liste des étudiants enregistrés :*
 ![Students List Screenshot](./capture_admin_students.png)
+
+## 7. Partie 6 : Vues CRUD pour la Gestion des Étudiants
+
+**6.1 Mise à jour de student/views.py**
+* **Action :** Création des fonctions de vues (CRUD) pour chaque opération : `student_list`, `add_student`, `edit_student`, `view_student`, `delete_student`.
+* **Objectif :** Gérer les requêtes HTTP pour l'affichage, l'ajout, la consultation, la modification et la suppression d'étudiants.
+
+**6.2 Mise à jour des routes dans student/urls.py**
+* **Action :** Ajout des routes correspondant à chaque vue CRUD, en utilisant des paramètres tels que `<str:student_id>` pour identifier précisément quel étudiant ou parent est ciblé.
+* **Objectif :** Associer les URLs appropriées (listes de données ou actions spécifiques) aux vues.
+
+**6.3 Implémentation de la vue d'ajout d'un étudiant**
+* **Action :** Développement de la logique POST dans `add_student` pour récupérer les données du formulaire HTML, créer d'abord un enregistrement `Parent`, puis l'instance `Student` liée au parent, et rediriger l'utilisateur vers la liste des étudiants avec un message de succès (via le module messages de Django).
+* **Objectif :** Permettre l'enregistrement conjoint d'un parent et d'un étudiant de manière fluide et sécurisée dans la base de données.
+
+**6.4 Liaison des menus aux routes**
+* **Action :** Modification du fichier de template partagé `templates/Home/base.html` pour utiliser les balises locales `{% url 'nom_route' %}` comme `{% url 'student_list' %}` et `{% url 'add_student' %}` dans les attributs HTML `href` du menu de navigation.
+* **Objectif :** Lier dynamiquement les liens du menu latéral du tableau de bord aux vues et URLs du projet, s'assurant ainsi que toute mise à jour de route côté backend est répercutée automatiquement côté front.
+
+*Aperçu de la page listant les étudiants (Student List) :*
+![Student List Screenshot](./capture_student_list.png)
+
+*Aperçu du formulaire d'ajout d'étudiant (Add Student) :*
+![Student Add Screenshot](./capture_student_add.png)
+
+## 8. Partie 7 : Module d'Authentification personnalisé
+
+Dans cette section, un système complet d'authentification a été conçu avec un modèle d'utilisateur personnalisé capable de gérer trois rôles distincts (Administrateur, Enseignant, Étudiant) et équipé de fonctionnalités avancées telles que la réinitialisation de mot de passe par mail.
+
+**7.1 Création et configuration de l'application home_auth**
+* **Action :** Création de la nouvelle application via `py manage.py startapp home_auth` et ajout de `'home_auth'` dans `INSTALLED_APPS` (fichier `settings.py`).
+* **Objectif :** Obtenir un module indépendant exclusif à la gestion rigoureuse de l'authentification et des différents utilisateurs.
+
+**7.2 Définition du modèle CustomUser et PasswordResetRequest**
+* **Action :** Création du modèle `CustomUser` (héritant d'`AbstractUser`) dans `home_auth/models.py`. Des champs booléens y ont été associés (`is_admin`, `is_teacher`, `is_student`) pour définir le statut. Un deuxième modèle `PasswordResetRequest` a été ajouté pour gérer la logique de création et vérification de requêtes de réinitialisation de mot de passe via l'envoi de tokens uniques.
+* **Objectif :** Subdiviser et personnaliser les comportements des classes d'utilisateurs natifs de Django pour mieux répondre aux profils spécifiques d'un établissement scolaire.
+
+**7.3 Refonte et liaison des Urls**
+* **Action :** Configuration du nouveau fichier de routage `home_auth/urls.py` avec les endpoints `login/`, `signup/`, `logout/` et connexion au fichier principal `school/urls.py` sous le préfixe `authentication/`.
+* **Objectif :** Établir l'arborescence adéquate pour séparer l'accès aux pages publiques du back-office.
+
+**7.4 Configuration du modèle utilisateur dans settings.py**
+* **Action :** Configuration de la variable clé `AUTH_USER_MODEL = 'home_auth.CustomUser'` ainsi que des liens par défaut (`LOGIN_URL`, `LOGIN_REDIRECT_URL`). Cette étape délicate a nécessité la suppression complète du précédent `db.sqlite3` ainsi que de son historique de migrations, suivi par la reconstruction structurelle globale de la base (via un nouveau `makemigrations` et `migrate`) pour éviter un conflit inéluctable avec la table standard.
+* **Objectif :** Forcer Django et son ORM à basculer du mécanisme d'authentification par défaut vers la version customisée intégrant nos rôles.
+
+**7.5 Logique des Vues : Inscription, Connexion et Redistribution**
+* **Action :** Implémentation du backend traitant les requêtes POST d'authentification dans `home_auth/views.py`.
+  * **La vue d'inscription (`signup_view`) :** Extrait les données, instancie l'enregistrement de l'utilisateur sécurisé (avec hachage de mot de passe) puis octroie les autorisations nécessaires sur la base du champ `role`.
+  * **La vue de connexion (`login_view`) :** Authentifie l'utilisateur via la fonction native `authenticate()`. Une fois `login()` invoqué, l’utilisateur est instantanément et conditionnellement redirigé vers *son* tableau de bord défini selon ses permissions (`is_admin`, `is_teacher`, `is_student`).
+* **Objectif :** Protéger le portail tout en redirigeant intelligemment le flux de nouveaux arrivants sur la plateforme vers l'espace qui les concerne.
+
+**7.6 Exploitation au sein de l'Admin Interface**
+* **Action :** Implémentation d'une structure sur-mesure de `UserAdmin` nommée `CustomUserAdmin` (dans `home_auth/admin.py`), modifiant les regroupements de champs natifs (fieldsets) pour afficher notamment le statut de rôle. Une fonction de sécurité logicielle a été incrustée dans `get_queryset` afin d'isoler les requêtes entre membres de l'équipe et éviter qu'un compte standard n'édite un compte super-administrateur.
+* **Objectif :** Offrir à l'administrateur principal un panneau visuel complet et fluide pour intervenir sur ou créer les utilisateurs.
+
+*Aperçu de la page de connexion (Login) :*
+![Login Screenshot](./capture_login.png)
