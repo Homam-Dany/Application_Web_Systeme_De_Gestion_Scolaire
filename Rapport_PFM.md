@@ -203,66 +203,66 @@ Dans cette section, un système complet d'authentification a été conçu avec u
 
 ## 9. Partie 8 : Système de Gestion des Enseignants (CRUD)
 
-Le module Enseignants permet un suivi rigoureux du corps professoral, incluant leurs spécialités, départements et coordonnées.
+Le module Enseignants est essentiel pour structurer l'équipe pédagogique. Il permet non seulement de stocker les informations personnelles, mais aussi de lier chaque professeur à sa spécialité académique.
 
-*   **Gestion des Enseignants :** Implémentation complète des opérations de création, lecture, mise à jour et suppression (CRUD).
-*   **Affectation Académique :** Chaque enseignant est lié à un département spécifique, permettant une organisation structurelle claire.
-*   **Interface Intuitive :** Utilisation de tables dynamiques pour une recherche rapide et une gestion simplifiée.
+*   **Logic métier :** Chaque enseignant est rattaché à un `CustomUser` pour son accès au portail, et à un `Department` pour définir son appartenance facultaire.
+*   **Fonctionnement :** L'interface administrateur utilise des `ModelForms` pour garantir l'intégrité des données lors de l'ajout. La liste affiche les informations clés (Identifiant, Département, Mobile) pour une identification rapide.
 
-*Aperçu de la liste des enseignants :*
+*Aperçu de la liste des enseignants (Gestion centralisée du corps professoral) :*
 ![Teachers List](./capture_teachers_list.png)
 
 ## 10. Partie 9 : Gestion des Départements et des Matières
 
-La structure académique repose sur la hiérarchie des départements et le catalogue des matières.
+Afin d'organiser les enseignements, nous avons mis en place une structure hiérarchique stricte.
 
-*   **Départements :** Regroupement des ressources pédagogiques par faculté ou discipline (Mathématiques, Physique, etc.).
-*   **Matières (Subjects) :** Création d'un catalogue de cours complet, chaque matière étant rattachée à un département et à une classe spécifique.
-*   **Flexibilité :** Possibilité d'ajouter, modifier ou supprimer des entités académiques selon l'évolution du programme scolaire.
-
-*Aperçu des départements :*
+### 9.1 Les Départements
+Le département représente l'unité structurelle (ex: Mathématiques, Informatique). Il permet de filtrer les enseignants et de regrouper les matières par spécialité.
+*Aperçu des départements configurés :*
 ![Departments List](./capture_departments_list.png)
 
-*Aperçu des matières :*
+### 9.2 Les Matières (Subjects)
+Les matières sont le cœur de l'enseignement. Chaque matière est liée dynamiquement à un département et à un niveau (classe). Cette modélisation permet d'automatiser l'affichage des cours disponibles pour chaque étudiant en fonction de son inscription.
+*Aperçu du catalogue des matières :*
 ![Subjects List](./capture_subjects_list.png)
 
 ## 11. Partie 10 : Tableaux de Bord Spécifiques (Dashboards)
 
-L'application propose des tableaux de bord personnalisés selon le rôle de l'utilisateur connecté, maximisant ainsi l'utilité des données affichées.
-
-*   **Dashboard Administrateur :** Vue d'ensemble avec statistiques globales (nombre d'étudiants, enseignants, graphiques de répartition).
-*   **Dashboard Enseignant :** Accès direct à son emploi du temps, à la liste de ses étudiants et à ses performances de classe.
-*   **Dashboard Étudiant :** Suivi personnel, progression des notes et documents importants.
-
-*Aperçu du Tableau de bord Administrateur :*
+### 10.1 Dashboard Administrateur
+L'administrateur dispose d'une vue "360 degrés". Des graphiques (via Chart.js) affichent la répartition hommes/femmes des étudiants et le volume des effectifs par département. C'est ici que les décisions stratégiques sont prises.
 ![Admin Dashboard](./capture_dashboard_admin.png)
 
-*Aperçu du Tableau de bord Enseignant :*
+### 10.2 Dashboard Enseignant
+Le tableau de bord enseignant est focalisé sur l'animation pédagogique. Il affiche en priorité son emploi du temps quotidien et le nombre d'étudiants sous sa supervision pour la journée.
 ![Teacher Dashboard](./capture_dashboard_teacher.png)
 
-*Aperçu du Tableau de bord Étudiant :*
+### 10.3 Dashboard Étudiant
+L'étudiant accède à un espace personnel "Self-Service". Il peut y voir sa progression, son assiduité et ses prochains examens. C'est également le point de départ pour toutes ses démarches administratives.
 ![Student Dashboard](./capture_dashboard_student.png)
 
 ## 12. Partie 11 : Fonctionnalités Avancées (Cartes et Certificats)
 
-Cette partie représente la valeur ajoutée du projet, automatisant des processus administratifs souvent lents et manuels.
+Cette partie automatise le bureau de la scolarité, réduisant les délais et le papier.
 
-*   **Génération de Cartes d'Étudiant :** Système permettant aux étudiants de demander leur badge. L'administrateur valide la photo et génère instantanément une carte d'identité scolaire formatée.
-*   **Demandes de Certificats Officiels :** Les étudiants peuvent demander des attestations de scolarité, des certificats de réussite ou des relevés de notes directement depuis leur espace.
-*   **Workflow d'Approbation :** L'administration dispose d'une interface dédiée pour approuver les demandes et générer des documents PDF officiels avec signature et tampon numérique.
-
-*Aperçu de la Carte d'Étudiant générée :*
+### 11.1 Génération de Cartes d'Étudiant
+*   **La demande :** L'étudiant soumet une photo d'identité numérique et choisit son groupe sanguin.
+*   **La validation :** L'administrateur vérifie la qualité de la photo dans un panneau dédié.
+*   **La génération :** Une fois validée, le système génère un document PDF aux dimensions standards d'une carte d'identité, incluant le QR Code (optionnel) et la photo.
+*Aperçu d'une carte générée au format officiel :*
 ![Student Card](./capture_student_card.png)
 
-*Aperçu de la gestion des demandes (Admin) :*
-![Certificate Approval](./capture_admin_certificate_approval.png)
+### 11.2 Demandes de Certificats Officiels (Self-Service)
+*   **Workflow :** L'étudiant sélectionne le type de document souhaité (Attestation de scolarité, Relevé de notes).
+*   **Suivi :** Un historique permet de voir l'état de la demande (En attente / Approuvé / Prêt).
+![Certificate Requests Dashboard Student](./capture_certificate_requests.png)
 
-*Exemple de certificat officiel généré :*
-![Official Certificate](./capture_official_certificate.png)
+### 11.3 Approbation et Génération (Côté Admin)
+L'administration traite les demandes par lot. Pour chaque certificat approuvé, le serveur génère un PDF formaté avec les entêtes de l'établissement et un tampon numérique de validité.
+*Aperçu du panneau d'approbation administrateur :*
+![Certificate Approval Panel Admin](./capture_admin_certificate_approval.png)
+
+*Résultat final : Exemple d'un certificat officiel prêt à être imprimé ou envoyé :*
+![Official Certificate Result](./capture_official_certificate.png)
 
 ## 13. Conclusion
-
-Ce projet de gestion scolaire (PFM) démontre la puissance et la flexibilité de Django pour le développement d'applications web complexes. En suivant une approche modulaire et en mettant l'accent sur l'expérience utilisateur (UX) et la sécurité, nous avons réussi à bâtir une base solide pour la transformation numérique d'un établissement d'enseignement.
-
-L'intégration réussie de la gestion des identités, des flux académiques et des services administratifs automatisés positionne cette application comme un outil complet et évolutif pour l'avenir.
+Le projet PreSkool ne se limite pas à une simple base de données d'étudiants. C'est un véritable écosystème numérique qui simplifie la vie scolaire. L'utilisation de Django a permis d'intégrer des fonctionnalités complexes comme la génération de PDF à la volée et une gestion fine des droits d'accès, garantissant ainsi sécurité et efficacité.
 
