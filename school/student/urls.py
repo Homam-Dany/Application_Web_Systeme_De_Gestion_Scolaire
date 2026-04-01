@@ -8,9 +8,23 @@ urlpatterns = [
     path('edit/<str:student_id>/', views.edit_student, name='edit_student'),
     path('delete/<str:student_id>/', views.delete_student, name='delete_student'),
 
+    # Holidays
+    path('holidays/', views.holiday_list, name='holiday_list'),
+    path('holidays/add/', views.add_holiday, name='add_holiday'),
+    path('holidays/delete/<str:holiday_id>/', views.delete_holiday, name='delete_holiday'),
 
+    # Exams
+    path('exams/', views.exam_list, name='exam_list'),
+    path('exams/add/', views.add_exam, name='add_exam'),
+    path('exams/delete/<int:exam_id>/', views.delete_exam, name='delete_exam'),
 
+    # TimeTable
+    path('timetable/', views.timetable_list, name='timetable_list'),
+    path('api/timetable/', views.api_timetable, name='api_timetable'),
+    path('timetable/add/', views.add_timetable, name='add_timetable'),
+    path('timetable/delete/<int:tt_id>/', views.delete_timetable, name='delete_timetable'),
     path('id/<str:student_id>/', views.generate_id_card, name='generate_id_card'),
+    path('my-grades/', views.student_my_grades, name='student_my_grades'),
     path('request-certificate/', views.request_certificate, name='request_certificate'),
     path('admin-certificates/', views.admin_certificates, name='admin_certificates'),
     path('approve-certificate/<int:req_id>/', views.approve_certificate, name='approve_certificate'),

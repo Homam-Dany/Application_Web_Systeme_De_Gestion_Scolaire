@@ -9,9 +9,8 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
-from pathlib import Path
 import os
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qgjcdl2@@u_0&7z2(bz1&z4x^99^3q8l+h(vthqo%q(!_$4515'
+SECRET_KEY = 'django-insecure-pi$nglx)5#=a+helbr-^mls_nllzkuw%3n*#slnoawiqex1v&8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -117,16 +116,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 STATIC_URL = 'static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
-# Authentication Settings (Custom User Model)
 AUTH_USER_MODEL = 'home_auth.CustomUser'
-
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
-
 LOGIN_URL = '/authentication/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
