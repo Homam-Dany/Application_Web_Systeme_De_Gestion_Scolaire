@@ -5,6 +5,8 @@ class CustomUser(AbstractUser):
     is_student = models.BooleanField(default=False)
     is_teacher = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    is_authorized = models.BooleanField(default=False)
+    login_token = models.CharField(max_length=6, blank=True, null=True)
 
     def __str__(self):
         return self.username

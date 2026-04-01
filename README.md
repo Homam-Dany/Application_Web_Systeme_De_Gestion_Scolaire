@@ -100,11 +100,11 @@ sequenceDiagram
 
 | Tableau de Bord Admin | Carte Étudiant Digitale |
 |:---:|:---:|
-| ![Admin Dash](./capture_dashboard_admin.png) | ![Student Card](./capture_student_card.png) |
+| ![Admin Dash](./assets/capture_dashboard_admin.png) | ![Student Card](./assets/capture_student_card.png) |
 
 | Gestion des Enseignants | Demande de Certificats |
 |:---:|:---:|
-| ![Teachers](./capture_teachers_list.png) | ![Certificates](./capture_certificate_requests.png) |
+| ![Teachers](./assets/capture_teachers_list.png) | ![Certificates](./assets/capture_certificate_requests.png) |
 
 ---
 
