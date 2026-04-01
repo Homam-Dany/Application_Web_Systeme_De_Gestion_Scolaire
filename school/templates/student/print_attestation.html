@@ -2,56 +2,273 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Attestation Officielle - {{ cert.student.first_name }}</title>
+    <title>Certificat Officiel - {{ cert.student.first_name }}</title>
     <style>
-        body { font-family: 'Helvetica', 'Arial', sans-serif; padding: 60px; color: #2c3e50; line-height: 1.8; }
-        .header { text-align: center; border-bottom: 3px solid #3b82f6; padding-bottom: 30px; margin-bottom: 50px; }
-        .school-name { font-size: 32px; font-weight: 800; margin: 0; color: #1e3a8a; letter-spacing: 2px; }
-        .school-sub { font-size: 16px; color: #64748b; text-transform: uppercase; }
-        .title { font-size: 36px; font-weight: bold; margin-top: 40px; margin-bottom: 40px; color: #2c3e50; text-transform: uppercase; text-align: center; letter-spacing: 1px; }
-        .content { font-size: 20px; text-align: justify; max-width: 800px; margin: 0 auto; }
-        .highlight { font-weight: bold; color: #000; font-size: 22px; }
-        .signature-block { margin-top: 150px; text-align: right; }
-        .stamp { display: inline-block; width: 120px; height: 120px; border: 4px solid #ef4444; border-radius: 50%; text-align: center; line-height: 110px; color: #ef4444; font-weight: bold; font-size: 20px; transform: rotate(-15deg); opacity: 0.8; margin-right: 40px; margin-bottom: -50px; }
-        .print-btn { background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; position: fixed; top: 20px; right: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .print-btn:hover { background: #2563eb; }
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Pinyon+Script&family=Open+Sans:wght@300;400;600&display=swap');
+
+        body { 
+            margin: 0; 
+            padding: 40px; 
+            background: #e9ecef; /* Slightly grey background for print preview */
+            display: flex;
+            justify-content: center;
+        }
+        
+        .certificate-container {
+            width: 297mm; /* A4 Landscape width */
+            height: 210mm; /* A4 Landscape height */
+            background: #fff;
+            background-image: 
+                radial-gradient(circle at center, rgba(212, 175, 55, 0.03) 0%, transparent 60%),
+                repeating-linear-gradient(45deg, rgba(0,0,0,0.01) 0px, rgba(0,0,0,0.01) 2px, transparent 2px, transparent 8px);
+            padding: 15mm;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            position: relative;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* Elaborate Twin Borders */
+        .border-outer {
+            width: 100%;
+            height: 100%;
+            border: 4px solid #1e3a8a; /* Deep royal blue */
+            padding: 4px;
+            box-sizing: border-box;
+        }
+        
+        .border-inner {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #d4af37; /* Gold */
+            padding: 30px 40px;
+            box-sizing: border-box;
+            position: relative;
+            text-align: center;
+        }
+
+        /* Decorative corners */
+        .corner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #d4af37;
+        }
+        .corner-tl { top: -6px; left: -6px; border-right: none; border-bottom: none; }
+        .corner-tr { top: -6px; right: -6px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: -6px; left: -6px; border-right: none; border-top: none; }
+        .corner-br { bottom: -6px; right: -6px; border-left: none; border-top: none; }
+
+        .header { margin-bottom: 25px; }
+        .school-name { 
+            font-family: 'Cinzel', serif; 
+            font-size: 38px; 
+            font-weight: 900; 
+            color: #1e3a8a; 
+            margin: 0; 
+            letter-spacing: 4px; 
+            text-transform: uppercase;
+        }
+        .school-sub { 
+            font-family: 'Open Sans', sans-serif; 
+            font-size: 13px; 
+            color: #d4af37; 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .title { 
+            font-family: 'Cinzel', serif; 
+            font-size: 42px; 
+            font-weight: 700; 
+            color: #d4af37; 
+            margin: 30px 0; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+        }
+        /* Underline decoration */
+        .title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 1px;
+            background: #d4af37;
+        }
+
+        .content { 
+            font-family: 'Playfair Display', serif; 
+            font-size: 21px; 
+            line-height: 1.9; 
+            color: #2c3e50; 
+            max-width: 80%; 
+            margin: 0 auto; 
+        }
+        
+        .highlight { 
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 600; 
+            color: #1e3a8a; 
+            font-size: 24px; 
+            text-transform: uppercase;
+            border-bottom: 1px dashed #d4af37;
+            padding: 0 10px;
+        }
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 60px;
+            padding: 0 50px;
+        }
+
+        .signature-box {
+            text-align: center;
+            width: 200px;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #2c3e50;
+            margin-top: 60px;
+            padding-top: 5px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .fake-signature {
+            font-family: 'Pinyon Script', cursive;
+            font-size: 38px;
+            color: #0f172a;
+            transform: rotate(-3deg);
+            margin-bottom: -15px;
+        }
+
+        /* Gold Seal CSS */
+        .gold-seal {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #f9d976 0%, #e9b646 25%, #fff1bd 50%, #e9b646 75%, #c89116 100%);
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3), inset 0 0 10px rgba(255,255,255,0.8);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .gold-seal-inner {
+            width: 104px;
+            height: 104px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.6);
+            border-style: dashed;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .seal-text {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: 900;
+            color: #5a4004;
+            letter-spacing: 1px;
+        }
+
+        /* The ribbons */
+        .ribbon {
+            position: absolute;
+            bottom: -35px;
+            width: 30px;
+            height: 50px;
+            background: #1e3a8a;
+            z-index: -1;
+        }
+        .ribbon-left { left: 20px; transform: rotate(15deg); border-bottom-left-radius: 5px; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%); }
+        .ribbon-right { right: 20px; transform: rotate(-15deg); border-bottom-right-radius: 5px; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%); }
+
+        .print-btn { 
+            background: #1e3a8a; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; 
+            font-size: 16px; font-weight: bold; position: fixed; top: 20px; right: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            z-index: 100; font-family: 'Open Sans', sans-serif;
+        }
+        .print-btn:hover { background: #152c6a; }
+        
         @media print {
-            body { padding: 0; }
+            body { padding: 0; background: none; }
+            .certificate-container { box-shadow: none; border: none; margin: 0; }
             .print-btn { display: none !important; }
+            @page { margin: 0; size: A4 landscape; }
         }
     </style>
 </head>
 <body>
     <button onclick="window.print()" class="print-btn">🖨️ Imprimer / Sauvegarder en PDF</button>
 
-    <div class="header">
-        <h1 class="school-name">PRESKOOL ACADEMY</h1>
-        <div class="school-sub">Département Administratif & Scolarité Universitaire</div>
-    </div>
-    
-    <div class="title">{{ cert.certificate_type }}</div>
-    
-    <div class="content">
-        <p>Le directeur de l'établissement d'enseignement supérieur certifie par la présente que :</p>
-        
-        <p style="margin: 40px 0;">
-            L'étudiant(e) <span class="highlight">{{ cert.student.first_name|upper }} {{ cert.student.last_name|upper }}</span>,<br>
-            Né(e) le <span class="highlight">{{ cert.student.date_of_birth|date:"d M Y" }}</span>,<br>
-            Inscrit(e) sous le numéro d'immatriculation officiel <span class="highlight">{{ cert.student.student_id }}</span>.
-        </p>
+    <div class="certificate-container">
+        <div class="border-outer">
+            <div class="border-inner">
+                <div class="corner corner-tl"></div>
+                <div class="corner corner-tr"></div>
+                <div class="corner corner-bl"></div>
+                <div class="corner corner-br"></div>
 
-        <p>Est régulièrement inscrit(e) et poursuit assidûment ses études au sein de notre établissement pour l'année universitaire de la promotion en cours, au sein de la classe <span class="highlight">{{ cert.student.student_class }}</span>.</p>
-        
-        <p style="margin-top: 50px; font-style: italic; color: #64748b;">
-            Ce document est délivré à l'intéressé(e) pour servir et valoir ce que de droit, et atteste de son inscription formelle dans nos registres académiques.
-        </p>
-    </div>
-    
-    <div class="signature-block">
-        <div class="stamp">OFFICIEL</div>
-        <p style="font-size: 18px;">Fait à Paris, le <strong>{% now "d M Y" %}</strong></p>
-        <p style="font-size: 20px; margin-top: 20px;"><strong>La Direction Générale</strong></p>
-        <div style="border-top: 2px dashed #000; width: 250px; float: right; margin-top: 60px;"></div>
+                <div class="header">
+                    <h1 class="school-name">PRESKOOL ACADEMY</h1>
+                    <div class="school-sub">Département d'Excellence Académique & Scolarité</div>
+                </div>
+                
+                <div class="title">{{ cert.certificate_type }}</div>
+                
+                <div class="content">
+                    <p style="font-style: italic; color: #64748b; font-size: 19px; margin-bottom: 30px;">À qui de droit, la Direction Générale certifie par la présente que :</p>
+                    
+                    <div style="margin: 40px 0;">
+                        L'étudiant(e) <span class="highlight">{{ cert.student.first_name|upper }} {{ cert.student.last_name|upper }}</span>,<br>
+                        Né(e) le <span class="highlight">{{ cert.student.date_of_birth|date:"d M Y" }}</span>,<br>
+                        Inscrit(e) sous le numéro de matricule <span class="highlight">{{ cert.student.student_id|default:"-" }}</span>,
+                    </div>
+
+                    <p style="margin-top: 30px;">
+                        Est régulièrement inscrit(e) et poursuit avec succès ses études au sein de notre établissement supérieur pour l'année académique courante, dans le programme officiel : <br>
+                        <strong style="color: #1e3a8a; font-family: 'Open Sans', sans-serif; font-size: 22px;">{{ cert.student.student_class }}</strong>.
+                    </p>
+                </div>
+                
+                <div class="signatures">
+                    <div class="signature-box">
+                        <div style="font-family: 'Open Sans', sans-serif; font-size: 14px; margin-bottom: 5px;">Fait à Paris, le {% now "d M Y" %}</div>
+                        <div class="seal-container" style="position: relative; display: inline-block;">
+                            <div class="ribbon ribbon-left"></div>
+                            <div class="ribbon ribbon-right"></div>
+                            <div class="gold-seal">
+                                <div class="gold-seal-inner">
+                                    <div class="seal-text">SCEL<br>★<br>OFFICIEL</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="signature-box">
+                        <div class="fake-signature">Dr. Jean Dupont</div>
+                        <div class="signature-line">Le Directeur Général</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <!-- Auto-trigger print window upon loading for professional feel -->

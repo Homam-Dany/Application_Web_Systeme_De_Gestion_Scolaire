@@ -1,28 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>{{ student.first_name }} {{ student.last_name }} - ID Card</title>
+    <title>{{ student.first_name }} {{ student.last_name }} - Carte Étudiant</title>
     <style>
-        body { margin: 0; padding: 0; background: #e2e8f0; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .id-card { width: 54mm; height: 86mm; background: white; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden; page-break-inside: avoid; }
-        .header { width: 100%; height: 25mm; background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .header::after { content: ''; position: absolute; bottom: -10px; left: 0; width: 100%; height: 20px; background: white; transform: skewY(-5deg); }
-        .school-name { font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; border-bottom: none; display:block; z-index: 1;}
-        .subtitle { font-size: 8px; font-weight: 500; opacity: 0.9; z-index: 1;}
-        .photo-container { width: 28mm; height: 28mm; border-radius: 50%; background: white; padding: 3px; position: absolute; top: 15mm; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Montserrat:wght@700&display=swap');
+        
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Inter', sans-serif; }
+        
+        .id-card { 
+            width: 54mm; 
+            height: 86mm; 
+            background: #ffffff; 
+            background-image: radial-gradient(circle at top right, rgba(28,58,148,0.05), transparent 60%);
+            border-radius: 12px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.8); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        /* Glassmorphism/Holo shine */
+        .id-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(135deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 70%);
+            transform: rotate(45deg);
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0.6;
+        }
+
+        .header { 
+            width: 100%; 
+            height: 28mm; 
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
+            color: #d4af37; /* Gold */
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+            padding-top: 5mm;
+            position: relative; 
+        }
+        
+        /* Arc at the bottom of header */
+        .header::after { 
+            content: ''; 
+            position: absolute; 
+            bottom: -5mm; 
+            left: 0; 
+            width: 100%; 
+            height: 10mm; 
+            background: #ffffff; 
+            border-radius: 50% 50% 0 0;
+        }
+
+        .school-name { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; z-index: 2;}
+        .subtitle { font-size: 7px; color: #ffffff; font-weight: 400; letter-spacing: 1px; margin-top: 1px; text-transform: uppercase; opacity: 0.8; z-index: 2;}
+        
+        .photo-container { 
+            width: 30mm; 
+            height: 30mm; 
+            border-radius: 50%; 
+            background: #ffffff; 
+            padding: 2.5px; 
+            position: absolute; 
+            top: 16mm; 
+            z-index: 10; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+        }
+        .photo-container::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            border: 2px solid #d4af37;
+            pointer-events: none;
+        }
         .photo { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .details { margin-top: 22mm; width: 100%; text-align: center; padding: 0 5mm; box-sizing: border-box; }
-        .name { font-size: 15px; font-weight: 700; color: #0f172a; margin: 0 0 2px 0; }
-        .role { font-size: 10px; font-weight: 600; color: #3b82f6; text-transform: uppercase; margin: 0 0 8px 0; }
-        .info-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px; text-align: left; font-size: 9px; margin-top: 5px; }
-        .label { color: #64748b; font-weight: 600; }
-        .value { color: #334155; font-weight: 500; }
-        .barcode { margin-top: auto; margin-bottom: 6mm; width: 40mm; height: 8mm; background: repeating-linear-gradient(90deg, #000 0, #000 1px, transparent 1px, transparent 3px, #000 3px, #000 5px, transparent 5px, transparent 6px); }
-        .footer { position: absolute; bottom: 0; width: 100%; height: 4mm; background: #1e3a8a; }
+        
+        .details { margin-top: 21mm; width: 100%; text-align: center; padding: 0 4mm; z-index: 2; position: relative;}
+        .name { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 800; color: #111827; margin: 0 0 2px 0; text-transform: uppercase; line-height: 1.1;}
+        .role { font-size: 9px; font-weight: 600; color: #d4af37; text-transform: uppercase; background: #0f2027; display: inline-block; padding: 2px 8px; border-radius: 20px; letter-spacing: 1px; margin-bottom: 5px; }
+        
+        .info-grid { 
+            display: grid; 
+            grid-template-columns: auto 1fr; 
+            gap: 2px 6px; 
+            text-align: left; 
+            font-size: 8px; 
+            margin-top: 4px; 
+            background: rgba(243,244,246,0.6);
+            padding: 5px;
+            border-radius: 6px;
+        }
+        .label { color: #6b7280; font-weight: 600; text-transform: uppercase; font-size: 7px;}
+        .value { color: #111827; font-weight: 800; }
+        
+        .barcode-container {
+            margin-top: auto;
+            margin-bottom: 2mm;
+            text-align: center;
+            width: 100%;
+        }
+        /* A nice imitation of a high-density barcode */
+        .barcode { 
+            display: inline-block;
+            width: 42mm; 
+            height: 7mm; 
+            background: repeating-linear-gradient(
+                to right,
+                #111 0, #111 1.2px, transparent 1.2px, transparent 2.5px,
+                #111 2.5px, #111 3px, transparent 3px, transparent 4px,
+                #111 4px, #111 5.5px, transparent 5.5px, transparent 7px,
+                #111 7px, #111 7.8px, transparent 7.8px, transparent 9px,
+                #111 9px, #111 11px, transparent 11px, transparent 12px
+            ); 
+            opacity: 0.85;
+        }
+        .card-footer-text {
+            font-size: 6px;
+            color: #9ca3af;
+            text-align: center;
+            margin-top: 1px;
+        }
+        
+        .footer-bar { position: absolute; bottom: 0; width: 100%; height: 3mm; background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37); }
+
         @media print {
-            body { background: white; display: block; padding: 0; align-items: flex-start; justify-content: flex-start; }
-            .id-card { box-shadow: none; border: 1px solid #ccc; margin: 0; border-radius: 0; }
+            body { background: white; display: block; padding: 0; min-height: auto; align-items: flex-start; justify-content: flex-start; }
+            .id-card { box-shadow: none; border: 1px solid #eee; margin: 0; border-radius: 8px; /* Slightly less rounded for print cuts */ }
+            /* Hide print button or specific print styling */
             @page { margin: 0; size: 54mm 86mm; }
         }
     </style>
@@ -31,23 +147,26 @@
     <div class="id-card">
         <div class="header">
             <div class="school-name">PreSkool Academy</div>
-            <div class="subtitle">Student Identity Card</div>
+            <div class="subtitle">Carte d'Identité Étudiant</div>
         </div>
         <div class="photo-container">
-            <img src="https://ui-avatars.com/api/?name={{ student.first_name }}+{{ student.last_name }}&background=e2e8f0&color=334155&size=150" class="photo" alt="Student Photo">
+            <img src="{% if student.student_image %}{{ student.student_image.url }}{% else %}https://ui-avatars.com/api/?name={{ student.first_name }}+{{ student.last_name }}&background=2c5364&color=fff&size=200{% endif %}" class="photo" alt="Photo Étudiant">
         </div>
         <div class="details">
-            <h2 class="name">{{ student.first_name }} {{ student.last_name }}</h2>
-            <p class="role">Student</p>
+            <h2 class="name">{{ student.first_name }}<br>{{ student.last_name }}</h2>
+            <div class="role">Étudiant(e)</div>
             <div class="info-grid">
-                <span class="label">ID N°:</span> <span class="value">{{ student.student_id }}</span>
-                <span class="label">Class:</span> <span class="value">{{ student.student_class }}</span>
-                <span class="label">DOB:</span> <span class="value">{{ student.dob|date:"m/d/Y" }}</span>
-                <span class="label">Phone:</span> <span class="value">{{ student.mobile_number }}</span>
+                <span class="label">MATRICULE</span> <span class="value">{{ student.student_id }}</span>
+                <span class="label">FILIÈRE</span> <span class="value">{{ student.student_class }}</span>
+                <span class="label">NÉ(E) LE</span> <span class="value">{{ student.date_of_birth|date:"d/m/Y" }}</span>
+                <span class="label">VALABLE JUSQU'AU</span> <span class="value">31/07/2026</span>
             </div>
         </div>
-        <div class="barcode"></div>
-        <div class="footer"></div>
+        <div class="barcode-container">
+            <div class="barcode"></div>
+            <div class="card-footer-text">Propriété stricte de l'établissement</div>
+        </div>
+        <div class="footer-bar"></div>
     </div>
 </body>
 </html>

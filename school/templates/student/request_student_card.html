@@ -35,16 +35,9 @@
                                 <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
                                 <h4>Carte Générée !</h4>
                                 <p class="text-muted">La scolarité a validé votre photo et généré votre carte d'étudiant.</p>
-                                {% if card_req.issued_card %}
-                                    <a href="{{ card_req.issued_card.url }}" download class="btn btn-primary mt-3 btn-lg">
-                                        <i class="fas fa-download mr-2"></i> Télécharger Ma Carte
+                                    <a href="{% url 'generate_id_card' student.student_id %}" target="_blank" class="btn btn-primary mt-3 btn-lg">
+                                        <i class="fas fa-print mr-2"></i> Imprimer / Voir Ma Carte (Haute Qualité)
                                     </a>
-                                {% else %}
-                                    <!-- Dynamic view generation link? For now, assume physical or dynamically printable view -->
-                                    <a href="#" class="btn btn-primary mt-3 btn-lg">
-                                        <i class="fas fa-print mr-2"></i> Imprimer / Voir Ma Carte
-                                    </a>
-                                {% endif %}
                             </div>
                         {% else %}
                             {% if card_req and card_req.status == 'Refusée' %}
