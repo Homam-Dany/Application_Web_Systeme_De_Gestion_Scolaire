@@ -1,0 +1,51 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header mb-4">
+            <h2 class="page-title text-dark font-weight-bold">Bibliothèque — Ajouter un Ouvrage</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card glass border-0 shadow-lg" style="border-radius: 20px;">
+                    <div class="card-body p-5">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label class="font-weight-bold">ID du Livre <span class="text-danger">*</span></label>
+                                    <input type="text" name="book_id" class="form-control rounded-pill border-light" placeholder="EX: LIB-001" required>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label class="font-weight-bold">Nom de l'Ouvrage <span class="text-danger">*</span></label>
+                                    <input type="text" name="name" class="form-control rounded-pill border-light" placeholder="Titre complet" required>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label class="font-weight-bold">Auteur <span class="text-danger">*</span></label>
+                                    <input type="text" name="author" class="form-control rounded-pill border-light" placeholder="Nom de l'auteur" required>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label class="font-weight-bold">Matière / Catégorie <span class="text-danger">*</span></label>
+                                    <input type="text" name="subject" class="form-control rounded-pill border-light" placeholder="Ex: Mathématiques, Physique..." required>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label class="font-weight-bold">Quantité en Stock <span class="text-danger">*</span></label>
+                                    <input type="number" name="quantity" class="form-control rounded-pill border-light" value="1" min="0" required>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label class="font-weight-bold">Description</label>
+                                    <textarea name="description" class="form-control border-light" rows="4" style="border-radius: 15px;" placeholder="Bref résumé ou détails de l'ouvrage..."></textarea>
+                                </div>
+                                <div class="col-md-12 text-right mt-4">
+                                    <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 font-weight-bold shadow-sm">Enregistrer l'Ouvrage</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,60 +1,98 @@
 {% extends 'Home/base.html' %}
 {% block body %}
+<!-- Importer le style Premium commun -->
+<style>
+    .premium-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(59,130,246,0.2);
+    }
+    .premium-card { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.04); background: white; }
+    .premium-card .card-body { padding: 25px; }
+    .table-custom { width: 100% !important; border-collapse: separate; border-spacing: 0 12px; margin-top: -10px; }
+    .table-custom thead th { border: none !important; background: transparent !important; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; }
+    .table-custom tbody tr { background: #f8fafc; border-radius: 10px; transition: transform 0.2s, box-shadow 0.2s; }
+    .table-custom tbody tr:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); background: #ffffff; }
+    .table-custom tbody td { border-top: none !important; border-bottom: none !important; padding: 16px 15px; vertical-align: middle; color: #334155; font-weight: 500; }
+    .table-custom tbody td:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+    .table-custom tbody td:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+    
+    .dataTables_wrapper .dataTables_filter { margin-bottom: 20px; }
+    .dataTables_wrapper .dataTables_filter input { border: 2px solid #e2e8f0; border-radius: 20px; padding: 6px 15px; outline: none; transition: all 0.3s; box-shadow: none; }
+    .dataTables_wrapper .dataTables_filter input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .dataTables_wrapper .dt-buttons { margin-bottom: 20px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .dataTables_wrapper .dt-buttons .dt-button { background: #ffffff; border: 1px solid #cbd5e1; color: #475569; border-radius: 8px; padding: 6px 14px; font-weight: 600; font-size: 0.8rem; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .dataTables_wrapper .dt-buttons .dt-button:hover { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
+    .dataTables_wrapper .dataTables_paginate { margin-top: 20px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { border-radius: 8px !important; border: none !important; font-weight: 600; margin: 0 2px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #3b82f6 !important; color: white !important; box-shadow: 0 4px 10px rgba(59,130,246,0.3); }
+
+    .fee-badge-paid { background: #dcfce7; color: #22c55e; border-radius: 6px; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; display: inline-block; }
+    .fee-badge-unpaid { background: #fee2e2; color: #ef4444; border-radius: 6px; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; display: inline-block; }
+</style>
+
 <div class="page-wrapper">
    <div class="content container-fluid">
-      <div class="page-header">
+      
+      <div class="premium-header">
          <div class="row align-items-center">
             <div class="col">
-               <h3 class="page-title">Fees Management</h3>
-               <ul class="breadcrumb">
-                  <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                  <li class="breadcrumb-item active">Fees</li>
-               </ul>
+               <h3 class="page-title text-white mb-1"><i class="fas fa-file-invoice-dollar mr-2"></i>Gestion des Frais</h3>
+               <p class="mb-0 text-white-50" style="font-size: 0.9rem;">Consultez et administrez les factures de l'établissement.</p>
             </div>
-            <div class="col-auto text-right float-right ml-auto">
-               <a href="#" class="btn btn-primary"><i class="fas fa-plus"></i> Add Invoice</a>
+            {% if request.user.is_admin %}
+            <div class="col-auto text-right mb-0">
+               <a href="#" class="btn btn-light" style="color: #1e3a8a; font-weight: bold; border-radius: 8px; padding: 10px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                  <i class="fas fa-plus mr-1"></i> Ajouter une Facture
+               </a>
             </div>
+            {% endif %}
          </div>
       </div>
+
       <div class="row">
          <div class="col-sm-12">
-            <div class="card card-table">
-               <div class="card-body">
+            <div class="card premium-card">
+               <div class="card-body p-4">
                   <div class="table-responsive">
-                     <table class="table table-hover table-center mb-0 datatable">
+                     <table class="table table-custom datatable">
                         <thead>
                            <tr>
-                              <th>ID ID</th>
-                              <th>Student Name</th>
-                              <th>Fee Type</th>
-                              <th>Amount</th>
-                              <th>Status</th>
-                              <th class="text-right">Action</th>
+                              <th>Nº Facture</th>
+                              <th>Étudiant</th>
+                              <th>Motif / Type</th>
+                              <th>Montant</th>
+                              <th>Statut</th>
+                              <th class="text-right">Actions</th>
                            </tr>
                         </thead>
                         <tbody>
+                           <!-- Static mock data just like the previous version, but styled -->
                            <tr>
-                              <td>INV-001</td>
-                              <td>John Doe</td>
-                              <td>Tuition</td>
-                              <td>$1500</td>
-                              <td><span class="badge badge-success">Paid</span></td>
+                              <td><div class="font-weight-bold text-muted">INV-001</div></td>
+                              <td><div class="font-weight-bold text-dark" style="font-size: 0.95rem;">John Doe</div></td>
+                              <td>Scolarité Annuelle</td>
+                              <td><div class="font-weight-bold text-primary">1500 MAD</div></td>
+                              <td><span class="fee-badge-paid"><i class="fas fa-check-circle mr-1"></i>Payé</span></td>
                               <td class="text-right">
-                                 <div class="actions">
-                                    <a href="#" class="btn btn-sm bg-success-light mr-2"><i class="fas fa-eye"></i></a>
-                                 </div>
+                                 <a href="#" class="btn btn-sm" style="background: #e0f2fe; color: #0284c7; border-radius: 6px; padding: 5px 10px;" title="Consulter">
+                                    <i class="fas fa-eye"></i>
+                                 </a>
                               </td>
                            </tr>
                            <tr>
-                              <td>INV-002</td>
-                              <td>Jane Smith</td>
-                              <td>Library Fee</td>
-                              <td>$50</td>
-                              <td><span class="badge badge-danger">Unpaid</span></td>
+                              <td><div class="font-weight-bold text-muted">INV-002</div></td>
+                              <td><div class="font-weight-bold text-dark" style="font-size: 0.95rem;">Jane Smith</div></td>
+                              <td>Frais de Bibliothèque</td>
+                              <td><div class="font-weight-bold text-primary">50 MAD</div></td>
+                              <td><span class="fee-badge-unpaid"><i class="fas fa-times-circle mr-1"></i>Impayé</span></td>
                               <td class="text-right">
-                                 <div class="actions">
-                                    <a href="#" class="btn btn-sm bg-success-light mr-2"><i class="fas fa-eye"></i></a>
-                                 </div>
+                                 <a href="#" class="btn btn-sm" style="background: #e0f2fe; color: #0284c7; border-radius: 6px; padding: 5px 10px;" title="Consulter">
+                                    <i class="fas fa-eye"></i>
+                                 </a>
                               </td>
                            </tr>
                         </tbody>
@@ -64,6 +102,7 @@
             </div>
          </div>
       </div>
+      
    </div>
 </div>
 {% endblock %}

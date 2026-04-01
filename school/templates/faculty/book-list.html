@@ -1,0 +1,93 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper" style="background: #f8fafc;">
+    <div class="content container-fluid">
+        <div class="page-header mb-4">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h2 class="page-title text-dark font-weight-bold">Bibliothèque & Ressources</h2>
+                    <p class="text-muted small">Gestion du catalogue et des stocks d'ouvrages.</p>
+                </div>
+                {% if request.user.is_admin %}
+                <div class="col-auto">
+                    <a href="{% url 'add_book' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                        <i class="fas fa-plus mr-2"></i> Ajouter un Ouvrage
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card border-0 shadow-sm" style="border-radius: 24px; overflow: hidden;">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead style="background: #f1f5f9;">
+                                    <tr class="text-muted small text-uppercase">
+                                        <th class="pl-4">ID</th>
+                                        <th>Titre / Ouvrage</th>
+                                        <th>Auteur</th>
+                                        <th>Catégorie</th>
+                                        <th>Stock</th>
+                                        <th>Disponibilité</th>
+                                        {% if request.user.is_admin %}
+                                        <th class="text-right pr-4">Action</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for book in books %}
+                                    <tr>
+                                        <td class="pl-4 text-indigo font-weight-bold">#{{ book.book_id }}</td>
+                                        <td><div class="font-weight-bold" style="color: #334155;">{{ book.name }}</div></td>
+                                        <td>{{ book.author }}</td>
+                                        <td><span class="badge badge-soft-cyan px-3 py-1 rounded-pill">{{ book.subject }}</span></td>
+                                        <td><span class="font-weight-bold">{{ book.quantity }}</span></td>
+                                        <td>
+                                            {% if book.quantity > 0 %}
+                                            <span class="badge badge-soft-emerald px-3 py-1 rounded-pill">
+                                                <i class="fas fa-check-circle mr-1"></i>En Stock
+                                            </span>
+                                            {% else %}
+                                            <span class="badge badge-soft-rose px-3 py-1 rounded-pill">
+                                                <i class="fas fa-times-circle mr-1"></i>Épuisé
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                        {% if request.user.is_admin %}
+                                        <td class="text-right pr-4">
+                                            <form action="{% url 'delete_book' book.book_id %}" method="POST" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Supprimer cet ouvrage ?');" style="border-radius: 8px;">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                        {% endif %}
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5 text-muted italic">Aucun ouvrage trouvé dans la bibliothèque.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-soft-cyan { background: #ecfeff; color: #0891b2; }
+    .badge-soft-emerald { background: #ecfdf5; color: #10b981; }
+    .badge-soft-rose { background: #fff1f2; color: #e11d48; }
+    .text-indigo { color: #6366f1; }
+    .table td { vertical-align: middle; height: 70px; border-top: 1px solid #f1f5f9; }
+</style>
+
+{% endblock %}

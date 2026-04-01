@@ -1,62 +1,144 @@
 {% extends 'Home/base.html' %}
 {% block body %}
+<!-- Importer le style Premium commun -->
+<style>
+    .premium-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(59,130,246,0.2);
+    }
+    .premium-card { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.04); background: white; }
+    .premium-card .card-body { padding: 25px; }
+    .table-custom { width: 100% !important; border-collapse: separate; border-spacing: 0 12px; margin-top: -10px; }
+    .table-custom thead th { border: none !important; background: transparent !important; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; }
+    .table-custom tbody tr { background: #f8fafc; border-radius: 10px; transition: transform 0.2s, box-shadow 0.2s; }
+    .table-custom tbody tr:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); background: #ffffff; }
+    .table-custom tbody td { border-top: none !important; border-bottom: none !important; padding: 16px 15px; vertical-align: middle; color: #334155; font-weight: 500; }
+    .table-custom tbody td:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+    .table-custom tbody td:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+    
+    .dataTables_wrapper .dataTables_filter { margin-bottom: 20px; }
+    .dataTables_wrapper .dataTables_filter input { border: 2px solid #e2e8f0; border-radius: 20px; padding: 6px 15px; outline: none; transition: all 0.3s; box-shadow: none; }
+    .dataTables_wrapper .dataTables_filter input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .dataTables_wrapper .dt-buttons { margin-bottom: 20px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .dataTables_wrapper .dt-buttons .dt-button { background: #ffffff; border: 1px solid #cbd5e1; color: #475569; border-radius: 8px; padding: 6px 14px; font-weight: 600; font-size: 0.8rem; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .dataTables_wrapper .dt-buttons .dt-button:hover { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
+    .dataTables_wrapper .dataTables_paginate { margin-top: 20px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { border-radius: 8px !important; border: none !important; font-weight: 600; margin: 0 2px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #3b82f6 !important; color: white !important; box-shadow: 0 4px 10px rgba(59,130,246,0.3); }
+
+    .book-badge-available { background: #dcfce7; color: #22c55e; border-radius: 6px; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; display: inline-block; }
+    .book-badge-issued { background: #fef9c3; color: #eab308; border-radius: 6px; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; display: inline-block; }
+    .subject-badge { background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.8rem; font-weight: 600; }
+</style>
+
 <div class="page-wrapper">
    <div class="content container-fluid">
-      <div class="page-header">
+      
+      <div class="premium-header">
          <div class="row align-items-center">
             <div class="col">
-               <h3 class="page-title">Library Books</h3>
-               <ul class="breadcrumb">
-                  <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                  <li class="breadcrumb-item active">Library</li>
-               </ul>
+               <h3 class="page-title text-white mb-1"><i class="fas fa-book-reader mr-2"></i>Bibliothèque Numérique</h3>
+               <p class="mb-0 text-white-50" style="font-size: 0.9rem;">Consultez et gérez l'inventaire des ouvrages scolaires.</p>
             </div>
-            <div class="col-auto text-right float-right ml-auto">
-               <a href="#" class="btn btn-primary"><i class="fas fa-plus"></i> Add Book</a>
+            {% if request.user.is_admin %}
+            <div class="col-auto text-right mb-0">
+               <a href="{% url 'add_book' %}" class="btn btn-light" style="color: #1e3a8a; font-weight: bold; border-radius: 8px; padding: 10px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                  <i class="fas fa-plus mr-1"></i> Ajouter un Livre
+               </a>
             </div>
+            {% endif %}
          </div>
       </div>
+
       <div class="row">
          <div class="col-sm-12">
-            <div class="card card-table">
-               <div class="card-body">
+            <div class="card premium-card">
+               <div class="card-body p-4">
                   <div class="table-responsive">
-                     <table class="table table-hover table-center mb-0 datatable">
+                     <table class="table table-custom datatable">
                         <thead>
                            <tr>
-                              <th>ID</th>
-                              <th>Book Name</th>
-                              <th>Subject</th>
-                              <th>Publisher</th>
-                              <th>Status</th>
-                              <th class="text-right">Action</th>
+                              <th>Réf. Livre</th>
+                              <th>Titre de l'Ouvrage</th>
+                              <th>Matière Associée</th>
+                              <th>Éditeur / Auteur</th>
+                              <th>Disponibilité</th>
+                              {% if request.user.is_admin %}
+                              <th class="text-right">Actions</th>
+                              {% endif %}
                            </tr>
                         </thead>
                         <tbody>
+                           {% for book in books %}
                            <tr>
-                              <td>LIB-A01</td>
-                              <td>Advanced Python Patterns</td>
-                              <td>Computer Science</td>
-                              <td>O'Reilly Media</td>
-                              <td><span class="badge badge-success">Available</span></td>
-                              <td class="text-right">
-                                 <div class="actions">
-                                    <a href="#" class="btn btn-sm bg-success-light mr-2"><i class="fas fa-eye"></i></a>
+                              <!-- ID -->
+                              <td><div class="font-weight-bold text-muted">{{ book.book_id }}</div></td>
+                              <!-- Nom -->
+                              <td>
+                                 <div class="d-flex align-items-center">
+                                    <div style="background: #e0f2fe; color: #0284c7; width: 40px; height: 40px; border-radius: 8px; display: flex; justify-content: center; align-items: center; margin-right: 15px;">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-weight-bold text-dark" style="font-size: 0.95rem;">{{ book.name }}</div>
+                                    </div>
                                  </div>
                               </td>
-                           </tr>
-                           <tr>
-                              <td>LIB-H09</td>
-                              <td>European History 101</td>
-                              <td>History</td>
-                              <td>Penguin Books</td>
-                              <td><span class="badge badge-warning">Issued</span></td>
-                              <td class="text-right">
-                                 <div class="actions">
-                                    <a href="#" class="btn btn-sm bg-success-light mr-2"><i class="fas fa-eye"></i></a>
+                              <!-- Matière -->
+                              <td>
+                                 {% if book.subject %}
+                                 <span class="subject-badge">{{ book.subject }}</span>
+                                 {% else %}
+                                 <span class="text-muted">—</span>
+                                 {% endif %}
+                              </td>
+                              <!-- Editeur / Auteur -->
+                              <td>
+                                 <div class="text-secondary font-weight-bold">
+                                    {% if book.author %} {{ book.author }} {% elif book.publisher %} {{ book.publisher }} {% else %} — {% endif %}
                                  </div>
                               </td>
+                              <!-- Statut -->
+                              <td>
+                                {% if book.availability %}
+                                    <span class="book-badge-available"><i class="fas fa-check-circle mr-1"></i>Disponible</span>
+                                {% else %}
+                                    <span class="book-badge-issued"><i class="fas fa-hand-holding mr-1"></i>Emprunté</span>
+                                {% endif %}
+                              </td>
+                              <!-- Actions -->
+                              {% if request.user.is_admin %}
+                              <td class="text-right d-flex justify-content-end align-items-center gap-2">
+                                 <a href="#" class="btn btn-sm mr-2" style="background: #f1f5f9; color: #64748b; border-radius: 6px; padding: 5px 10px;" title="Détails">
+                                    <i class="fas fa-eye"></i>
+                                 </a>
+                                 <form action="{% url 'delete_book' book.book_id %}" method="POST" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce livre ?');">
+                                     {% csrf_token %}
+                                     <button type="submit" class="btn btn-sm" style="background: #fee2e2; color: #ef4444; border-radius: 6px; padding: 5px 10px;">
+                                        <i class="fas fa-trash"></i>
+                                     </button>
+                                 </form>
+                              </td>
+                              {% endif %}
                            </tr>
+                           {% empty %}
+                           <tr>
+                               <td colspan="6" class="text-center py-5">
+                                 <div style="background: #f8fafc; border-radius: 15px; padding: 40px;">
+                                    <i class="fas fa-book-open fa-3x mb-3 text-muted"></i>
+                                    <h5 class="text-secondary font-weight-bold">La bibliothèque est vide</h5>
+                                    <p class="text-muted">Aucun ouvrage n'a encore été enregistré.</p>
+                                    {% if request.user.is_admin %}
+                                    <a href="{% url 'add_book' %}" class="btn btn-primary mt-2" style="border-radius: 8px;">Ajouter le premier livre</a>
+                                    {% endif %}
+                                 </div>
+                               </td>
+                           </tr>
+                           {% endfor %}
                         </tbody>
                      </table>
                   </div>

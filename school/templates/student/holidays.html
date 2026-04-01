@@ -1,25 +1,112 @@
 {% extends 'Home/base.html' %}
 {% block body %}
+<style>
+    /* Premium List Styling */
+    .premium-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(59,130,246,0.2);
+    }
+    .premium-card { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.04); background: white; }
+    .premium-card .card-body { padding: 25px; }
+    .table-custom { width: 100% !important; border-collapse: separate; border-spacing: 0 12px; margin-top: -10px; }
+    .table-custom thead th { border: none !important; background: transparent !important; color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; }
+    .table-custom tbody tr { background: #f8fafc; border-radius: 10px; transition: transform 0.2s, box-shadow 0.2s; }
+    .table-custom tbody tr:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.06); background: #ffffff; }
+    .table-custom tbody td { border-top: none !important; border-bottom: none !important; padding: 16px 15px; vertical-align: middle; color: #334155; font-weight: 500; }
+    .table-custom tbody td:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+    .table-custom tbody td:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+    
+    .dataTables_wrapper .dataTables_filter { margin-bottom: 20px; }
+    .dataTables_wrapper .dataTables_filter input { border: 2px solid #e2e8f0; border-radius: 20px; padding: 6px 15px; outline: none; transition: all 0.3s; box-shadow: none; }
+    .dataTables_wrapper .dataTables_filter input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .dataTables_wrapper .dt-buttons { margin-bottom: 20px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .dataTables_wrapper .dt-buttons .dt-button { background: #ffffff; border: 1px solid #cbd5e1; color: #475569; border-radius: 8px; padding: 6px 14px; font-weight: 600; font-size: 0.8rem; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .dataTables_wrapper .dt-buttons .dt-button:hover { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
+    .dataTables_wrapper .dataTables_paginate { margin-top: 20px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { border-radius: 8px !important; border: none !important; font-weight: 600; margin: 0 2px; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current { background: #3b82f6 !important; color: white !important; box-shadow: 0 4px 10px rgba(59,130,246,0.3); }
+    
+    .holiday-badge { background: #fee2e2; color: #ef4444; border-radius: 6px; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; display: inline-block; }
+</style>
+
 <div class="page-wrapper">
    <div class="content container-fluid">
-      <div class="page-header">
+      
+      <div class="premium-header">
          <div class="row align-items-center">
-            <div class="col"><h3 class="page-title">Holidays</h3></div>
-            <div class="col-auto text-right float-right ml-auto">
-               <a href="{% url 'add_holiday' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Holiday</a>
+            <div class="col">
+               <h3 class="page-title text-white mb-1"><i class="fas fa-umbrella-beach mr-2"></i>Liste des Jours Fériés</h3>
+               <p class="mb-0 text-white-50" style="font-size: 0.9rem;">Consultez les dates des vacances et jours fériés officiels.</p>
+            </div>
+            {% if request.user.is_admin %}
+            <div class="col-auto text-right mb-0">
+               <a href="{% url 'add_holiday' %}" class="btn btn-light" style="color: #1e3a8a; font-weight: bold; border-radius: 8px; padding: 10px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                  <i class="fas fa-plus mr-1"></i> Ajouter un Jour Férié
+               </a>
+            </div>
+            {% endif %}
+         </div>
+      </div>
+
+      <div class="row">
+         <div class="col-sm-12">
+            <div class="card premium-card">
+               <div class="card-body p-4">
+                  <div class="table-responsive">
+                     <table class="table table-custom datatable">
+                        <thead>
+                           <tr>
+                              <th>ID Férié</th>
+                              <th>Nom de l'Événement</th>
+                              <th>Période</th>
+                              <th>Date de Début</th>
+                              <th>Date de Fin</th>
+                              {% if request.user.is_admin %}<th class="text-right">Action</th>{% endif %}
+                           </tr>
+                        </thead>
+                        <tbody>
+                           {% for holi in holidays %}
+                           <tr>
+                              <td><div class="font-weight-bold text-muted">{{ holi.holiday_id }}</div></td>
+                              <td><div class="font-weight-bold text-dark" style="font-size: 0.95rem;">{{ holi.name }}</div></td>
+                              <td><span class="holiday-badge">{{ holi.holiday_type }}</span></td>
+                              <td><div class="font-weight-bold"><i class="far fa-calendar-alt text-primary mr-1"></i> {{ holi.start_date|date:"d M Y" }}</div></td>
+                              <td><div class="font-weight-bold"><i class="far fa-calendar-alt text-primary mr-1"></i> {{ holi.end_date|date:"d M Y" }}</div></td>
+                              
+                              {% if request.user.is_admin %}
+                              <td class="text-right">
+                                 <form action="{% url 'delete_holiday' holi.holiday_id %}" method="POST" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm" style="background: #fee2e2; color: #ef4444; border-radius: 6px; padding: 5px 10px;" onclick="return confirm('Confirmez-vous la suppression ?');">
+                                       <i class="fas fa-trash"></i>
+                                    </button>
+                                 </form>
+                              </td>
+                              {% endif %}
+                           </tr>
+                           {% empty %}
+                           <tr>
+                              <td colspan="6" class="text-center py-5">
+                                 <div style="background: #f8fafc; border-radius: 15px; padding: 40px;">
+                                    <i class="fas fa-umbrella-beach fa-3x mb-3 text-muted"></i>
+                                    <h5 class="text-secondary font-weight-bold">Aucun jour férié trouvé</h5>
+                                    <p class="text-muted">La base de données des vacances est vide.</p>
+                                 </div>
+                              </td>
+                           </tr>
+                           {% endfor %}
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
             </div>
          </div>
       </div>
-      <div class="row"><div class="col-sm-12"><div class="card card-table"><div class="card-body"><div class="table-responsive">
-         <table class="table table-hover table-center mb-0 datatable">
-            <thead><tr><th>ID</th><th>Holiday Name</th><th>Type</th><th>Start Date</th><th>End Date</th><th class="text-right">Action</th></tr></thead>
-            <tbody>
-               {% for holi in holidays %}
-               <tr><td>{{ holi.holiday_id }}</td><td>{{ holi.name }}</td><td>{{ holi.holiday_type }}</td><td>{{ holi.start_date }}</td><td>{{ holi.end_date }}</td><td class="text-right"><div class="actions"><form action="{% url 'delete_holiday' holi.holiday_id %}" method="POST" style="display:inline;">{% csrf_token %}<button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('Delete this?');"><i class="fas fa-trash"></i></button></form></div></td></tr>
-               {% endfor %}
-            </tbody>
-         </table>
-      </div></div></div></div></div>
+
    </div>
 </div>
 {% endblock %}

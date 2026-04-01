@@ -1,41 +1,119 @@
 {% extends 'Home/base.html' %}
 {% block body %}
+<style>
+    /* Premium Styling - Commun */
+    .premium-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(59,130,246,0.2);
+    }
+    
+    /* Input states pour le formulaire Admin */
+    .premium-input {
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        padding: 10px 15px;
+        transition: all 0.3s;
+        box-shadow: none;
+        background: #f8fafc;
+    }
+    .premium-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        background: #ffffff;
+    }
+
+    /* Activity Cards */
+    .activity-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+        transition: transform 0.3s, box-shadow 0.3s;
+        background: #ffffff;
+        overflow: hidden;
+        height: 100%;
+        position: relative;
+    }
+    .activity-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+    }
+    /* Dynamic top border indicator */
+    .activity-card::before {
+        content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 5px;
+        background: linear-gradient(90deg, #3b82f6, #06b6d4);
+    }
+    
+    .event-title { font-weight: 800; color: #1e293b; font-size: 1.15rem; margin-bottom: 12px; }
+    .event-meta { font-size: 0.85rem; color: #64748b; margin-bottom: 15px; font-weight: 600; display: flex; align-items: center; gap: 15px; }
+    .event-desc { color: #475569; line-height: 1.6; font-size: 0.95rem; }
+    
+    .icon-box {
+        display: inline-flex; justify-content: center; align-items: center;
+        width: 32px; height: 32px; border-radius: 8px; background: #eff6ff; color: #3b82f6; margin-right: 8px;
+    }
+</style>
+
 <div class="page-wrapper">
     <div class="content container-fluid">
-        <div class="page-header">
-            <h3 class="page-title">Faculty Event Timeline</h3>
-            <p class="text-muted">Stay connected with upcoming activities, seminars, and clubs.</p>
+        <!-- Header Premium -->
+        <div class="premium-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title text-white mb-1"><i class="fas fa-bullhorn mr-2"></i>Événements & Activités</h3>
+                    <p class="mb-0 text-white-50" style="font-size: 0.9rem;">Restez connectés avec le calendrier du campus, les séminaires et la vie associative.</p>
+                </div>
+            </div>
         </div>
         
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-success">{{ message }}</div>
+                <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px; border: none; background: #dcfce7; color: #166534; font-weight: 600;">
+                    <i class="fas fa-check-circle mr-2"></i> {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
             {% endfor %}
         {% endif %}
 
         <div class="row">
             {% if request.user.is_admin %}
-            <div class="col-md-12 mb-4">
-                <div class="card">
-                    <div class="card-header bg-primary text-white"><h5 class="card-title text-white mb-0"><i class="fas fa-plus"></i> Schedule New Activity</h5></div>
-                    <div class="card-body">
+            <div class="col-md-12 mb-5">
+                <div class="card" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.04);">
+                    <div class="card-header pb-0" style="background: white; border-bottom: none; border-radius: 15px 15px 0 0; padding: 25px 25px 10px 25px;">
+                        <h5 class="card-title text-dark mb-0 font-weight-bold" style="font-size: 1.1rem;">
+                            <i class="fas fa-plus-circle text-primary mr-2"></i> Planifier une nouvelle activité
+                        </h5>
+                        <p class="text-muted small mt-1">Publiez un événement et notifiez instantanément tout le campus.</p>
+                    </div>
+                    <div class="card-body p-4 pt-2">
                         <form method="POST">
                             {% csrf_token %}
                             <div class="row">
-                                <div class="col-md-3">
-                                    <input type="text" name="title" class="form-control" placeholder="Event Title" required>
+                                <div class="col-md-4 mb-3">
+                                    <label class="text-muted font-weight-bold small">Titre de l'événement</label>
+                                    <input type="text" name="title" class="form-control premium-input" placeholder="Ex: Hackathon Annuel 2026" required>
                                 </div>
-                                <div class="col-md-3">
-                                    <input type="datetime-local" name="date" class="form-control" required>
+                                <div class="col-md-4 mb-3">
+                                    <label class="text-muted font-weight-bold small">Date et Heure</label>
+                                    <input type="datetime-local" name="date" class="form-control premium-input" required>
                                 </div>
-                                <div class="col-md-3">
-                                    <input type="text" name="location" class="form-control" placeholder="Location (e.g. Amphitheater A)" required>
+                                <div class="col-md-4 mb-3">
+                                    <label class="text-muted font-weight-bold small">Lieu / Salle</label>
+                                    <input type="text" name="location" class="form-control premium-input" placeholder="Ex: Amphithéâtre A" required>
                                 </div>
-                                <div class="col-md-3">
-                                    <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-broadcast-tower"></i> Publish & Notify All</button>
+                                <div class="col-md-12 mb-4">
+                                    <label class="text-muted font-weight-bold small">Description Détaillée</label>
+                                    <textarea name="description" class="form-control premium-input" rows="3" placeholder="Décrivez le programme, les intervenants..." required></textarea>
                                 </div>
-                                <div class="col-md-12 mt-3">
-                                    <textarea name="description" class="form-control" rows="2" placeholder="Detailed event description..." required></textarea>
+                                <div class="col-md-12 text-align-right text-right">
+                                    <button type="submit" class="btn btn-primary" style="padding: 12px 25px; border-radius: 10px; font-weight: 700; box-shadow: 0 4px 15px rgba(59,130,246,0.3);">
+                                        <i class="fas fa-broadcast-tower mr-2"></i> Publier & Notifier Tous
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -47,19 +125,35 @@
             <div class="col-md-12">
                 <div class="row">
                     {% for act in activities %}
-                    <div class="col-md-6 col-lg-4 d-flex">
-                        <div class="card flex-fill shadow-sm" style="border-top: 4px solid #3b82f6;">
-                            <div class="card-body">
-                                <h4 class="card-title">{{ act.title }}</h4>
-                                <h6 class="card-subtitle text-muted mb-3"><i class="fas fa-map-marker-alt"></i> {{ act.location }} &bull; <i class="fas fa-clock"></i> {{ act.date|date:"d M Y, H:i" }}</h6>
-                                <p class="card-text">{{ act.description }}</p>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card activity-card">
+                            <div class="card-body p-4">
+                                <h4 class="event-title">{{ act.title }}</h4>
+                                
+                                <div class="event-meta">
+                                    <span title="Lieu">
+                                        <span class="icon-box"><i class="fas fa-map-marker-alt"></i></span> 
+                                        {{ act.location }}
+                                    </span>
+                                    <span title="Date">
+                                        <span class="icon-box" style="background:#fefce8; color:#eab308;"><i class="fas fa-calendar-day"></i></span>
+                                        {{ act.date|date:"d M, H:i" }}
+                                    </span>
+                                </div>
+                                
+                                <p class="event-desc mt-3 pt-3 border-top">{{ act.description|linebreaksbr }}</p>
                             </div>
                         </div>
                     </div>
                     {% empty %}
-                    <div class="col-12 text-center text-muted p-5">
-                        <i class="fas fa-calendar-times fa-3x mb-3"></i>
-                        <h5>No upcoming activities planned.</h5>
+                    <div class="col-12">
+                        <div class="text-center p-5" style="background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+                            <div style="background: #f8fafc; display: inline-block; padding: 25px; border-radius: 50%; margin-bottom: 20px;">
+                                <i class="fas fa-calendar-times fa-3x text-muted"></i>
+                            </div>
+                            <h5 class="text-dark font-weight-bold">Aucune activité programmée</h5>
+                            <p class="text-muted">Revenez plus tard pour découvrir les prochains événements du campus.</p>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
