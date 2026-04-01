@@ -85,7 +85,7 @@ def add_teacher(request):
             email=email,
             password=request.POST.get('password'),
             is_teacher=True,
-            is_authorized=True
+            is_active=True  # Ensure teacher is active by default when added by admin
         )
         Teacher.objects.create(
             user=user,

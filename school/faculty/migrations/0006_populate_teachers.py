@@ -37,7 +37,6 @@ def create_teachers(apps, schema_editor):
                 'password': make_password('1234'),
                 'is_teacher': True,
                 'is_active': True,
-                'is_authorized': True
             }
         )
             
