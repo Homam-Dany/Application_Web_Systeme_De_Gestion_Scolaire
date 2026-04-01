@@ -29,16 +29,24 @@
                                             SEMESTRE : {{ cname|upper }}
                                         </td>
                                         <td class="font-weight-bold text-center align-middle" style="font-size: 16px; color: #495057;">
-                                            {{ data.average|stringformat:".3f" }}
+                                            {% if data.is_ready %}
+                                                {{ data.average|stringformat:".3f" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
                                         </td>
                                         <td class="text-center align-middle bg-light">
                                             <!-- Ratt Moyenne Globale -->
                                         </td>
                                         <td class="font-weight-bold text-center align-middle" style="font-size: 15px; letter-spacing: 1px;">
-                                            {% if data.semester_status == 'VALIDÉ' %}
-                                                <span class="text-success">{{ data.semester_status }}</span>
+                                            {% if data.is_ready %}
+                                                {% if data.semester_status == 'VALIDÉ' %}
+                                                    <span class="text-success">{{ data.semester_status }}</span>
+                                                {% else %}
+                                                    <span class="text-danger">{{ data.semester_status }}</span>
+                                                {% endif %}
                                             {% else %}
-                                                <span class="text-danger">{{ data.semester_status }}</span>
+                                                <span class="text-muted" style="font-size: 12px; letter-spacing: 0;">EN ATTENTE</span>
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -51,7 +59,7 @@
                                             <small class="text-muted font-weight-normal"><i class="fas fa-caret-right"></i> {{ res.exam_name }}</small>
                                         </td>
                                         <td class="text-center align-middle" style="font-size: 15px;">
-                                            {{ res.note|stringformat:".2f" }}
+                                            {% if res.note != None %}{{ res.note|stringformat:".2f" }}{% else %}-{% endif %}
                                         </td>
                                         <td class="text-center align-middle font-weight-bold" style="font-size: 15px; color: #d35400;">
                                             {% if res.note_rattrapage != None %}{{ res.note_rattrapage|stringformat:".2f" }}{% else %}-{% endif %}
@@ -63,8 +71,10 @@
                                                 <span class="text-primary">{{ res.status }}</span>
                                             {% elif res.status == 'RAT' %}
                                                 <span class="text-warning text-dark">{{ res.status }}</span>
-                                            {% else %}
+                                            {% elif res.status == 'NV' %}
                                                 <span class="text-danger">{{ res.status }}</span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
                                             {% endif %}
                                         </td>
                                     </tr>

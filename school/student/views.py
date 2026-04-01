@@ -416,76 +416,95 @@ def student_my_grades(request):
     if not student:
         return render(request, 'student/student_grades.html', {'grouped_results': {}})
         
-    results = ExamResult.objects.filter(student=student, is_published=True).select_related('exam', 'exam__subject').order_by('exam__subject__class_name', 'exam__date')
+    # Get all subjects for the student's class (e.g. "MIP" covers "MIP_S1", "MIP_S2")
+    all_subjects = Subject.objects.filter(class_name__icontains=student.student_class).order_by('class_name', 'name')
     
-    # Structure for the Relevé de Notes:
-    # {
-    #   'MIP_S1': { 'results': [..], 'total': sum, 'count': count, 'average': avg, 'status': 'VALIDÉ'/'NON VALIDÉ' }
-    # }
+    # Get published results
+    results = ExamResult.objects.filter(student=student, is_published=True).select_related('exam', 'exam__subject')
+    results_map = {res.exam.subject.id: res for res in results}
+    
     grouped_results = {}
-    for r in results:
-        cname = r.exam.subject.class_name if r.exam.subject else "Général"
+    
+    for subj in all_subjects:
+        cname = subj.class_name if subj.class_name else "Général"
         if cname not in grouped_results:
-            grouped_results[cname] = {'results': [], 'sum_marks': 0.0, 'count': 0, 'has_rat': False, 'has_nv': False}
-            
-        total_m = float(r.exam.total_marks) if r.exam.total_marks else 20.0
+            grouped_results[cname] = {
+                'results': [], 'sum_marks': 0.0, 'published_count': 0, 'total_count': 0,
+                'has_rat': False, 'has_nv': False, 'is_ready': True
+            }
         
-        # Calculate Normal Note and Rattrapage Note scaled to 20
-        note_normale_scaled = (float(r.marks_obtained) / total_m) * 20.0
+        grouped_results[cname]['total_count'] += 1
+        res = results_map.get(subj.id)
         
-        note_rattrapage_scaled = None
-        if r.rattrapage_marks is not None:
-            note_rattrapage_scaled = (float(r.rattrapage_marks) / total_m) * 20.0
+        res_data = {
+            'element': subj.name.upper(),
+            'exam_name': '—',
+            'note': None,
+            'note_rattrapage': None,
+            'total_marks': 20,
+            'final_mark': None,
+            'status': '—'
+        }
+        
+        if res:
+            grouped_results[cname]['published_count'] += 1
+            total_m = float(res.exam.total_marks) if res.exam.total_marks else 20.0
             
-        final_mark = note_normale_scaled
-        if note_rattrapage_scaled is not None:
-            final_mark = max(note_normale_scaled, note_rattrapage_scaled)
+            # Scaled to 20
+            note_normale_scaled = (float(res.marks_obtained) / total_m) * 20.0
+            note_rattrapage_scaled = None
+            if res.rattrapage_marks is not None:
+                note_rattrapage_scaled = (float(res.rattrapage_marks) / total_m) * 20.0
             
-        # Initial status before compensation
-        status = 'RAT'
-        if final_mark >= 10:
-            status = 'V'
-        elif 7 <= final_mark < 10:
-            if note_rattrapage_scaled is None:
+            final_mark = note_normale_scaled
+            if note_rattrapage_scaled is not None:
+                final_mark = max(note_normale_scaled, note_rattrapage_scaled)
+            
+            # Status mapping per user requirements
+            status = 'RAT'
+            if note_normale_scaled >= 10 and note_rattrapage_scaled is None:
+                status = 'V'
+            elif note_rattrapage_scaled is not None:
+                if final_mark >= 10:
+                    status = 'V'
+                elif 7 <= final_mark < 10:
+                    status = 'VC_ELIGIBLE'
+                else: 
+                    status = 'NV'
+                    grouped_results[cname]['has_nv'] = True
+            else: # Session 1 < 10 and no rattrapage yet
                 status = 'RAT'
                 grouped_results[cname]['has_rat'] = True
-            else:
-                status = 'VC_ELIGIBLE' # Will check for average >= 10 later
-        else: # final_mark < 7
-            if note_rattrapage_scaled is None:
-                status = 'RAT'
-                grouped_results[cname]['has_rat'] = True
-            else:
-                status = 'NV'
-                grouped_results[cname]['has_nv'] = True
-        
-        grouped_results[cname]['results'].append({
-            'element': r.exam.subject.name.upper(),
-            'exam_name': r.exam.name,
-            'note': r.marks_obtained,
-            'note_rattrapage': r.rattrapage_marks,
-            'total_marks': r.exam.total_marks,
-            'final_mark': final_mark,
-            'status': status
-        })
-        grouped_results[cname]['sum_marks'] += final_mark
-        grouped_results[cname]['count'] += 1
+            
+            res_data.update({
+                'exam_name': res.exam.name,
+                'note': res.marks_obtained,
+                'note_rattrapage': res.rattrapage_marks,
+                'total_marks': res.exam.total_marks,
+                'final_mark': final_mark,
+                'status': status
+            })
+            grouped_results[cname]['sum_marks'] += final_mark
+        else:
+            grouped_results[cname]['is_ready'] = False
+            
+        grouped_results[cname]['results'].append(res_data)
 
-    # Pass 2: Calculate averages and assign VC / Final Statuses
     for cname, data in grouped_results.items():
-        avg = data['sum_marks'] / data['count'] if data['count'] > 0 else 0
+        if data['published_count'] < data['total_count']:
+            data['is_ready'] = False
+            
+        avg = data['sum_marks'] / data['total_count'] if data['total_count'] > 0 else 0
         data['average'] = round(avg, 3)
         
-        semester_status = 'NON VALIDÉ'
-        if not data['has_rat'] and not data['has_nv'] and avg >= 10:
-            semester_status = 'VALIDÉ'
-            
-        data['semester_status'] = semester_status
+        # Validation rules: Average >= 10 + no current RAT + all modules ready + no NV
+        can_be_valid = data['is_ready'] and not data['has_rat'] and avg >= 10 and not data['has_nv']
+        data['semester_status'] = 'VALIDÉ' if can_be_valid else 'NON VALIDÉ'
         
-        # Resolve VC_ELIGIBLE based on semester average
+        # Resolve VC_ELIGIBLE
         for res in data['results']:
             if res['status'] == 'VC_ELIGIBLE':
-                res['status'] = 'VC' if avg >= 10 and not data['has_nv'] else 'NV'
+                res['status'] = 'VC' if can_be_valid else 'NV'
 
     return render(request, 'student/student_grades.html', {
         'grouped_results': grouped_results, 
