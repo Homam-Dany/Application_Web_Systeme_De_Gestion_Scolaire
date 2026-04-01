@@ -58,7 +58,7 @@ Ce rapport documente la construction pas à pas d'une application web de gestion
 * **Objectif :** Lancement du serveur de développement local Django. L'application est alors accessible sur l'adresse locale `http://localhost:8000/`. L'affichage du message "First Test" confirme que les liens entre la vue, les URLs de l'application et les URLs natives du projet fonctionnent correctement.
 
 *Aperçu du résultat dans le navigateur :*
-![First Test Screenshot](./capture_first_test.png)
+![First Test Screenshot](./assets/capture_first_test.png)
 
 ## 4. Partie 3 : Templates et Fichiers Statiques
 
@@ -83,7 +83,7 @@ Ce rapport documente la construction pas à pas d'une application web de gestion
 * **Objectif :** Lier la logique de la vue à la nouvelle interface graphique HTML plutôt qu'à un simple texte. La vue est désormais testée et fonctionnelle.
 
 *Aperçu du tableau de bord (Dashboard) intégré :*
-![Dashboard Screenshot](./capture_dashboard.png)
+![Dashboard Screenshot](./assets/capture_dashboard.png)
 
 ## 5. Partie 4 : Création de l'application Student, Modèles et Migrations
 
@@ -116,7 +116,7 @@ Ce rapport documente la construction pas à pas d'une application web de gestion
 * **Objectif :** Exécuter les scripts de migration afin de créer concrètement toutes les tables requises (y compris celles par défaut de Django) dans la base de données SQLite.
 
 *Aperçu de l'exécution des migrations :*
-![Migrations Screenshot](./capture_migrations.png)
+![Migrations Screenshot](./assets/capture_migrations.png)
 
 ## 6. Partie 5 : Interface d'Administration Django
 
@@ -136,13 +136,13 @@ Ce rapport documente la construction pas à pas d'une application web de gestion
 * **Objectif :** Valider que les modèles sont correctement enregistrés et que les listes d'affichage, les filtres et la recherche fonctionnent comme prévu.
 
 *Aperçu du panneau d'administration :*
-![Admin Dashboard Screenshot](./capture_admin_dashboard.png)
+![Admin Dashboard Screenshot](./assets/capture_admin_dashboard.png)
 
 *Liste des parents enregistrés :*
-![Parents List Screenshot](./capture_admin_parents.png)
+![Parents List Screenshot](./assets/capture_admin_parents.png)
 
 *Liste des étudiants enregistrés :*
-![Students List Screenshot](./capture_admin_students.png)
+![Students List Screenshot](./assets/capture_admin_students.png)
 
 ## 7. Partie 6 : Vues CRUD pour la Gestion des Étudiants
 
@@ -163,10 +163,10 @@ Ce rapport documente la construction pas à pas d'une application web de gestion
 * **Objectif :** Lier dynamiquement les liens du menu latéral du tableau de bord aux vues et URLs du projet, s'assurant ainsi que toute mise à jour de route côté backend est répercutée automatiquement côté front.
 
 *Aperçu de la page listant les étudiants (Student List) :*
-![Student List Screenshot](./capture_student_list.png)
+![Student List Screenshot](./assets/capture_student_list.png)
 
 *Aperçu du formulaire d'ajout d'étudiant (Add Student) :*
-![Student Add Screenshot](./capture_student_add.png)
+![Student Add Screenshot](./assets/capture_student_add.png)
 
 ## 8. Partie 7 : Conception et Modélisation (UML)
 
@@ -174,19 +174,19 @@ La réussite d'un projet complexe comme PreSkool repose sur une phase de concept
 
 ### 7.1 Diagramme de Cas d'Utilisation (Use Case Diagram)
 Ce diagramme illustre les interactions entre les trois acteurs principaux (Admin, Enseignant, Étudiant) et les fonctionnalités du système. Il met en évidence la séparation des responsabilités et les services offerts à chaque profil.
-![UML Use Case](./diag_usecase.png)
+![UML Use Case](./assets/diag_usecase.png)
 
 ### 7.2 Diagramme de Classes
 Le diagramme de classes représente la structure statique du système. Il détaille les modèles Django (entités), leurs attributs et surtout les relations (One-to-One, Foreign Key) qui lient les étudiants aux parents, et les enseignants aux départements.
-![UML Class Diagram](./diag_classe.png)
+![UML Class Diagram](./assets/diag_classe.png)
 
 ### 7.3 Diagramme de Séquence
 Ce diagramme détaille le flux dynamique des messages lors d'une opération critique, comme l'authentification ou la création d'un étudiant. Il montre comment les requêtes circulent entre le navigateur, le routeur d'URL, la vue Django et la base de données.
-![UML Sequence Diagram](./diag_sequence.png)
+![UML Sequence Diagram](./assets/diag_sequence.png)
 
 ### 7.4 Diagramme d'Activité
 Le diagramme d'activité modélise le flux de contrôle. Il représente ici le processus de connexion, incluant les vérifications de sécurité et la redirection conditionnelle vers le tableau de bord approprié selon le rôle de l'utilisateur.
-![UML Activity Diagram](./diag_activite.png)
+![UML Activity Diagram](./assets/diag_activite.png)
 
 ## 9. Partie 8 : Module d'Authentification personnalisé
 
@@ -220,7 +220,7 @@ Dans cette section, un système complet d'authentification a été conçu avec u
 * **Objectif :** Offrir à l'administrateur principal un panneau visuel complet et fluide pour intervenir sur ou créer les utilisateurs.
 
 *Aperçu de la page de connexion (Login) :*
-![Login Screenshot](./capture_login.png)
+![Login Screenshot](./assets/capture_login.png)
 
 ## 10. Partie 9 : Système de Gestion des Enseignants (CRUD)
 
@@ -230,7 +230,7 @@ Le module Enseignants est essentiel pour structurer l'équipe pédagogique. Il p
 *   **Fonctionnement :** L'interface administrateur utilise des `ModelForms` pour garantir l'intégrité des données lors de l'ajout. La liste affiche les informations clés (Identifiant, Département, Mobile) pour une identification rapide.
 
 *Aperçu de la liste des enseignants (Gestion centralisée du corps professoral) :*
-![Teachers List](./capture_teachers_list.png)
+![Teachers List](./assets/capture_teachers_list.png)
 
 ## 11. Partie 10 : Gestion des Départements et des Matières
 
@@ -239,26 +239,26 @@ Afin d'organiser les enseignements, nous avons mis en place une structure hiéra
 ### 9.1 Les Départements
 Le département représente l'unité structurelle (ex: Mathématiques, Informatique). Il permet de filtrer les enseignants et de regrouper les matières par spécialité.
 *Aperçu des départements configurés :*
-![Departments List](./capture_departments_list.png)
+![Departments List](./assets/capture_departments_list.png)
 
 ### 9.2 Les Matières (Subjects)
 Les matières sont le cœur de l'enseignement. Chaque matière est liée dynamiquement à un département et à un niveau (classe). Cette modélisation permet d'automatiser l'affichage des cours disponibles pour chaque étudiant en fonction de son inscription.
 *Aperçu du catalogue des matières :*
-![Subjects List](./capture_subjects_list.png)
+![Subjects List](./assets/capture_subjects_list.png)
 
 ## 12. Partie 11 : Tableaux de Bord Spécifiques (Dashboards)
 
 ### 10.1 Dashboard Administrateur
 L'administrateur dispose d'une vue "360 degrés". Des graphiques (via Chart.js) affichent la répartition hommes/femmes des étudiants et le volume des effectifs par département. C'est ici que les décisions stratégiques sont prises.
-![Admin Dashboard](./capture_dashboard_admin.png)
+![Admin Dashboard](./assets/capture_dashboard_admin.png)
 
 ### 10.2 Dashboard Enseignant
 Le tableau de bord enseignant est focalisé sur l'animation pédagogique. Il affiche en priorité son emploi du temps quotidien et le nombre d'étudiants sous sa supervision pour la journée.
-![Teacher Dashboard](./capture_dashboard_teacher.png)
+![Teacher Dashboard](./assets/capture_dashboard_teacher.png)
 
 ### 10.3 Dashboard Étudiant
 L'étudiant accède à un espace personnel "Self-Service". Il peut y voir sa progression, son assiduité et ses prochains examens. C'est également le point de départ pour toutes ses démarches administratives.
-![Student Dashboard](./capture_dashboard_student.png)
+![Student Dashboard](./assets/capture_dashboard_student.png)
 
 ## 13. Partie 12 : Fonctionnalités Avancées (Cartes et Certificats)
 
@@ -269,20 +269,20 @@ Cette partie automatise le bureau de la scolarité, réduisant les délais et le
 *   **La validation :** L'administrateur vérifie la qualité de la photo dans un panneau dédié.
 *   **La génération :** Une fois validée, le système génère un document PDF aux dimensions standards d'une carte d'identité, incluant le QR Code (optionnel) et la photo.
 *Aperçu d'une carte générée au format officiel :*
-![Student Card](./capture_student_card.png)
+![Student Card](./assets/capture_student_card.png)
 
 ### 11.2 Demandes de Certificats Officiels (Self-Service)
 *   **Workflow :** L'étudiant sélectionne le type de document souhaité (Attestation de scolarité, Relevé de notes).
 *   **Suivi :** Un historique permet de voir l'état de la demande (En attente / Approuvé / Prêt).
-![Certificate Requests Dashboard Student](./capture_certificate_requests.png)
+![Certificate Requests Dashboard Student](./assets/capture_certificate_requests.png)
 
 ### 11.3 Approbation et Génération (Côté Admin)
 L'administration traite les demandes par lot. Pour chaque certificat approuvé, le serveur génère un PDF formaté avec les entêtes de l'établissement et un tampon numérique de validité.
 *Aperçu du panneau d'approbation administrateur :*
-![Certificate Approval Panel Admin](./capture_admin_certificate_approval.png)
+![Certificate Approval Panel Admin](./assets/capture_admin_certificate_approval.png)
 
 *Résultat final : Exemple d'un certificat officiel prêt à être imprimé ou envoyé :*
-![Official Certificate Result](./capture_official_certificate.png)
+![Official Certificate Result](./assets/capture_official_certificate.png)
 
 ## 14. Conclusion
 Le projet PreSkool ne se limite pas à une simple base de données d'étudiants. C'est un véritable écosystème numérique qui simplifie la vie scolaire. L'utilisation de Django a permis d'intégrer des fonctionnalités complexes comme la génération de PDF à la volée et une gestion fine des droits d'accès, garantissant ainsi sécurité et efficacité.
