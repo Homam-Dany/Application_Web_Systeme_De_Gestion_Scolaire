@@ -1,0 +1,80 @@
+{% extends 'Home/base.html' %}
+{% load static %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title">Centre de Notifications</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Tableau de bord</a></li>
+                        <li class="breadcrumb-item active">Notifications</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card card-table glass" style="border-radius: 20px; overflow: hidden; border: none; box-shadow: var(--card-shadow);">
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0 datatable">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Notification</th>
+                                        <th>Date</th>
+                                        <th>Statut</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for n in notifications %}
+                                    <tr>
+                                        <td>
+                                            <div class="avatar avatar-sm flex-shrink-0" style="background: {% if n.notification_type == 'success' %}#10b98120{% elif n.notification_type == 'warning' %}#f59e0b20{% elif n.notification_type == 'danger' %}#ef444420{% else %}#3b82f620{% endif %}; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: {% if n.notification_type == 'success' %}#10b981{% elif n.notification_type == 'warning' %}#f59e0b{% elif n.notification_type == 'danger' %}#ef4444{% else %}#3b82f6{% endif %}; font-size: 16px; width: 40px; height: 40px;">
+                                                <i class="{% if n.notification_type == 'success' %}fas fa-check-circle{% elif n.notification_type == 'warning' %}fas fa-exclamation-triangle{% elif n.notification_type == 'danger' %}fas fa-times-circle{% else %}fas fa-info-circle{% endif %}"></i>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <h2 class="table-avatar">
+                                                <a href="{{ n.link|default:'#' }}" style="color: #1e293b; font-weight: 600;">{{ n.title }}</a>
+                                                <br>
+                                                <small class="text-muted">{{ n.message }}</small>
+                                            </h2>
+                                        </td>
+                                        <td>{{ n.created_at|date:"d M Y, H:i" }}</td>
+                                        <td>
+                                            {% if n.is_read %}
+                                                <span class="badge bg-light text-dark">Lu</span>
+                                            {% else %}
+                                                <span class="badge bg-primary">Nouveau</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            {% if n.link and n.link != '#' %}
+                                                <a href="{{ n.link }}" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;">Voir</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center p-5">
+                                            <i class="fas fa-bell-slash mb-3" style="font-size: 48px; opacity: 0.1;"></i>
+                                            <p class="text-muted">Aucune notification pour le moment.</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

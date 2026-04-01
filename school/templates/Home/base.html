@@ -19,6 +19,8 @@ window.onerror = function(msg, url, line) {
       <link rel="stylesheet" href="{%static 'assets/plugins/fontawesome/css/all.min.css' %}">
       <link rel="stylesheet" href="{%static 'assets/plugins/datatables/datatables.min.css' %}">
       <link rel="stylesheet" href="{%static 'assets/css/style.css' %}">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 
       <style>
          :root {
@@ -549,49 +551,122 @@ body > .skiptranslate { display: none !important; }
       <script src="{%static 'assets/js/script.js' %}?v=2.0"></script>
 
       <script>
-      function fetchNotifications() {
-          fetch('/authentication/api/notifications/')
-              .then(response => response.json())
-              .then(data => {
-                  const badge = document.getElementById('notiBadge');
-                  const list = document.querySelector('.notification-list');
-                  
-                  if(data.count > 0) {
-                      badge.style.display = 'block';
-                      badge.innerText = data.count;
-                  } else {
-                      badge.style.display = 'none';
-                  }
-                  
-                  list.innerHTML = '';
-                  data.notifications.forEach(n => {
-                      list.innerHTML += `
-                      <li class="notification-message">
-                         <a href="javascript:void(0)" onclick="markRead(${n.id})">
-                            <div class="media">
-                               <span class="avatar avatar-sm">
-                                  <img class="avatar-img rounded-circle" alt="User Image" src="{%static 'assets/img/profiles/avatar-02.jpg'%}">
-                               </span>
-                               <div class="media-body">
-                                  <p class="noti-details"><span class="noti-title">System Alert</span> <span class="text-dark">${n.title}</span> - ${n.message}</p>
-                                  <p class="noti-time"><span class="notification-time">${n.time}</span></p>
-                               </div>
-                            </div>
-                         </a>
-                      </li>`;
-                  });
-              });
-      }
-      function markRead(id) {
-          fetch('/authentication/api/notifications/read/' + id + '/')
-              .then(() => fetchNotifications());
-      }
-      document.querySelector('.clear-noti').addEventListener('click', function() {
-          fetch('/authentication/api/notifications/clear/')
-              .then(() => fetchNotifications());
-      });
-      setInterval(fetchNotifications, 10000);
-      setTimeout(fetchNotifications, 500);
+       let lastNotifIds = new Set();
+       let isFirstLoad = true;
+
+       function pollNotifications() {
+           fetch('/authentication/api/notifications/')
+               .then(response => response.json())
+               .then(data => {
+                   const badge = document.getElementById('notiBadge');
+                   const list = document.querySelector('.notification-list');
+                   
+                   if(data.count > 0) {
+                       badge.style.display = 'block';
+                       badge.innerText = data.count;
+                   } else {
+                       badge.style.display = 'none';
+                   }
+                   
+                   // Check for new notifications to show Toasts
+                   data.notifications.forEach(n => {
+                       if (!lastNotifIds.has(n.id)) {
+                           if (!isFirstLoad) {
+                               showToast(n);
+                           }
+                           lastNotifIds.add(n.id);
+                       }
+                   });
+                   isFirstLoad = false;
+
+                   list.innerHTML = '';
+                   if (data.notifications.length === 0) {
+                       list.innerHTML = '<li class="p-4 text-center text-muted"><i class="fas fa-bell-slash mb-2" style="font-size: 24px; opacity: 0.3;"></i><br>Aucune notification</li>';
+                   }
+                   data.notifications.forEach(n => {
+                       list.innerHTML += `
+                       <li class="notification-message">
+                          <a href="${n.link || 'javascript:void(0)'}" onclick="${n.link ? '' : 'markRead(' + n.id + ')'}">
+                             <div class="media" style="display: flex; align-items: start; padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.2s;">
+                                <div class="avatar avatar-sm flex-shrink-0" style="width: 38px; height: 38px; background: ${getTypeColor(n.type)}20; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: ${getTypeColor(n.type)}; font-size: 16px;">
+                                   <i class="${getIcon(n.type)}"></i>
+                                </div>
+                                <div class="media-body" style="margin-left: 12px; flex: 1;">
+                                   <p class="noti-details" style="margin: 0; font-weight: 600; font-size: 13.5px; color: #1e293b;">${n.title}</p>
+                                   <p class="noti-text" style="font-size: 12px; color: #64748b; margin: 2px 0 0 0; line-height: 1.4;">${n.message}</p>
+                                   <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+                                       <p class="noti-time" style="font-size: 10px; color: #94a3b8; margin: 0;"><i class="far fa-clock me-1"></i> ${n.time}</p>
+                                       ${!n.is_read ? '<span style="width: 6px; height: 6px; background: ' + getTypeColor(n.type) + '; border-radius: 50%;"></span>' : ''}
+                                   </div>
+                                </div>
+                             </div>
+                          </a>
+                       </li>`;
+                   });
+               });
+       }
+
+       function getTypeColor(type) {
+           switch(type) {
+               case 'success': return '#10b981';
+               case 'warning': return '#f59e0b';
+               case 'danger': return '#ef4444';
+               default: return '#3b82f6';
+           }
+       }
+
+       function getIcon(type) {
+           switch(type) {
+               case 'success': return 'fas fa-check-circle';
+               case 'warning': return 'fas fa-exclamation-triangle';
+               case 'danger': return 'fas fa-times-circle';
+               default: return 'fas fa-info-circle';
+           }
+       }
+
+       function showToast(n) {
+           Toastify({
+               text: `<div style="display: flex; align-items: center;">
+                        <div style="margin-right: 12px; color: ${getTypeColor(n.type)}; font-size: 18px;"><i class="${getIcon(n.type)}"></i></div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 14px;">${n.title}</div>
+                            <div style="font-size: 12px; margin-top: 2px;">${n.message}</div>
+                        </div>
+                      </div>`,
+               duration: 6000,
+               close: true,
+               gravity: "top", 
+               position: "right",
+               stopOnFocus: true,
+               escapeHTML: false,
+               style: {
+                   background: "white",
+                   color: "#1e293b",
+                   borderLeft: `5px solid ${getTypeColor(n.type)}`,
+                   borderRadius: "15px",
+                   boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                   padding: "15px 25px",
+                   minWidth: "300px"
+               },
+               onClick: function(){
+                   if(n.link && n.link !== '#') window.location.href = n.link;
+                   markRead(n.id);
+               }
+           }).showToast();
+       }
+
+       function markRead(id) {
+           fetch('/authentication/api/notifications/read/' + id + '/')
+               .then(() => pollNotifications());
+       }
+
+       document.querySelector('.clear-noti')?.addEventListener('click', function() {
+           fetch('/authentication/api/notifications/clear/')
+               .then(() => pollNotifications());
+       });
+
+       setInterval(pollNotifications, 10000);
+       setTimeout(pollNotifications, 500);
       </script>
 
 <div class="chatbot-widget" id="chatbotWidget">
@@ -776,6 +851,7 @@ function setLanguage(langCode) {
 }
 </script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 </body>
   </html>
