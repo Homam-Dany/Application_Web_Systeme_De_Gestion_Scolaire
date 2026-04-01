@@ -359,8 +359,10 @@ def teacher_enter_grades(request):
                 for admin in admins:
                     Notification.objects.create(
                         user=admin,
-                        title=f"📋 Nouvelles notes à valider : {exam.name}",
-                        message=f"{request.user.first_name} {request.user.last_name} a soumis {updates_count} note(s) pour la filière {class_name}. Veuillez les vérifier dans le Bureau de Validation."
+                        title=f"📋 Nouvelles notes : {exam.name}",
+                        message=f"{request.user.first_name} a soumis des notes ({class_name}).",
+                        notification_type='info',
+                        link='/validate_grades/'
                     )
                 messages.success(request, f"{updates_count} note(s) sauvegardée(s) et envoyée(s) à l'administration pour validation.")
             else:
@@ -470,8 +472,10 @@ def activities_board(request):
             for u in users:
                 Notification.objects.create(
                     user=u,
-                    title=f"📅 L'activité '{title}' a été programmée !",
-                    message=f"L'administration a planifié une activité à {loc}. Résumé : {desc[:50]}..."
+                    title=f"📅 Activité : {title}",
+                    message=f"Rendez-vous à {loc}.",
+                    notification_type='info',
+                    link='/activities_board/'
                 )
             from django.contrib import messages
             messages.success(request, "Activité programmée avec succès !")
@@ -555,8 +559,10 @@ def admin_validate_grades(request):
                     if teacher_user:
                         Notification.objects.create(
                             user=teacher_user,
-                            title=f"⚠️ Modification de Note Suggérée : {res.exam.name}",
-                            message=f"L'administration propose de changer la note de {res.student.first_name} {res.student.last_name} de {res.marks_obtained} à {res.proposed_marks}. Veuillez valider dans vos Modifications Administratives."
+                            title=f"⚠️ Modification Note : {res.exam.name}",
+                            message=f"Proposition de {res.marks_obtained} -> {res.proposed_marks} pour {res.student.last_name}.",
+                            notification_type='warning',
+                            link='/review_modifications/'
                         )
                     count_proposed += 1
                 else:
@@ -568,7 +574,9 @@ def admin_validate_grades(request):
                         Notification.objects.create(
                             user=res.student.user,
                             title=f"🎓 Note Publiée : {res.exam.name}",
-                            message=f"L'administration a validé votre résultat pour l'examen '{res.exam.name}'. Score Officiel : {res.marks_obtained}/{res.exam.total_marks}."
+                            message=f"Votre résultat : {res.marks_obtained}/{res.exam.total_marks}.",
+                            notification_type='success',
+                            link='/student/my-grades/'
                         )
                     count_published += 1
                     
@@ -670,8 +678,10 @@ def teacher_review_grades(request):
                     for admin in admins:
                         Notification.objects.create(
                             user=admin,
-                            title=f"✅ Négociation Acceptée : {res.exam.name}",
-                            message=f"Le professeur a accepté votre proposition pour l'étudiant {res.student.last_name}."
+                            title=f"✅ Négociation Acceptée",
+                            message=f"Modification validée pour {res.student.last_name}.",
+                            notification_type='success',
+                            link='/validate_grades/'
                         )
                     
                     from django.contrib import messages
@@ -692,8 +702,10 @@ def teacher_review_grades(request):
                     for admin in admins:
                         Notification.objects.create(
                             user=admin,
-                            title=f"❌ Négociation Refusée : {res.exam.name}",
-                            message=f"Le professeur a rejeté votre proposition ({rejected_mark}) pour l'étudiant {res.student.last_name}."
+                            title=f"❌ Négociation Refusée",
+                            message=f"Modification rejetée pour {res.student.last_name}.",
+                            notification_type='danger',
+                            link='/validate_grades/'
                         )
                         
                     from django.contrib import messages
@@ -703,8 +715,10 @@ def teacher_review_grades(request):
                 if getattr(res.student, 'user', None):
                     Notification.objects.create(
                         user=res.student.user,
-                        title=f"🎓 Note Publiée : {res.exam.name}",
-                        message=f"Votre résultat final pour l'examen a été publié. Score : {res.marks_obtained}/{res.exam.total_marks}."
+                        title=f"🎓 Note Publiée",
+                        message=f"Résultat pour {res.exam.name} : {res.marks_obtained}.",
+                        notification_type='success',
+                        link='/student/my-grades/'
                     )
                 
         return redirect('teacher_review_grades')
