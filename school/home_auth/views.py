@@ -51,8 +51,10 @@ def signup_view(request):
         for admin in admins:
             Notification.objects.create(
                 user=admin,
-                title=f"👤 Nouvelle demande de compte : {first_name} {last_name}",
-                message=f"Demande de rôle '{role}' en attente de validation. Infos : {extra_info or 'N/A'}."
+                title=f"👤 Nouvelle demande de compte",
+                message=f"Rôle '{role}' demandé par {first_name} {last_name}.",
+                notification_type='warning',
+                link='/review-requests/'
             )
 
         messages.success(request, 'Inscription réussie ! Votre compte est en attente de validation par un administrateur.')
@@ -137,6 +139,7 @@ def profile_view(request):
 
 @login_required
 def get_notifications(request):
+    # Fetch 5 latest unread notifications
     notifs = Notification.objects.filter(user=request.user, is_read=False).order_by('-created_at')[:5]
     data = []
     for n in notifs:
@@ -144,9 +147,17 @@ def get_notifications(request):
             'id': n.id,
             'title': n.title,
             'message': n.message,
-            'time': timesince(n.created_at) + ' ago'
+            'time': timesince(n.created_at) + ' ago',
+            'type': n.notification_type,
+            'link': n.link or '#'
         })
-    return JsonResponse({'count': notifs.count(), 'notifications': data})
+    return JsonResponse({'count': Notification.objects.filter(user=request.user, is_read=False).count(), 'notifications': data})
+
+@login_required
+def notifications_list_view(request):
+    # Retrieve all notifications for the history page
+    all_notifs = Notification.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'Home/notifications_list.html', {'notifications': all_notifs})
 
 @login_required
 def mark_notification_read(request, notif_id):
