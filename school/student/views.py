@@ -1,8 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Student, Parent, Holiday, Exam, TimeTable
+from .models import Student, Parent, Holiday, Exam, TimeTable, TemporaryClassRequest, CertificateRequest, StudentCardRequest
 from faculty.models import Subject, Teacher
+from home_auth.models import Notification, CustomUser
+from django.utils import timezone
+import datetime
 
 @login_required
 def dashboard(request):
@@ -262,14 +265,16 @@ def timetable_list(request):
         'DEFAULT': {'main': '#3b82f6', 'border': '#2563eb', 'cell': '#eff6ff', 'header': '#1d4ed8', 'hborder': '#1e3a8a'}
     }
 
-    def build_matrix(tts):
+    def build_matrix(tts, temp_tts=[]):
         matrix = {day: {f"{s[0]} - {s[1]}": [] for s in slots} for day in days}
         day_map = {
             'MONDAY': 'LUNDI', 'TUESDAY': 'MARDI', 'WEDNESDAY': 'MERCREDI',
             'THURSDAY': 'JEUDI', 'FRIDAY': 'VENDREDI', 'SATURDAY': 'SAMEDI'
         }
+        
+        # Combine both types
         for tt in tts:
-            # Assign color dynamically
+            tt.is_temporary = False
             base_key = tt.class_name.split('_')[0] if tt.class_name and '_' in tt.class_name else tt.class_name
             tt.colors = filiere_colors.get(base_key, filiere_colors['DEFAULT'])
             
@@ -279,6 +284,22 @@ def timetable_list(request):
             day_str = day_map.get(tt.day_of_week.upper(), tt.day_of_week.upper())
             if day_str in matrix and slot_key in matrix[day_str]:
                 matrix[day_str][slot_key].append(tt)
+        
+        for tpt in temp_tts:
+            tpt.is_temporary = True
+            base_key = tpt.class_name.split('_')[0] if tpt.class_name and '_' in tpt.class_name else tpt.class_name
+            tpt.colors = filiere_colors.get(base_key, filiere_colors['DEFAULT'])
+            
+            # Map date to day name
+            eng_day = tpt.date.strftime('%A').upper()
+            day_str = day_map.get(eng_day, eng_day)
+            
+            start_str = tpt.start_time.strftime('%H:%M')
+            end_str = tpt.end_time.strftime('%H:%M')
+            slot_key = f"{start_str} - {end_str}"
+            
+            if day_str in matrix and slot_key in matrix[day_str]:
+                matrix[day_str][slot_key].append(tpt)
         
         timetable_data = []
         for day in days:
@@ -302,33 +323,40 @@ def timetable_list(request):
             base_key = student_cls.split('_')[0].upper()
             context['table_colors'] = filiere_colors.get(base_key, filiere_colors['DEFAULT'])
             timetables = [tt for tt in TimeTable.objects.all() if tt.class_name and (student_cls in tt.class_name.lower() or tt.class_name.lower() in student_cls)]
+            temp_timetables = TemporaryClassRequest.objects.filter(class_name=student.student_class, status__in=['Approved', 'Pending'])
         else:
             context['table_colors'] = filiere_colors['DEFAULT']
             timetables = []
-        context['timetable_data'] = build_matrix(timetables)
+            temp_timetables = []
+        context['timetable_data'] = build_matrix(timetables, temp_timetables)
         
     elif request.user.is_teacher:
         teacher = Teacher.objects.filter(user=request.user).first()
         context['table_colors'] = filiere_colors['DEFAULT']
         timetables = TimeTable.objects.filter(teacher=teacher) if teacher else []
-        context['timetable_data'] = build_matrix(timetables)
+        temp_timetables = TemporaryClassRequest.objects.filter(teacher=teacher, status__in=['Approved', 'Pending']) if teacher else []
+        context['timetable_data'] = build_matrix(timetables, temp_timetables)
+        context['my_requests'] = TemporaryClassRequest.objects.filter(teacher=teacher).order_by('-created_at') if teacher else []
         
     else:
-        # Admin Global Context -> Generate matrices for ALL distinct class names
+        # Admin Global Context
         all_timetables = TimeTable.objects.all()
-        class_names = set([tt.class_name for tt in all_timetables if tt.class_name])
+        all_temp = TemporaryClassRequest.objects.filter(status__in=['Approved', 'Pending'])
+        class_names = set([tt.class_name for tt in all_timetables if tt.class_name]) | set([t.class_name for t in all_temp if t.class_name])
         
-        admin_matrices = {}
+        data_clusters = []
         for cname in sorted(list(class_names)):
             tts = [tt for tt in all_timetables if tt.class_name == cname]
+            tpts = [t for t in all_temp if t.class_name == cname]
             base_key = cname.split('_')[0] if '_' in cname else cname
             color_scheme = filiere_colors.get(base_key, filiere_colors['DEFAULT'])
-            admin_matrices[cname] = {
-                'data': build_matrix(tts),
+            data_clusters.append({
+                'name': cname,
+                'data': build_matrix(tts, tpts),
                 'colors': color_scheme
-            }
+            })
         
-        context['admin_matrices'] = admin_matrices
+        context['data_clusters'] = data_clusters
 
     return render(request, 'student/timetable.html', context)
 
@@ -490,6 +518,99 @@ def request_certificate(request):
             
     requests_history = CertificateRequest.objects.filter(student=student).order_by('-date_requested') if student else []
     return render(request, 'student/request_certificate.html', {'requests': requests_history})
+
+@login_required
+def request_temporary_class(request):
+    if not request.user.is_teacher:
+        messages.error(request, "Accès réservé aux enseignants.")
+        return redirect('dashboard')
+    
+    teacher = get_object_or_404(Teacher, user=request.user)
+    subjects = Subject.objects.filter(teacher=teacher)
+    
+    if request.method == 'POST':
+        subj_id = request.POST.get('subject')
+        subject = get_object_or_404(Subject, id=subj_id)
+        date = request.POST.get('date')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time')
+        room = request.POST.get('room')
+        reason = request.POST.get('reason')
+        custom_reason = request.POST.get('custom_reason', '')
+        
+        temp_req = TemporaryClassRequest.objects.create(
+            teacher=teacher,
+            subject=subject,
+            class_name=subject.class_name,
+            date=date,
+            start_time=start_time,
+            end_time=end_time,
+            room_no=room,
+            reason=reason,
+            custom_reason=custom_reason if reason == 'Autre' else ''
+        )
+        
+        # Notify Admins
+        admins = CustomUser.objects.filter(is_admin=True)
+        for admin in admins:
+            Notification.objects.create(
+                user=admin,
+                title="📅 Nouvelle demande de séance",
+                message=f"Le Pr. {teacher.last_name} demande une séance de {reason} pour {subject.class_name}.",
+                notification_type='warning',
+                link='/student/timetable/manage-temp/'
+            )
+            
+        messages.success(request, "Votre demande a été envoyée avec succès et est en attente de validation.")
+        return redirect('timetable_list')
+        
+    return render(request, 'student/request_temp_class.html', {
+        'subjects': subjects,
+        'reasons': TemporaryClassRequest.REASON_CHOICES
+    })
+
+@login_required
+def admin_manage_temp_classes(request):
+    if not request.user.is_admin:
+        return redirect('dashboard')
+    
+    requests = TemporaryClassRequest.objects.all().order_by('-created_at')
+    return render(request, 'student/admin_manage_temp_classes.html', {'temp_requests': requests})
+
+@login_required
+def process_temp_class_request(request, req_id):
+    if not request.user.is_admin:
+        return redirect('dashboard')
+        
+    temp_req = get_object_or_404(TemporaryClassRequest, id=req_id)
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        admin_notes = request.POST.get('admin_notes', '')
+        new_room = request.POST.get('room_no')
+        
+        if action == 'approve':
+            temp_req.status = 'Approved'
+            if new_room:
+                temp_req.room_no = new_room
+            messages.success(request, f"Séance pour {temp_req.subject.name} approuvée.")
+        elif action == 'reject':
+            temp_req.status = 'Rejected'
+            messages.warning(request, f"Séance pour {temp_req.subject.name} refusée.")
+            
+        temp_req.admin_notes = admin_notes
+        temp_req.save()
+        
+        # Notify Teacher
+        Notification.objects.create(
+            user=temp_req.teacher.user,
+            title=f"📅 Séance {temp_req.status}",
+            message=f"Votre demande pour {temp_req.subject.name} le {temp_req.date} a été {temp_req.status}.",
+            notification_type='success' if action == 'approve' else 'danger',
+            link='/student/timetable/'
+        )
+        
+    return redirect('admin_manage_temp_classes')
 
 @login_required
 def admin_certificates(request):

@@ -1,0 +1,111 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title">Demander une Séance Temporaire</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'timetable_list' %}">Emploi du Temps</a></li>
+                        <li class="breadcrumb-item active">Nouvelle Demande</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-premium">
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-12">
+                                    <h5 class="form-title"><span>Détails de la Séance</span></h5>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <div class="form-group">
+                                        <label>Matière (Module)</label>
+                                        <select name="subject" class="form-control" required id="id_subject">
+                                            <option value="">-- Sélectionner une matière --</option>
+                                            {% for sub in subjects %}
+                                            <option value="{{ sub.id }}">{{ sub.name }} ({{ sub.class_name }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <div class="form-group">
+                                        <label>Date</label>
+                                        <input type="date" name="date" class="form-control" required min="{{ today|date:'Y-m-d' }}">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-4">
+                                    <div class="form-group">
+                                        <label>Créneau Horaire</label>
+                                        <select name="slot" class="form-control" required id="id_slot">
+                                            <option value="" data-start="" data-end="">-- Sélectionner un créneau --</option>
+                                            <option value="09:00 - 10:30" data-start="09:00" data-end="10:30">09:00 - 10:30</option>
+                                            <option value="10:45 - 12:15" data-start="10:45" data-end="12:15">10:45 - 12:15</option>
+                                            <option value="12:30 - 14:00" data-start="12:30" data-end="14:00">12:30 - 14:00</option>
+                                            <option value="14:15 - 15:45" data-start="14:15" data-end="15:45">14:15 - 15:45</option>
+                                            <option value="16:00 - 17:30" data-start="16:00" data-end="17:30">16:00 - 17:30</option>
+                                        </select>
+                                        <input type="hidden" name="start_time" id="id_start_time">
+                                        <input type="hidden" name="end_time" id="id_end_time">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-4">
+                                    <div class="form-group">
+                                        <label>Salle Souhaitée</label>
+                                        <input type="text" name="room" class="form-control" placeholder="Ex: Salle 101" required>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <div class="form-group">
+                                        <label>Motif / Raison</label>
+                                        <select name="reason" class="form-control" required id="id_reason">
+                                            {% for code, label in reasons %}
+                                            <option value="{{ code }}">{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6" id="custom_reason_div" style="display:none;">
+                                    <div class="form-group">
+                                        <label>Précisez le motif</label>
+                                        <textarea name="custom_reason" class="form-control" rows="2" placeholder="Expliquez brièvement..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary btn-block py-3">Envoyer la Demande</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('id_slot').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    document.getElementById('id_start_time').value = selectedOption.getAttribute('data-start');
+    document.getElementById('id_end_time').value = selectedOption.getAttribute('data-end');
+});
+
+document.getElementById('id_reason').addEventListener('change', function() {
+    const customDiv = document.getElementById('custom_reason_div');
+    if (this.value === 'Autre') {
+        customDiv.style.display = 'block';
+        customDiv.querySelector('textarea').required = true;
+    } else {
+        customDiv.style.display = 'none';
+        customDiv.querySelector('textarea').required = false;
+    }
+});
+</script>
+{% endblock %}

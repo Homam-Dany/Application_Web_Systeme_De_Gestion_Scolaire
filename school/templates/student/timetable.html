@@ -1,35 +1,124 @@
 {% extends 'Home/base.html' %}
 {% block body %}
-<!-- Importer le style Premium commun -->
 <style>
+    /* Design System Premium */
     .premium-header {
         background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
         border-radius: 15px;
         padding: 25px;
         color: white;
         margin-bottom: 30px;
-        box-shadow: 0 10px 25px rgba(59,130,246,0.2);
+        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.2);
     }
-    .premium-card { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.04); background: white; overflow: hidden; }
-    
-    /* Navigation Tabs Premium */
-    .nav-tabs-solid { border-bottom: none; background: #f8fafc; border-radius: 10px; padding: 5px; margin-bottom: 25px !important; }
-    .nav-tabs-solid .nav-item { margin-bottom: 0; }
-    .nav-tabs-solid .nav-link { 
-        border: none; color: #64748b; border-radius: 8px; font-weight: 700; transition: all 0.3s; padding: 12px 20px; 
+
+    .premium-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        background: white;
+        overflow: hidden;
     }
-    .nav-tabs-solid .nav-link:hover { color: #3b82f6; background: rgba(59,130,246,0.05); }
-    .nav-tabs-solid .nav-link.active { 
-        background: white; color: #1e3a8a; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: none; 
+
+    .nav-tabs-solid {
+        border-bottom: none;
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 5px;
+        margin-bottom: 25px !important;
     }
-    
-    .table-timetable th { text-transform: uppercase; letter-spacing: 1px; font-weight: 700 !important; }
-    .table-timetable td { padding: 12px; }
-    
+
+    .nav-tabs-solid .nav-link {
+        border: none;
+        color: #64748b;
+        border-radius: 8px;
+        font-weight: 700;
+        transition: all 0.3s;
+        padding: 12px 20px;
+    }
+
+    .nav-tabs-solid .nav-link.active {
+        background: white !important;
+        color: #1e3a8a !important;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Timetable Grid System */
+    .timetable-grid {
+        table-layout: fixed;
+        width: 100%;
+        border-color: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        border-style: hidden;
+        box-shadow: 0 0 0 1px #e2e8f0;
+    }
+
+    .timetable-header th {
+        background-color: var(--header-bg, #1e3a8a);
+        border-color: var(--header-border, #1e40af);
+        font-size: 13px;
+        color: white !important;
+    }
+
+    .day-header {
+        background-color: var(--main-color, #3b82f6);
+        border-color: var(--border-color, #2563eb);
+        letter-spacing: 1.5px;
+        font-size: 12px;
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        text-transform: uppercase;
+        color: white !important;
+        vertical-align: middle;
+    }
+
+    .event-slot {
+        border: 1px solid #e2e8f0;
+        vertical-align: middle;
+    }
+
     .course-card {
-        transition: transform 0.2s, box-shadow 0.2s; border-radius: 8px; padding: 10px; margin-bottom: 4px; border-left-width: 4px !important;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 4px;
+        border-left-width: 4px !important;
+        background-color: var(--cell-bg, #eff6ff);
+        border-left-color: var(--cell-border, #3b82f6);
     }
-    .course-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+    .course-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-card.is-temp {
+        border-left-style: dashed;
+    }
+
+    .course-card.is-pending {
+        opacity: 0.8 !important;
+        background-color: #f1f5f9 !important;
+        border-left-color: #94a3b8 !important;
+    }
+
+    .room-badge {
+        font-size: 10px;
+        font-weight: 700;
+        background-color: var(--badge-bg, #2563eb);
+    }
+
+    .room-badge.is-pending {
+        background-color: #94a3b8 !important;
+    }
+
+    .teacher-info {
+        color: var(--text-color, #757575);
+    }
+
+    .class-info {
+        color: var(--text-color, #ef4444);
+    }
 </style>
 
 <div class="page-wrapper">
@@ -38,135 +127,179 @@
         <div class="premium-header">
             <div class="row align-items-center">
                 <div class="col">
-                    <h3 class="page-title text-white mb-1"><i class="fas fa-calendar-alt mr-2"></i>Emploi du Temps Universitaire</h3>
-                    <p class="mb-0 text-white-50" style="font-size: 0.9rem;">
-                        Consultez le planning {% if is_teacher %}Professeur{% else %}Étudiant{% endif %} de la semaine en cours.
-                    </p>
+                    <h3 class="page-title text-white mb-1"><i class="fas fa-calendar-alt mr-2"></i>Emploi du Temps
+                        Universitaire</h3>
+                    <p class="mb-0 text-white-50" style="font-size: 0.9rem;">Consultez le planning Professeur de la
+                        semaine en cours.</p>
                 </div>
-                {% if request.user.is_admin %}
-                <div class="col-auto text-right mb-0">
-                    <a href="{% url 'add_timetable' %}" class="btn btn-light" style="color: #1e3a8a; font-weight: bold; border-radius: 8px; padding: 10px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                        <i class="fas fa-plus mr-1"></i> Ajouter un Cours
+                <div class="col-auto d-flex align-items-center">
+                    {% if is_admin %}
+                    <a href="{% url 'admin_manage_temp_classes' %}"
+                        class="btn btn-primary font-weight-bold shadow-sm mr-2" style="border-radius: 10px; background: white; color: #1e3a8a; border: none;">
+                        <i class="fas fa-tasks mr-2"></i>Gérer les Demandes
                     </a>
+                    {% endif %}
+                    {% if is_teacher %}
+                    <a href="{% url 'request_temporary_class' %}"
+                        class="btn btn-white text-primary font-weight-bold shadow-sm" style="border-radius: 10px;">
+                        <i class="fas fa-plus-circle mr-2"></i>Demander une Séance
+                    </a>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="card premium-card">
-                    <div class="card-body p-4">
-                        {% if is_admin %}
-                        <!-- ADMIN MULTI-TAB VIEW -->
-                        <ul class="nav nav-tabs nav-tabs-solid nav-justified" id="timetableTabs" role="tablist">
-                            {% for cname, data in admin_matrices.items %}
-                            <li class="nav-item">
-                                <a class="nav-link {% if forloop.first %}active{% endif %}" id="tab-{{ cname }}-link" data-toggle="tab" href="#tab-{{ cname }}" role="tab" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
-                                    {{ cname }}
-                                </a>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                        
-                        <div class="tab-content mt-4" id="timetableTabsContent">
-                            {% for cname, cluster in admin_matrices.items %}
-                            {% with matrix=cluster.data colors=cluster.colors %}
-                            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-{{ cname }}" role="tabpanel">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-timetable text-center align-middle" style="table-layout: fixed; width: 100%; border-color: #e2e8f0; border-radius: 10px; overflow: hidden; border-style: hidden; box-shadow: 0 0 0 1px #e2e8f0;">
-                                        <thead class="text-white" style="background-color: {{ colors.header }};">
-                                            <tr>
-                                                <th style="width: 14%; border-color: {{ colors.hborder }}; font-size: 13px;">Jours / Heures</th>
-                                                {% for h in slot_headers %}
-                                                    <th style="border-color: {{ colors.hborder }}; font-size: 13px;">{{ h }}</th>
-                                                {% endfor %}
-                                            </tr>
-                                        </thead>
-                                        <tbody style="background-color: #fafafa;">
-                                            {% for row in matrix %}
-                                            <tr>
-                                                <!-- Jours de la semaine -->
-                                                {% for cell in row.slots %}
-                                                    {% if forloop.first %}
-                                                    <td class="font-weight-bold text-white align-middle shadow-sm" style="background-color: {{ colors.main }}; border-color: {{ colors.border }}; letter-spacing: 1.5px; font-size: 12px; writing-mode: vertical-rl; transform: rotate(180deg); text-transform: uppercase;">
-                                                        {{ row.day_name }}
-                                                    </td>
-                                                    {% endif %}
-                                                    
-                                                    <td style="border: 1px solid #e2e8f0; vertical-align: middle;">
-                                                        {% if cell.events %}
-                                                            {% for ev in cell.events %}
-                                                            <div class="course-card shadow-sm" style="background-color: {{ ev.colors.cell|default:'#eff6ff' }}; border-left-color: {{ ev.colors.border|default:'#3b82f6' }};">
-                                                                <strong style="color: #1e293b; font-size: 13px; display: block; margin-bottom: 5px;">{{ ev.subject.name|upper }}</strong>
-                                                                <span class="badge badge-pill text-white mb-2 py-1 px-2" style="font-size: 10px; font-weight: 700; background-color: {{ ev.colors.main|default:'#2563eb' }};"><i class="fas fa-door-open mr-1"></i>{{ ev.room_no }}</span><br>
-                                                                <small class="text-muted font-weight-bold"><i class="fas fa-chalkboard-teacher text-secondary mr-1"></i>Pr. {{ ev.teacher.last_name }}</small>
-                                                            </div>
-                                                            {% endfor %}
-                                                        {% else %}
-                                                            <span class="text-muted" style="opacity: 0.15; font-size: 1.5rem;">&bull;</span>
-                                                        {% endif %}
-                                                    </td>
-                                                {% endfor %}
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            {% endwith %}
-                            {% endfor %}
-                        </div>
+        <div class="card premium-card">
+            <div class="card-body">
+                {% if is_admin %}
+                <!-- ADMIN VIEW WITH TABBED DEPARTMENTS -->
+                <ul class="nav nav-tabs nav-tabs-solid nav-justified" id="deptTabs" role="tablist">
+                    {% for cluster in data_clusters %}
+                    {% with cname=cluster.name|slugify %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if forloop.first %}active{% endif %}" id="tab-{{ cname }}-link"
+                            data-toggle="tab" href="#tab-{{ cname }}" role="tab">
+                            {{ cluster.name }}
+                        </a>
+                    </li>
+                    {% endwith %}
+                    {% endfor %}
+                </ul>
 
-                        {% else %}
-                        <!-- REGULAR STUDENT/TEACHER VIEW -->
+                <div class="tab-content" id="deptTabsContent">
+                    {% for cluster in data_clusters %}
+                    {% with cname=cluster.name|slugify %}
+                    {% with matrix=cluster.data colors=cluster.colors %}
+                    <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-{{ cname }}"
+                        role="tabpanel">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-timetable text-center align-middle" style="table-layout: fixed; width: 100%; border-color: #e2e8f0; border-radius: 10px; overflow: hidden; border-style: hidden; box-shadow: 0 0 0 1px #e2e8f0;">
-                                <thead class="text-white" style="background-color: {{ table_colors.header|default:'#1e3a8a' }};">
+                            <table class="table table-bordered table-timetable timetable-grid text-center align-middle">
+                                <thead class="timetable-header"
+                                    style="--header-bg: {{ colors.header }}; --header-border: {{ colors.hborder }};">
                                     <tr>
-                                        <th style="width: 14%; border-color: {{ table_colors.hborder|default:'#1e40af' }}; font-size: 13px;">Jours / Heures</th>
+                                        <th style="width: 14%;">Jours / Heures</th>
                                         {% for h in slot_headers %}
-                                            <th style="border-color: {{ table_colors.hborder|default:'#1e40af' }}; font-size: 13px;">{{ h }}</th>
+                                        <th>{{ h }}</th>
                                         {% endfor %}
                                     </tr>
                                 </thead>
                                 <tbody style="background-color: #fafafa;">
-                                    {% for row in timetable_data %}
+                                    {% for row in matrix %}
                                     <tr>
+                                        <!-- Jours de la semaine -->
                                         {% for cell in row.slots %}
-                                            {% if forloop.first %}
-                                            <!-- Jour sur le côté -->
-                                            <td class="font-weight-bold text-white align-middle shadow-sm" style="background-color: {{ table_colors.main|default:'#3b82f6' }}; border-color: {{ table_colors.border|default:'#2563eb' }}; letter-spacing: 1.5px; font-size: 12px; writing-mode: vertical-rl; transform: rotate(180deg); text-transform: uppercase;">
-                                                {{ row.day_name }}
-                                            </td>
-                                            {% endif %}
-                                            
-                                            <td style="border: 1px solid #e2e8f0; vertical-align: middle;">
-                                                {% if cell.events %}
-                                                    {% for ev in cell.events %}
-                                                    <div class="course-card shadow-sm" style="background-color: {{ ev.colors.cell|default:'#eff6ff' }}; border-left-color: {{ ev.colors.border|default:'#3b82f6' }};">
-                                                        <strong style="color: #1e293b; font-size: 13px; display: block; margin-bottom: 5px;">{{ ev.subject.name|upper }}</strong>
-                                                        <span class="badge badge-pill text-white mb-2 py-1 px-2" style="font-size: 10px; font-weight: 700; background-color: {{ ev.colors.main|default:'#2563eb' }};"><i class="fas fa-door-open mr-1"></i>{{ ev.room_no }}</span><br>
-                                                        {% if is_teacher %}
-                                                            <small class="font-weight-bold" style="color: {{ ev.colors.border|default:'#ef4444' }};"><i class="fas fa-users mr-1"></i>{{ ev.class_name }}</small>
-                                                        {% else %}
-                                                            <small class="text-muted font-weight-bold"><i class="fas fa-chalkboard-teacher text-secondary mr-1"></i>Pr. {{ ev.teacher.last_name }}</small>
-                                                        {% endif %}
-                                                    </div>
-                                                    {% endfor %}
+                                        {% if forloop.first %}
+                                        <td class="day-header font-weight-bold shadow-sm"
+                                            style="--main-color: {{ colors.main }}; --border-color: {{ colors.border }};">
+                                            {{ row.day_name }}
+                                        </td>
+                                        {% endif %}
+
+                                        <td class="event-slot">
+                                            {% if cell.events %}
+                                            {% for ev in cell.events %}
+                                            <div class="course-card shadow-sm {% if ev.is_temporary %}is-temp{% endif %} {% if ev.status == 'Pending' %}is-pending{% endif %}"
+                                                style="--cell-bg: {{ ev.colors.cell|default:'#eff6ff' }}; --cell-border: {{ ev.colors.border|default:'#3b82f6' }};">
+                                                {% if ev.is_temporary %}
+                                                {% if ev.status == 'Pending' %}
+                                                <div class="badge badge-pill text-white mb-1"
+                                                    style="font-size: 8px; background-color: #64748b;"><i
+                                                        class="fas fa-hourglass-half mr-1"></i>{{ ev.date|date:"d M"|upper }} | EN ATTENTE</div>
                                                 {% else %}
-                                                    <span class="text-muted" style="opacity: 0.15; font-size: 1.5rem;">&bull;</span>
+                                                <div class="badge badge-warning text-white mb-1" style="font-size: 8px;"><i class="fas fa-clock mr-1"></i>{{ ev.date|date:"d M"|upper }} | TEMPORAIRE</div>
                                                 {% endif %}
-                                            </td>
+                                                {% endif %}
+                                                <strong style="color: #1e293b; font-size: 13px; display: block; margin-bottom: 5px;">{{ ev.subject.name|upper }}</strong>
+                                                <span class="badge badge-pill text-white mb-2 py-1 px-2 room-badge {% if ev.status == 'Pending' %}is-pending{% endif %}" style="--badge-bg: {{ ev.colors.main|default:'#2563eb' }};"><i class="fas fa-door-open mr-1"></i>{{ ev.room_no }}</span><br>
+                                                <small class="text-muted font-weight-bold"><i class="fas fa-chalkboard-teacher text-secondary mr-1"></i>Pr. {{ ev.teacher.last_name }}</small>
+                                                {% if ev.is_temporary %}<br><small class="text-info font-weight-bold" style="font-size: 9px;">({{ ev.reason }})</small>{% endif %}
+                                            </div>
+                                            {% endfor %}
+                                            {% else %}
+                                            <span class="text-muted"
+                                                style="opacity: 0.15; font-size: 1.5rem;">&bull;</span>
+                                            {% endif %}
+                                        </td>
                                         {% endfor %}
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
-                        {% endif %}
                     </div>
+                    {% endwith %}
+                    {% endwith %}
+                    {% endfor %}
                 </div>
+
+                {% else %}
+                <!-- REGULAR STUDENT/TEACHER VIEW -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-timetable timetable-grid text-center align-middle">
+                        <thead class="timetable-header"
+                            style="--header-bg: {{ table_colors.header|default:'#1e3a8a' }}; --header-border: {{ table_colors.hborder|default:'#1e40af' }};">
+                            <tr>
+                                <th style="width: 14%;">Jours / Heures</th>
+                                {% for h in slot_headers %}
+                                <th>{{ h }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody style="background-color: #fafafa;">
+                            {% for row in timetable_data %}
+                            <tr>
+                                {% for cell in row.slots %}
+                                {% if forloop.first %}
+                                <!-- Jour sur le côté -->
+                                <td class="day-header font-weight-bold shadow-sm"
+                                    style="--main-color: {{ table_colors.main|default:'#3b82f6' }}; --border-color: {{ table_colors.border|default:'#2563eb' }};">
+                                    {{ row.day_name }}
+                                </td>
+                                {% endif %}
+
+                                <td class="event-slot">
+                                    {% if cell.events %}
+                                    {% for ev in cell.events %}
+                                    <div class="course-card shadow-sm {% if ev.is_temporary %}is-temp{% endif %} {% if ev.status == 'Pending' %}is-pending{% endif %}"
+                                        style="--cell-bg: {{ ev.colors.cell|default:'#eff6ff' }}; --cell-border: {{ ev.colors.border|default:'#3b82f6' }};">
+                                        {% if ev.is_temporary %}
+                                        {% if ev.status == 'Pending' %}
+                                        <div class="badge badge-pill text-white mb-1"
+                                            style="font-size: 8px; background-color: #64748b;"><i
+                                                class="fas fa-hourglass-half mr-1"></i>{{ ev.date|date:"d M"|upper }} | EN ATTENTE</div>
+                                        {% else %}
+                                        <div class="badge badge-warning text-white mb-1" style="font-size: 8px;"><i
+                                                class="fas fa-clock mr-1"></i>{{ ev.date|date:"d M"|upper }} | TEMPORAIRE</div>
+                                        {% endif %}
+                                        {% endif %}
+                                        <strong style="color: #1e293b; font-size: 13px; display: block; margin-bottom: 5px;">{{ ev.subject.name|upper }}</strong>
+                                        <span
+                                            class="badge badge-pill text-white mb-2 py-1 px-2 room-badge {% if ev.status == 'Pending' %}is-pending{% endif %}"
+                                            style="--badge-bg: {{ ev.colors.main|default:'#2563eb' }};"><i
+                                                class="fas fa-door-open mr-1"></i>{{ ev.room_no }}</span><br>
+                                        {% if is_teacher %}
+                                        <small class="font-weight-bold class-info"
+                                            style="--text-color: {{ ev.colors.border|default:'#ef4444' }};"><i
+                                                class="fas fa-users mr-1"></i>{{ ev.class_name }}</small>
+                                        {% else %}
+                                        <small class="text-muted font-weight-bold"><i
+                                                class="fas fa-chalkboard-teacher text-secondary mr-1"></i>Pr. {{ ev.teacher.last_name }}</small>
+                                        {% endif %}
+                                        {% if ev.is_temporary %}<br><small class="text-info font-weight-bold"
+                                            style="font-size: 9px;">({{ ev.reason }})</small>{% endif %}
+                                    </div>
+                                    {% endfor %}
+                                    {% else %}
+                                    <span class="text-muted" style="opacity: 0.15; font-size: 1.5rem;">&bull;</span>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

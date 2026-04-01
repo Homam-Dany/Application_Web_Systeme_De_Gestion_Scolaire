@@ -1,0 +1,168 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <h3 class="page-title">Gestion des Séances Temporaires</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'timetable_list' %}">Emploi du Temps</a></li>
+                        <li class="breadcrumb-item active">Demandes de Professeurs</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card card-table">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0 datatable">
+                                <thead>
+                                    <tr>
+                                        <th>Professeur</th>
+                                        <th>Matière / Classe</th>
+                                        <th>Date & Heure</th>
+                                        <th>Salle Demandée</th>
+                                        <th>Motif</th>
+                                        <th>Statut</th>
+                                        <th class="text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for req in temp_requests %}
+                                    <tr class="{% if req.status == 'Pending' %}bg-light-yellow{% endif %}">
+                                        <td>
+                                            <h2 class="table-avatar">
+                                                <a href="#">Pr. {{ req.teacher.last_name }} <span>{{ req.teacher.department.name }}</span></a>
+                                            </h2>
+                                        </td>
+                                        <td>{{ req.subject.name }} ({{ req.class_name }})</td>
+                                        <td>
+                                            {{ req.date }} <br>
+                                            <small class="text-muted">{{ req.start_time|time:"H:i" }} - {{ req.end_time|time:"H:i" }}</small>
+                                        </td>
+                                        <td><span class="badge badge-info">{{ req.room_no }}</span></td>
+                                        <td>
+                                            {% if req.reason == 'Autre' %}
+                                            {{ req.custom_reason|truncatechars:30 }}
+                                            {% else %}
+                                            {{ req.reason }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if req.status == 'Pending' %}
+                                            <span class="badge badge-warning">En attente</span>
+                                            {% elif req.status == 'Approved' %}
+                                            <span class="badge badge-success">Approuvée</span>
+                                            {% else %}
+                                            <span class="badge badge-danger">Refusée</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-right">
+                                            {% if req.status == 'Pending' %}
+                                            <div class="actions">
+                                                <button type="button" class="btn btn-sm btn-success mr-2 process-btn"
+                                                    data-toggle="modal" data-target="#processModal{{ req.id }}"
+                                                    data-container="body">
+                                                    <i class="fas fa-check"></i> Traiter
+                                                </button>
+                                            </div>
+                                            {% else %}
+                                            <small class="text-muted">{{ req.admin_notes }}</small>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center">Aucune demande trouvée.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- All Modals moved to the end of the file and outside the main wrapper to prevent DataTables/CSS interference -->
+{% for req in temp_requests %}
+{% if req.status == 'Pending' %}
+<div class="modal fade" id="processModal{{ req.id }}" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Traiter la demande</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" action="{% url 'process_temp_class_request' req.id %}">
+                {% csrf_token %}
+                <div class="modal-body text-left">
+                    <div class="alert alert-info mb-3">
+                        <strong>Motif complet:</strong> {{ req.reason }} {% if req.reason == 'Autre' %}- {{ req.custom_reason }}{% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label>Salle (Modifier si nécessaire)</label>
+                        <input type="text" name="room_no" class="form-control" value="{{ req.room_no }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes Administrateur</label>
+                        <textarea name="admin_notes" class="form-control" rows="3" placeholder="Raison du refus ou infos sur la salle..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" name="action" value="reject" class="btn btn-danger">Refuser</button>
+                    <button type="submit" name="action" value="approve" class="btn btn-success">Approuver</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<style>
+/* Final Stabilization Fix for Modals */
+body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+}
+.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 3.5rem);
+}
+.modal.fade .modal-dialog {
+    transform: none !important;
+    transition: none !important;
+}
+.modal-content {
+    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.3) !important;
+}
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Move all modals to body to escape any relative/transform parents
+        $('.modal').appendTo('body');
+
+        $(document).off('click', '.process-btn').on('click', '.process-btn', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var targetId = $(this).data('target');
+            $(targetId).modal('show');
+        });
+    });
+</script>
+{% endblock %}
