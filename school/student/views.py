@@ -190,6 +190,8 @@ def add_exam(request):
         if teacher and teacher.department:
             allowed_subjects = Subject.objects.filter(department=teacher.department)
         else:
+            from django.contrib import messages
+            messages.warning(request, "Votre profil n'est pas lié à un département. Veuillez contacter l'administrateur.")
             allowed_subjects = Subject.objects.none()
     else:
         allowed_subjects = Subject.objects.all()
@@ -223,8 +225,10 @@ def add_exam(request):
             if s.user:
                 Notification.objects.create(
                     user=s.user,
-                    title=f"📝 Nouvel examen programmé : {exam.name}",
-                    message=f"Un examen de '{subj.name}' ({class_name}) a été planifié le {exam.date}. Préparez-vous !"
+                    title=f"📝 Examen : {exam.name}",
+                    message=f"Planifié le {exam.date} ({class_name}).",
+                    notification_type='info',
+                    link='/student/exams/'
                 )
                 notif_count += 1
         from django.contrib import messages
@@ -476,8 +480,10 @@ def request_certificate(request):
             for a in admins:
                 Notification.objects.create(
                     user=a,
-                    title=f"Nouvelle demande d'attestation",
-                    message=f"L'étudiant {student.first_name} {student.last_name} a demandé: {cert_type}."
+                    title="📜 Demande d'attestation",
+                    message=f"{student.first_name} demande: {cert_type}.",
+                    notification_type='warning',
+                    link='/student/admin-certificates/'
                 )
             messages.success(request, f"Votre demande de '{cert_type}' a été envoyée à l'administration.")
             return redirect('request_certificate')
@@ -506,7 +512,9 @@ def approve_certificate(request, req_id):
         Notification.objects.create(
             user=cert.student.user,
             title="✅ Attestation Prête",
-            message=f"Votre document officiel '{cert.certificate_type}' a été généré avec succès par la faculté."
+            message=f"Document '{cert.certificate_type}' prêt !",
+            notification_type='success',
+            link='/student/request-certificate/'
         )
     messages.success(request, f"L'attestation pour {cert.student.first_name} a été générée.")
     return redirect('admin_certificates')

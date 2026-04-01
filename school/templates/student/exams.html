@@ -117,7 +117,7 @@
                     <h3 class="mb-1"><i class="fas fa-clipboard-list mr-2"></i>Liste des Examens</h3>
                     <p class="mb-0 text-white-50" style="font-size: 0.9rem;">Consultez ou gérez l'ensemble des épreuves d'évaluation académique.</p>
                 </div>
-                {% if request.user.is_admin %}
+                {% if request.user.is_admin or request.user.is_teacher %}
                 <div class="col-auto text-right">
                     <a href="{% url 'add_exam' %}" class="btn btn-light" style="color: #1e3a8a; font-weight: bold; border-radius: 8px; padding: 10px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                         <i class="fas fa-plus mr-2"></i> Créer un Examen
