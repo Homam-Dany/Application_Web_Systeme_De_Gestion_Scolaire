@@ -14,11 +14,29 @@ def dashboard(request):
     exams = Exam.objects.all()[:5]
     timetables = TimeTable.objects.filter(class_name=student.student_class) if student else []
 
+    # Calculate current average for stats
+    from .models import ExamResult
+    results = ExamResult.objects.filter(student=student, is_published=True)
+    avg_grade = 0
+    if results.exists():
+        total_scaled = 0
+        for r in results:
+            total_m = float(r.exam.total_marks) if r.exam.total_marks else 20.0
+            mark = float(r.marks_obtained)
+            if r.rattrapage_marks is not None:
+                mark = max(mark, float(r.rattrapage_marks))
+            total_scaled += (mark / total_m) * 20.0
+        avg_grade = round(total_scaled / results.count(), 2)
+
     context = {
         'student': student,
         'holidays': holidays,
         'exams': exams,
-        'timetables': timetables
+        'timetables': timetables,
+        'average_grade': avg_grade,
+        'exam_count': exams.count(),
+        'total_subjects': Subject.objects.filter(class_name=student.student_class).count() if student else 0,
+        'teacher_count': Subject.objects.filter(class_name=student.student_class).values('teacher').distinct().count() if student else 0
     }
     return render(request, 'students/student-dashboard.html', context)
 
@@ -39,6 +57,8 @@ def student_list(request):
 
 @login_required
 def add_student(request):
+    if not request.user.is_admin:
+        return redirect('dashboard')
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
@@ -98,6 +118,8 @@ def holiday_list(request):
 
 @login_required
 def add_holiday(request):
+    if not request.user.is_admin:
+        return redirect('dashboard')
     if request.method == 'POST':
         Holiday.objects.create(
             holiday_id=request.POST.get('holiday_id'),
@@ -160,6 +182,8 @@ def exam_list(request):
 
 @login_required
 def add_exam(request):
+    if not (request.user.is_admin or request.user.is_teacher):
+        return redirect('dashboard')
     # Logic for allowed subjects based on user role
     if request.user.is_teacher:
         teacher = Teacher.objects.filter(user=request.user).first()
@@ -225,6 +249,15 @@ def timetable_list(request):
     ]
     slot_headers = [f"{s[0]} - {s[1]}" for s in slots]
 
+    # Predefined color palettes per filiere
+    filiere_colors = {
+        'MIP': {'main': '#22c55e', 'border': '#16a34a', 'cell': '#dcfce7', 'header': '#15803d', 'hborder': '#166534'},
+        'BCG': {'main': '#ef4444', 'border': '#dc2626', 'cell': '#fee2e2', 'header': '#b91c1c', 'hborder': '#991b1b'},
+        'MIPC': {'main': '#8b5cf6', 'border': '#7c3aed', 'cell': '#ede9fe', 'header': '#6d28d9', 'hborder': '#5b21b6'},
+        'GEGM': {'main': '#f97316', 'border': '#ea580c', 'cell': '#ffedd5', 'header': '#c2410c', 'hborder': '#9a3412'},
+        'DEFAULT': {'main': '#3b82f6', 'border': '#2563eb', 'cell': '#eff6ff', 'header': '#1d4ed8', 'hborder': '#1e3a8a'}
+    }
+
     def build_matrix(tts):
         matrix = {day: {f"{s[0]} - {s[1]}": [] for s in slots} for day in days}
         day_map = {
@@ -232,6 +265,10 @@ def timetable_list(request):
             'THURSDAY': 'JEUDI', 'FRIDAY': 'VENDREDI', 'SATURDAY': 'SAMEDI'
         }
         for tt in tts:
+            # Assign color dynamically
+            base_key = tt.class_name.split('_')[0] if tt.class_name and '_' in tt.class_name else tt.class_name
+            tt.colors = filiere_colors.get(base_key, filiere_colors['DEFAULT'])
+            
             start_str = tt.start_time.strftime('%H:%M')
             end_str = tt.end_time.strftime('%H:%M')
             slot_key = f"{start_str} - {end_str}"
@@ -258,13 +295,17 @@ def timetable_list(request):
         student = Student.objects.filter(user=request.user).first()
         if student and student.student_class:
             student_cls = student.student_class.lower()
+            base_key = student_cls.split('_')[0].upper()
+            context['table_colors'] = filiere_colors.get(base_key, filiere_colors['DEFAULT'])
             timetables = [tt for tt in TimeTable.objects.all() if tt.class_name and (student_cls in tt.class_name.lower() or tt.class_name.lower() in student_cls)]
         else:
+            context['table_colors'] = filiere_colors['DEFAULT']
             timetables = []
         context['timetable_data'] = build_matrix(timetables)
         
     elif request.user.is_teacher:
         teacher = Teacher.objects.filter(user=request.user).first()
+        context['table_colors'] = filiere_colors['DEFAULT']
         timetables = TimeTable.objects.filter(teacher=teacher) if teacher else []
         context['timetable_data'] = build_matrix(timetables)
         
@@ -274,15 +315,6 @@ def timetable_list(request):
         class_names = set([tt.class_name for tt in all_timetables if tt.class_name])
         
         admin_matrices = {}
-        # Predefined color palettes per filiere
-        filiere_colors = {
-            'MIP': {'main': '#74b9ff', 'border': '#0984e3', 'cell': '#e3f2fd', 'header': '#3b5998', 'hborder': '#2a4175'},
-            'BCG': {'main': '#55efc4', 'border': '#00b894', 'cell': '#e8f8f5', 'header': '#16a085', 'hborder': '#0e6655'},
-            'MIPC': {'main': '#a29bfe', 'border': '#6c5ce7', 'cell': '#f4f1ea', 'header': '#8e44ad', 'hborder': '#5b2c6f'},
-            'GEGM': {'main': '#fab1a0', 'border': '#e17055', 'cell': '#fdf2e9', 'header': '#d35400', 'hborder': '#873600'},
-            'DEFAULT': {'main': '#ffeaa7', 'border': '#fdcb6e', 'cell': '#fcf3cf', 'header': '#f39c12', 'hborder': '#9c640c'}
-        }
-        
         for cname in sorted(list(class_names)):
             tts = [tt for tt in all_timetables if tt.class_name == cname]
             base_key = cname.split('_')[0] if '_' in cname else cname
@@ -298,6 +330,8 @@ def timetable_list(request):
 
 @login_required
 def add_timetable(request):
+    if not request.user.is_admin:
+        return redirect('dashboard')
     subjects = Subject.objects.all()
     teachers = Teacher.objects.all()
     if request.method == 'POST':

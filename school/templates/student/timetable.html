@@ -1,19 +1,53 @@
 {% extends 'Home/base.html' %}
 {% block body %}
+<!-- Importer le style Premium commun -->
+<style>
+    .premium-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(59,130,246,0.2);
+    }
+    .premium-card { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.04); background: white; overflow: hidden; }
+    
+    /* Navigation Tabs Premium */
+    .nav-tabs-solid { border-bottom: none; background: #f8fafc; border-radius: 10px; padding: 5px; margin-bottom: 25px !important; }
+    .nav-tabs-solid .nav-item { margin-bottom: 0; }
+    .nav-tabs-solid .nav-link { 
+        border: none; color: #64748b; border-radius: 8px; font-weight: 700; transition: all 0.3s; padding: 12px 20px; 
+    }
+    .nav-tabs-solid .nav-link:hover { color: #3b82f6; background: rgba(59,130,246,0.05); }
+    .nav-tabs-solid .nav-link.active { 
+        background: white; color: #1e3a8a; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: none; 
+    }
+    
+    .table-timetable th { text-transform: uppercase; letter-spacing: 1px; font-weight: 700 !important; }
+    .table-timetable td { padding: 12px; }
+    
+    .course-card {
+        transition: transform 0.2s, box-shadow 0.2s; border-radius: 8px; padding: 10px; margin-bottom: 4px; border-left-width: 4px !important;
+    }
+    .course-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+</style>
+
 <div class="page-wrapper">
     <div class="content container-fluid">
-        <div class="page-header">
+        <!-- Header Premium -->
+        <div class="premium-header">
             <div class="row align-items-center">
                 <div class="col">
-                    <h3 class="page-title">Emploi du Temps Universitaire</h3>
-                    <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Time Table</li>
-                    </ul>
+                    <h3 class="page-title text-white mb-1"><i class="fas fa-calendar-alt mr-2"></i>Emploi du Temps Universitaire</h3>
+                    <p class="mb-0 text-white-50" style="font-size: 0.9rem;">
+                        Consultez le planning {% if is_teacher %}Professeur{% else %}Étudiant{% endif %} de la semaine en cours.
+                    </p>
                 </div>
                 {% if request.user.is_admin %}
-                <div class="col-auto text-right float-right ml-auto">
-                    <a href="{% url 'add_timetable' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Event</a>
+                <div class="col-auto text-right mb-0">
+                    <a href="{% url 'add_timetable' %}" class="btn btn-light" style="color: #1e3a8a; font-weight: bold; border-radius: 8px; padding: 10px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        <i class="fas fa-plus mr-1"></i> Ajouter un Cours
+                    </a>
                 </div>
                 {% endif %}
             </div>
@@ -21,58 +55,56 @@
 
         <div class="row">
             <div class="col-sm-12">
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white text-center border-bottom-0 pb-0">
-                        <h4 class="card-title text-uppercase font-weight-bold" style="color: #2c3e50; letter-spacing: 1px;">
-                            Emploi du Temps {% if is_teacher %}Professeur{% else %}Étudiant{% endif %}
-                        </h4>
-                        <p class="text-muted"><small>Semestre en Cours - <i>Sciences et Techniques</i></small></p>
-                    </div>
+                <div class="card premium-card">
                     <div class="card-body p-4">
                         {% if is_admin %}
                         <!-- ADMIN MULTI-TAB VIEW -->
-                        <ul class="nav nav-tabs nav-tabs-solid nav-justified mb-4" id="timetableTabs" role="tablist">
+                        <ul class="nav nav-tabs nav-tabs-solid nav-justified" id="timetableTabs" role="tablist">
                             {% for cname, data in admin_matrices.items %}
                             <li class="nav-item">
-                                <a class="nav-link font-weight-bold text-uppercase {% if forloop.first %}active{% endif %}" id="tab-{{ cname }}-link" data-toggle="tab" href="#tab-{{ cname }}" role="tab" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}" style="letter-spacing: 1px;">
+                                <a class="nav-link {% if forloop.first %}active{% endif %}" id="tab-{{ cname }}-link" data-toggle="tab" href="#tab-{{ cname }}" role="tab" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
                                     {{ cname }}
                                 </a>
                             </li>
                             {% endfor %}
                         </ul>
                         
-                        <div class="tab-content" id="timetableTabsContent">
+                        <div class="tab-content mt-4" id="timetableTabsContent">
                             {% for cname, cluster in admin_matrices.items %}
                             {% with matrix=cluster.data colors=cluster.colors %}
                             <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-{{ cname }}" role="tabpanel">
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-striped text-center align-middle" style="table-layout: fixed; width: 100%; border-color: #dee2e6;">
+                                    <table class="table table-bordered table-timetable text-center align-middle" style="table-layout: fixed; width: 100%; border-color: #e2e8f0; border-radius: 10px; overflow: hidden; border-style: hidden; box-shadow: 0 0 0 1px #e2e8f0;">
                                         <thead class="text-white" style="background-color: {{ colors.header }};">
                                             <tr>
-                                                <th style="width: 12%; border: 1px solid {{ colors.hborder }}; font-size: 14px;">Jours / Heures</th>
+                                                <th style="width: 14%; border-color: {{ colors.hborder }}; font-size: 13px;">Jours / Heures</th>
                                                 {% for h in slot_headers %}
-                                                    <th style="border: 1px solid {{ colors.hborder }}; font-size: 14px;">{{ h }}</th>
+                                                    <th style="border-color: {{ colors.hborder }}; font-size: 13px;">{{ h }}</th>
                                                 {% endfor %}
                                             </tr>
                                         </thead>
-                                        <tbody style="background-color: #f8f9fa;">
+                                        <tbody style="background-color: #fafafa;">
                                             {% for row in matrix %}
                                             <tr>
-                                                <td class="font-weight-bold text-white align-middle shadow-sm" style="background-color: {{ colors.main }}; border: 1px solid {{ colors.border }}; letter-spacing: 1px; font-size: 13px;">
-                                                    {{ row.day_name }}
-                                                </td>
+                                                <!-- Jours de la semaine -->
                                                 {% for cell in row.slots %}
-                                                    <td style="border: 1px solid #dfe6e9; padding: 10px; vertical-align: middle;">
+                                                    {% if forloop.first %}
+                                                    <td class="font-weight-bold text-white align-middle shadow-sm" style="background-color: {{ colors.main }}; border-color: {{ colors.border }}; letter-spacing: 1.5px; font-size: 12px; writing-mode: vertical-rl; transform: rotate(180deg); text-transform: uppercase;">
+                                                        {{ row.day_name }}
+                                                    </td>
+                                                    {% endif %}
+                                                    
+                                                    <td style="border: 1px solid #e2e8f0; vertical-align: middle;">
                                                         {% if cell.events %}
                                                             {% for ev in cell.events %}
-                                                            <div class="p-2 mb-1 shadow-sm rounded" style="background-color: {{ colors.cell }}; border-left: 4px solid {{ colors.border }};">
-                                                                <strong style="color: #2d3436; font-size: 12px; display: block;">{{ ev.subject.name|upper }}</strong>
-                                                                <span class="badge badge-primary badge-pill mb-1" style="font-size: 10px; background-color: {{ colors.main }};">{{ ev.room_no }}</span><br>
-                                                                <small class="text-muted font-weight-bold"><i class="fas fa-user-tie"></i> Pr. {{ ev.teacher.last_name }}</small>
+                                                            <div class="course-card shadow-sm" style="background-color: {{ ev.colors.cell|default:'#eff6ff' }}; border-left-color: {{ ev.colors.border|default:'#3b82f6' }};">
+                                                                <strong style="color: #1e293b; font-size: 13px; display: block; margin-bottom: 5px;">{{ ev.subject.name|upper }}</strong>
+                                                                <span class="badge badge-pill text-white mb-2 py-1 px-2" style="font-size: 10px; font-weight: 700; background-color: {{ ev.colors.main|default:'#2563eb' }};"><i class="fas fa-door-open mr-1"></i>{{ ev.room_no }}</span><br>
+                                                                <small class="text-muted font-weight-bold"><i class="fas fa-chalkboard-teacher text-secondary mr-1"></i>Pr. {{ ev.teacher.last_name }}</small>
                                                             </div>
                                                             {% endfor %}
                                                         {% else %}
-                                                            <span class="text-muted" style="opacity: 0.2;">-</span>
+                                                            <span class="text-muted" style="opacity: 0.15; font-size: 1.5rem;">&bull;</span>
                                                         {% endif %}
                                                     </td>
                                                 {% endfor %}
@@ -89,37 +121,41 @@
                         {% else %}
                         <!-- REGULAR STUDENT/TEACHER VIEW -->
                         <div class="table-responsive">
-                            <table class="table table-bordered table-striped text-center align-middle" style="table-layout: fixed; width: 100%; border-color: #dee2e6;">
-                                <thead class="text-white" style="background-color: {% if is_teacher %}#c0392b{% else %}#3b5998{% endif %};">
+                            <table class="table table-bordered table-timetable text-center align-middle" style="table-layout: fixed; width: 100%; border-color: #e2e8f0; border-radius: 10px; overflow: hidden; border-style: hidden; box-shadow: 0 0 0 1px #e2e8f0;">
+                                <thead class="text-white" style="background-color: {{ table_colors.header|default:'#1e3a8a' }};">
                                     <tr>
-                                        <th style="width: 12%; border: 1px solid {% if is_teacher %}#922b21{% else %}#2a4175{% endif %}; font-size: 14px;">Jours / Heures</th>
+                                        <th style="width: 14%; border-color: {{ table_colors.hborder|default:'#1e40af' }}; font-size: 13px;">Jours / Heures</th>
                                         {% for h in slot_headers %}
-                                            <th style="border: 1px solid {% if is_teacher %}#922b21{% else %}#2a4175{% endif %}; font-size: 14px;">{{ h }}</th>
+                                            <th style="border-color: {{ table_colors.hborder|default:'#1e40af' }}; font-size: 13px;">{{ h }}</th>
                                         {% endfor %}
                                     </tr>
                                 </thead>
-                                <tbody style="background-color: #f8f9fa;">
+                                <tbody style="background-color: #fafafa;">
                                     {% for row in timetable_data %}
                                     <tr>
-                                        <td class="font-weight-bold text-white align-middle shadow-sm" style="background-color: {% if is_teacher %}#e74c3c{% else %}#74b9ff{% endif %}; border: 1px solid {% if is_teacher %}#c0392b{% else %}#0984e3{% endif %}; letter-spacing: 1px; font-size: 13px;">
-                                            {{ row.day_name }}
-                                        </td>
                                         {% for cell in row.slots %}
-                                            <td style="border: 1px solid #dfe6e9; padding: 10px; vertical-align: middle;">
+                                            {% if forloop.first %}
+                                            <!-- Jour sur le côté -->
+                                            <td class="font-weight-bold text-white align-middle shadow-sm" style="background-color: {{ table_colors.main|default:'#3b82f6' }}; border-color: {{ table_colors.border|default:'#2563eb' }}; letter-spacing: 1.5px; font-size: 12px; writing-mode: vertical-rl; transform: rotate(180deg); text-transform: uppercase;">
+                                                {{ row.day_name }}
+                                            </td>
+                                            {% endif %}
+                                            
+                                            <td style="border: 1px solid #e2e8f0; vertical-align: middle;">
                                                 {% if cell.events %}
                                                     {% for ev in cell.events %}
-                                                    <div class="p-2 mb-1 shadow-sm rounded" style="background-color: {% if is_teacher %}#fadbd8{% else %}#e3f2fd{% endif %}; border-left: 4px solid {% if is_teacher %}#e74c3c{% else %}#0984e3{% endif %};">
-                                                        <strong style="color: #2d3436; font-size: 12px; display: block;">{{ ev.subject.name|upper }}</strong>
-                                                        <span class="badge badge-primary badge-pill mb-1" style="font-size: 10px;">{{ ev.room_no }}</span><br>
+                                                    <div class="course-card shadow-sm" style="background-color: {{ ev.colors.cell|default:'#eff6ff' }}; border-left-color: {{ ev.colors.border|default:'#3b82f6' }};">
+                                                        <strong style="color: #1e293b; font-size: 13px; display: block; margin-bottom: 5px;">{{ ev.subject.name|upper }}</strong>
+                                                        <span class="badge badge-pill text-white mb-2 py-1 px-2" style="font-size: 10px; font-weight: 700; background-color: {{ ev.colors.main|default:'#2563eb' }};"><i class="fas fa-door-open mr-1"></i>{{ ev.room_no }}</span><br>
                                                         {% if is_teacher %}
-                                                            <small class="text-muted font-weight-bold">{{ ev.subject.class_name }}</small>
+                                                            <small class="font-weight-bold" style="color: {{ ev.colors.border|default:'#ef4444' }};"><i class="fas fa-users mr-1"></i>{{ ev.class_name }}</small>
                                                         {% else %}
-                                                            <small class="text-muted font-weight-bold"><i class="fas fa-user-tie"></i> Pr. {{ ev.teacher.last_name }}</small>
+                                                            <small class="text-muted font-weight-bold"><i class="fas fa-chalkboard-teacher text-secondary mr-1"></i>Pr. {{ ev.teacher.last_name }}</small>
                                                         {% endif %}
                                                     </div>
                                                     {% endfor %}
                                                 {% else %}
-                                                    <span class="text-muted" style="opacity: 0.2;">-</span>
+                                                    <span class="text-muted" style="opacity: 0.15; font-size: 1.5rem;">&bull;</span>
                                                 {% endif %}
                                             </td>
                                         {% endfor %}
