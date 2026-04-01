@@ -30,4 +30,9 @@ urlpatterns = [
     path('approve-certificate/<int:req_id>/', views.approve_certificate, name='approve_certificate'),
     path('print-attestation/<int:req_id>/', views.print_attestation, name='print_attestation'),
     path('request-card/', views.request_student_card, name='request_student_card'),
+    
+    # Temporary Class Requests
+    path('timetable/request-temp/', views.request_temporary_class, name='request_temporary_class'),
+    path('timetable/manage-temp/', views.admin_manage_temp_classes, name='admin_manage_temp_classes'),
+    path('timetable/process-temp/<int:req_id>/', views.process_temp_class_request, name='process_temp_class_request'),
 ]
