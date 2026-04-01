@@ -21,16 +21,6 @@ class Migration(migrations.Migration):
             model_name='customuser',
             name='login_token',
         ),
-        migrations.AddField(
-            model_name='notification',
-            name='link',
-            field=models.CharField(blank=True, max_length=500, null=True),
-        ),
-        migrations.AddField(
-            model_name='notification',
-            name='notification_type',
-            field=models.CharField(choices=[('info', 'Information'), ('success', 'Success'), ('warning', 'Warning'), ('danger', 'Danger')], default='info', max_length=20),
-        ),
         migrations.AlterField(
             model_name='customuser',
             name='date_joined',
@@ -65,8 +55,5 @@ class Migration(migrations.Migration):
             model_name='customuser',
             name='username',
             field=models.CharField(error_messages={'unique': 'A user with that username already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.', max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='username'),
-        ),
-        migrations.DeleteModel(
-            name='PasswordResetRequest',
         ),
     ]

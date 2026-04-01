@@ -1,5 +1,6 @@
 from django.db import migrations
 import datetime
+from decimal import Decimal
 
 def load_data(apps, schema_editor):
     data = [
