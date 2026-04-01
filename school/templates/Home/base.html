@@ -21,10 +21,31 @@ window.onerror = function(msg, url, line) {
       <link rel="stylesheet" href="{%static 'assets/css/style.css' %}">
 
       <style>
+         :root {
+            --palette-indigo: #6366f1;
+            --palette-emerald: #10b981;
+            --palette-amber: #f59e0b;
+            --palette-rose: #e11d48;
+            --palette-cyan: #06b6d4;
+            --palette-violet: #8b5cf6;
+            --palette-orange: #f97316;
+            
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.2);
+         }
+
+         .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: var(--glass-border);
+         }
+
          body {
-            background-color: #f8fafc !important;
+            background-color: #f1f5f9 !important;
             font-family: 'Poppins', sans-serif !important;
-            color: #334155;
+            color: #1e293b;
          }
          .header {
             background-color: #ffffff !important;
@@ -49,15 +70,46 @@ window.onerror = function(msg, url, line) {
          }
          .card {
             border: none !important;
-            border-radius: 12px !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+            border-radius: 16px !important;
+            box-shadow: var(--card-shadow) !important;
             background-color: #ffffff !important;
-            transition: transform 0.2s ease-in-out;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
          }
          .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04) !important;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
          }
+         .card-premium {
+            background: white;
+            position: relative;
+         }
+         .card-premium::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+         }
+         .admin-border::before { background: var(--admin-grad); }
+         .teacher-border::before { background: var(--teacher-grad); }
+         .student-border::before { background: var(--student-grad); }
+
+         .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+         }
+         .bg-admin-soft { background: #eef2ff; color: var(--admin-main); }
+         .bg-teacher-soft { background: #ecfdf5; color: var(--teacher-main); }
+         .bg-student-soft { background: #fff7ed; color: var(--student-main); }
+         
+         .grad-admin { background: var(--admin-grad); color: white; }
+         .grad-teacher { background: var(--teacher-grad); color: white; }
+         .grad-student { background: var(--student-grad); color: white; }
          .btn-primary {
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
             border: none !important;
@@ -279,21 +331,26 @@ body > .skiptranslate { display: none !important; }
                 </li>
 
                 {% if request.user.is_admin or request.user.is_teacher %}
-                <li class="{% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">
-                    <a href="{% url 'student_list' %}"><i class="fas fa-user-graduate"></i> <span> Student List</span></a>
+                <li class="submenu {% if 'student' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="#"><i class="fas fa-user-graduate"></i> <span> Students</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{% url 'student_list' %}" class="{% if request.resolver_match.url_name == 'student_list' %}active{% endif %}">Student List</a></li>
+                        {% if request.user.is_admin %}
+                        <li><a href="{% url 'add_student' %}" class="{% if request.resolver_match.url_name == 'add_student' %}active{% endif %}">Student Add</a></li>
+                        {% endif %}
+                    </ul>
                 </li>
                 {% endif %}
 
-                {% if request.user.is_admin or request.user.is_student %}
-                <li class="{% if request.resolver_match.url_name == 'teacher_list' %}active{% endif %}">
-                    <a href="{% url 'teacher_list' %}"><i class="fas fa-chalkboard-teacher"></i> <span> Teacher List</span></a>
+                <li class="submenu {% if 'teacher' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Teachers</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{% url 'teacher_list' %}" class="{% if request.resolver_match.url_name == 'teacher_list' %}active{% endif %}">Teacher List</a></li>
+                        {% if request.user.is_admin %}
+                        <li><a href="{% url 'add_teacher' %}" class="{% if request.resolver_match.url_name == 'add_student' %}active{% endif %}">Teacher Add</a></li>
+                        {% endif %}
+                    </ul>
                 </li>
-                {% if request.user.is_admin %}
-                <li class="{% if request.resolver_match.url_name == 'add_teacher' %}active{% endif %}">
-                    <a href="{% url 'add_teacher' %}"><i class="fas fa-user-plus"></i> <span> Add Teacher</span></a>
-                </li>
-                {% endif %}
-                {% endif %}
 
                 {% if request.user.is_admin %}
                 <li class="{% if request.resolver_match.url_name == 'department_list' %}active{% endif %}">
@@ -343,8 +400,8 @@ body > .skiptranslate { display: none !important; }
                 <li class="{% if request.resolver_match.url_name == 'timetable_list' %}active{% endif %}">
                     <a href="{% url 'timetable_list' %}"><i class="fas fa-table"></i> <span>Time Table</span></a>
                 </li>
-                <li>
-                    <a href="{% url 'library_list' %}"><i class="fas fa-book"></i> <span>Library</span></a>
+                <li class="{% if request.resolver_match.url_name == 'book_list' %}active{% endif %}">
+                    <a href="{% url 'book_list' %}"><i class="fas fa-book"></i> <span>Library / Books</span></a>
                 </li>
                 
                 <li class="menu-title mt-2">
@@ -560,19 +617,28 @@ body > .skiptranslate { display: none !important; }
     
     const botScenarios = {
         'admin': [
-            { text: "How do I review new accounts?", answer: "Go to Management > Account Requests in the sidebar. You can approve or reject pending users there." },
-            { text: "What are the system stats?", answer: "Currently the system acts as a dashboard. Check the main page for live student/teacher ratios." },
-            { text: "How do I add a Holiday?", answer: "Navigate to the Holiday List module and click 'Add Holiday' at the top right." }
+            { text: "Nouvelles inscriptions ?", answer: "Allez dans Gestion > Account Requests pour valider les nouveaux comptes." },
+            { text: "Comment ajouter un professeur ?", answer: "Dans le menu Teachers, cliquez sur 'Teacher Add'." },
+            { text: "Où valider les notes ?", answer: "Consultez le 'Bureau de Validation (Notes)' pour approuver les résultats des examens." },
+            { text: "Gérer les jours fériés ?", answer: "Accédez au module 'Holiday List' pour ajouter ou modifier un jour de congé." },
+            { text: "Demandes de cartes ?", answer: "Dans 'Demandes de Cartes', vous pouvez générer ou rejeter les requêtes des étudiants." },
+            { text: "Gérer les filières ?", answer: "Allez dans 'Department List' pour ajouter ou consulter les filières de l'établissement." }
         ],
         'teacher': [
-            { text: "Where are my students?", answer: "Click 'Student List' in the sidebar to view all students enrolled in your department." },
-            { text: "How do I add grades?", answer: "The Exam List module allows you to track exams. Grade entry is coming in the next update!" },
-            { text: "View my schedule?", answer: "Your classes are listed in the 'Time Table' section of the dashboard." }
+            { text: "Où sont mes étudiants ?", answer: "Cliquez sur 'Student List' pour voir les étudiants affectés à vos cours." },
+            { text: "Comment publier des notes ?", answer: "Allez dans 'Publish Grades'. Sélectionnez la filière et l'examen pour saisir les notes." },
+            { text: "Mon emploi du temps ?", answer: "Vos séances sont listées dans la section 'Time Table'." },
+            { text: "Gérer un rattrapage ?", answer: "Lors de la saisie des notes, remplissez 'Rattrapage'. La meilleure des deux notes sera conservée." },
+            { text: "Activités prévues ?", answer: "Consultez le 'Faculty Activities' pour voir les événements administratifs ou pédagogiques prévus." },
+            { text: "L'admin a modifié une note ?", answer: "Vous recevrez une alerte. Allez dans 'Modifications Admin' pour accepter ou refuser la suggestion." }
         ],
         'student': [
-            { text: "What's my next holiday?", answer: "Check the 'Holiday List' on your sidebar to see all upcoming school breaks!" },
-            { text: "Where do I view my courses?", answer: "Your assigned subjects are visible in the 'Subject List' menu." },
-            { text: "How do I borrow a book?", answer: "The digital 'Library' module lets you browse available books. Contact the librarian to issue one." }
+            { text: "Mes prochaines vacances ?", answer: "Consultez la 'Holiday List' sur votre menu pour voir les congés scolaires prévus." },
+            { text: "Où voir mes matières ?", answer: "Vos cours et modules sont visibles dans le menu 'Subject List'." },
+            { text: "Demander ma carte étudiante ?", answer: "Allez dans 'Demande de Carte', téléversez une photo et soumettez la requête." },
+            { text: "Où sont mes résultats ?", answer: "Consultez l'onglet 'My Grades' pour voir vos notes aux examens et rattrapages." },
+            { text: "Emprunter un livre ?", answer: "La 'Library' numérique vous permet de voir la disponibilité des livres de l'école." },
+            { text: "Contacter un professeur ?", answer: "Utilisez la 'Teacher List' pour trouver les identifiants et le département de vos professeurs." }
         ]
     };
 

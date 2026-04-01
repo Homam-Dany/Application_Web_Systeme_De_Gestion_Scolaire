@@ -1,134 +1,309 @@
 {% extends 'Home/base.html' %}
 {% block body %}
+<style>
+  .db-wrap { 
+    background: transparent; 
+    min-height: 100vh; 
+    padding-bottom: 1rem; 
+  }
+  
+  /* Modern soft shadows and rounded corners */
+  .kpi { 
+    border-radius: 12px; 
+    border: 1px solid #e2e8f0; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04); 
+    padding: 1rem; 
+    display: flex; 
+    align-items: center; 
+    gap: 0.8rem; 
+    background: #fff; 
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+  
+  .kpi-ico { 
+    width: 42px; height: 42px; 
+    border-radius: 10px; 
+    flex-shrink: 0; 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 1.2rem; color: #fff; 
+  }
+  
+  .kpi-val { font-size: 1.3rem; font-weight: 800; line-height: 1.1; color: #0f172a; margin-bottom: 0.1rem; }
+  .kpi-lbl { font-size: 0.7rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+  
+  /* Chart / Content cards */
+  .cc { 
+    background: #fff; 
+    border-radius: 12px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04); 
+    padding: 1.25rem; 
+    border: 1px solid #e2e8f0;
+    display: flex; flex-direction: column;
+  }
+  .cc-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; }
+  
+  /* Charts dynamic container */
+  .chart-container { position: relative; height: 210px; width: 100%; margin: 0 auto; flex-shrink: 0; }
+  .chart-container-sm { position: relative; height: 160px; width: 100%; max-width: 160px; margin: 0 auto; flex-shrink: 0; }
+  
+  /* Modern Badges */
+  .xbadge { display: inline-flex; align-items: center; padding: 0.25rem 0.8rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+  .xb-cyan   { background: #ecfeff; color: #0891b2; }
+  .xb-orange { background: #fff7ed; color: #ea580c; }
+  .xb-green  { background: #f0fdf4; color: #16a34a; }
+  .xb-amber  { background: #fffbeb; color: #d97706; }
+  
+  /* Slots */
+  .slot { 
+    border-radius: 12px; padding: 0.8rem 1rem; margin-bottom: 0.8rem; 
+    border-left: 4px solid; background: #f8fafc; transition: all 0.2s;
+  }
+  .slot:hover { background: #f1f5f9; }
+  
+  /* Clean Tables */
+  .ctable th, .ctable td { padding: 0.8rem 0.6rem; vertical-align: middle; }
+  .ctable th { color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; border-bottom: 2px solid #e2e8f0; border-top: none; }
+  .ctable td { border-top: 1px solid #f1f5f9; color: #334155; font-size: 0.85rem; }
+</style>
 
+<div class="page-wrapper db-wrap">
+<div class="content container-fluid py-2">
 
-<div class="page-wrapper">
-    <div class="content container-fluid">
-        <div class="page-header">
-            <h3 class="page-title">Welcome {{ request.user.first_name }}!</h3>
-            <ul class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
-                <li class="breadcrumb-item active">Teacher Dashboard</li>
-            </ul>
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-1" style="font-size:1.5rem;font-weight:800;color:#0f172a;">
+        <i class="fas fa-chalkboard-teacher mr-2" style="color:#06b6d4;"></i>Espace Enseignant
+      </h2>
+      <p class="mb-0" style="font-size:.9rem;color:#64748b;">Pr. {{ request.user.first_name }} {{ request.user.last_name }} • Semestre 2025/2026</p>
+    </div>
+  </div>
+
+  <!-- ROW 1: KPI Cards -->
+  <div class="row mb-3" style="row-gap:1rem;">
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#06b6d4,#0891b2);"><i class="fas fa-book-reader"></i></div>
+        <div><div class="kpi-val">{{ class_count }}</div><div class="kpi-lbl">Matières</div></div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#f97316,#ea580c);"><i class="fas fa-users"></i></div>
+        <div><div class="kpi-val">{{ student_count }}</div><div class="kpi-lbl">Étudiants</div></div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#f59e0b,#d97706);"><i class="fas fa-clipboard-list"></i></div>
+        <div><div class="kpi-val">{{ upcoming_exams|length }}</div><div class="kpi-lbl">Examens</div></div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi" style="border-left:4px solid #ef4444;">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#ef4444,#dc2626);"><i class="fas fa-pen-alt"></i></div>
+        <div><div class="kpi-val" style="color:#dc2626;">{{ pending_grading }}</div><div class="kpi-lbl">À Corriger</div></div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#22c55e,#16a34a);"><i class="fas fa-calendar-alt"></i></div>
+        <div><div class="kpi-val">{{ timetables|length }}</div><div class="kpi-lbl">Créneaux</div></div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);"><i class="fas fa-star"></i></div>
+        <div><div class="kpi-val">94%</div><div class="kpi-lbl">Assiduité</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Charts -->
+  <div class="row mb-3" style="row-gap:1rem;">
+    <div class="col-lg-4">
+      <div class="cc">
+        <div class="cc-title"><i class="fas fa-chart-area mr-2 text-primary" style="color:#8b5cf6;"></i>Charge d'Examens</div>
+        <div class="chart-container"><canvas id="polarExam"></canvas></div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="cc">
+        <div class="cc-title"><i class="fas fa-chart-bar mr-2 text-info"></i>Performance par Matière</div>
+        <div class="chart-container"><canvas id="perfBar"></canvas></div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="cc">
+        <div class="cc-title"><i class="fas fa-chart-line mr-2 text-warning"></i>Progression des Notes</div>
+        <div class="chart-container"><canvas id="gradesTrend"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Timetable + Exams -->
+  <div class="row" style="row-gap:1rem;">
+    <div class="col-lg-5">
+      <div class="cc">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="cc-title mb-0"><i class="fas fa-calendar-alt mr-2 text-info"></i>Mon Emploi du Temps</div>
+          <a href="{% url 'timetable_list' %}" class="btn btn-sm btn-light text-info font-weight-bold rounded-pill px-3">Semaine <i class="fas fa-arrow-right ml-1"></i></a>
         </div>
         
-        <!-- 3 Stat Cards -->
-        <div class="row">
-            <div class="col-xl-4 d-flex">
-                <div class="card bg-nine w-100 text-white">
-                    <div class="card-body">
-                        <div class="db-widgets d-flex justify-content-between align-items-center">
-                            <div class="db-info"><h3>{{ student_count }}</h3><h6>Total Students in School</h6></div>
-                            <div class="db-icon"><i class="fas fa-user-graduate fa-2x"></i></div>
-                        </div>
-                    </div>
+        <div class="d-flex flex-column" style="gap:.5rem;">
+        {% for slot in timetables %}
+          <div class="slot" style="border-left-color:#06b6d4;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong style="font-size:1rem; color:#0f172a;">{{ slot.subject.name }}</strong>
+                <div style="font-size:.85rem;color:#64748b;margin-top:.2rem;">
+                  <i class="fas fa-users mr-1"></i>{{ slot.class_name }} &nbsp;•&nbsp; <i class="fas fa-map-marker-alt mr-1"></i>Salle {{ slot.room_no }}
                 </div>
+              </div>
+              <div class="text-right">
+                <span class="xbadge xb-cyan mb-1"><i class="far fa-calendar-check mr-1"></i>{{ slot.day_of_week }}</span>
+                <div style="font-size:.85rem;font-weight:700;color:#0f172a;">{{ slot.start_time|time:"H:i" }}</div>
+              </div>
             </div>
-            <div class="col-xl-4 d-flex">
-                <div class="card bg-six w-100 text-white">
-                    <div class="card-body">
-                        <div class="db-widgets d-flex justify-content-between align-items-center">
-                            <div class="db-info"><h3>{{ class_count }}</h3><h6>Classes Taught</h6></div>
-                            <div class="db-icon"><i class="fas fa-chalkboard-teacher fa-2x"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-4 d-flex">
-                <div class="card bg-ten w-100 text-white" style="background-color:#ff5a5f;">
-                    <div class="card-body">
-                        <div class="db-widgets d-flex justify-content-between align-items-center">
-                            <div class="db-info"><h3>{{ upcoming_exams.count }}</h3><h6>Upcoming Supervisions</h6></div>
-                            <div class="db-icon"><i class="fas fa-eye fa-2x"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
+        {% empty %}
+          <div class="text-center text-muted py-4">
+            <i class="far fa-calendar-times fa-3x mb-3 opacity-25"></i>
+            <p>Aucun créneau assigné à ce jour.</p>
+          </div>
+        {% endfor %}
         </div>
-
-        <!-- Charts Row -->
-        <div class="row">
-            <div class="col-md-12 col-lg-8">
-                <div class="card card-chart">
-                    <div class="card-header">
-                        <div class="row align-items-center">
-                            <div class="col-6"><h5 class="card-title">Class Performance Averages</h5></div>
-                        </div>
-                    </div>
-                    <div class="card-body p-4">
-                        <canvas id="performanceChart" style="max-height: 300px;"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-12 col-lg-4">
-                 <div class="card flex-fill">
-                    <div class="card-header"><h5 class="card-title">Timetable (Classes Today)</h5></div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-center mb-0">
-                                <thead><tr><th>Time</th><th>Subject</th><th>Room</th></tr></thead>
-                                <tbody>
-                                    {% for t in timetables %}
-                                    <tr><td>{{t.start_time|time:"H:i"}}</td><td>{{t.subject.name}}</td><td>{{t.room_no}}</td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tables Row -->
-        <div class="row">
-            <div class="col-12 col-md-12 d-flex">
-                <div class="card flex-fill">
-                    <div class="card-header"><h5 class="card-title">Upcoming Exams to Supervise</h5></div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-center">
-                                <thead><tr><th>Exam Name</th><th>Subject</th><th>Date</th><th>Length</th></tr></thead>
-                                <tbody>
-                                    {% for exam in upcoming_exams %}
-                                    <tr>
-                                       <td>{{exam.name}}</td>
-                                       <td>{{exam.subject.name}}</td>
-                                       <td>{{exam.date|date:"d M Y"}}</td>
-                                       <td>{{exam.start_time|time:"H:i"}} - {{exam.end_time|time:"H:i"}}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+    
+    <div class="col-lg-7">
+      <div class="cc">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="cc-title mb-0"><i class="fas fa-clipboard-list mr-2 text-warning"></i>Examens Récents & À Corriger</div>
+          <a href="{% url 'exam_list' %}" class="btn btn-sm btn-light text-warning font-weight-bold rounded-pill px-3">Gérer <i class="fas fa-arrow-right ml-1"></i></a>
+        </div>
+        <div class="table-responsive">
+          <table class="table ctable mb-0">
+            <thead>
+              <tr>
+                <th>Examen</th>
+                <th>Matière</th>
+                <th>Date</th>
+                <th>Points</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for exam in upcoming_exams %}
+              <tr>
+                <td><strong style="color:#0f172a;">{{ exam.name }}</strong></td>
+                <td>{{ exam.subject.name }}</td>
+                <td><span class="xbadge xb-cyan">{{ exam.date|date:"d M" }}</span></td>
+                <td><span class="xbadge xb-amber">{{ exam.total_marks }} pts</span></td>
+                <td class="text-right">
+                  <a href="{% url 'teacher_enter_grades' %}?exam_id={{ exam.id }}" class="btn btn-sm btn-warning rounded-pill px-3 py-1 shadow-sm font-weight-bold" style="font-size:.75rem;">
+                    <i class="fas fa-pen mr-1"></i>Notes
+                  </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  <i class="fas fa-check-circle fa-2x mb-2 text-success opacity-25"></i>
+                  <p class="mb-0">Tous les examens sont corrigés.</p>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    var ctx2 = document.getElementById('performanceChart').getContext('2d');
-    var performanceChart = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-            labels: ['Physics 101', 'Maths 201', 'Chemistry Advanced', 'English Lit'],
-            datasets: [{
-                label: 'Average Score (%)',
-                data: [78, 85, 62, 91],
-                backgroundColor: ['#28a745', '#18aefa', '#ef4444', '#f6b116'],
-                borderRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: { beginAtZero: true, max: 100 }
-            }
-        }
+document.addEventListener('DOMContentLoaded', function() {
+  Chart.defaults.font.size = 12;
+  Chart.defaults.font.family = "'Inter', 'Poppins', sans-serif";
+  Chart.defaults.color = '#64748b';
+  
+  // Polar Area Exam Load
+  const ctxPolar = document.getElementById('polarExam');
+  if(ctxPolar) {
+    let pending_grading = {{ pending_grading|default:0 }};
+    let upcoming_exams = {{ upcoming_exams|length|default:1 }};
+    let published = Math.max(0, upcoming_exams - pending_grading);
+    new Chart(ctxPolar, {
+      type: 'polarArea',
+      data: {
+        labels: ['Publiés', 'À corriger', 'En attente'],
+        datasets: [{
+          data: [published, pending_grading, 1],
+          backgroundColor: ['rgba(34,197,94,0.7)', 'rgba(249,115,22,0.7)', 'rgba(245,158,11,0.7)'],
+          borderWidth: 0
+        }]
+      },
+      options: { plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } } } }
     });
+  }
+
+  // Performance by Subject
+  const ctxPerf = document.getElementById('perfBar');
+  if(ctxPerf) {
+    new Chart(ctxPerf, {
+      type: 'bar',
+      data: {
+        labels: ['Maths', 'Physique', 'Info', 'Anglais', 'Algo'],
+        datasets: [{
+          label: 'Moyenne /20',
+          data: [14.5, 13.2, 17.1, 15.8, 12.4],
+          backgroundColor: ['#06b6d4', '#8b5cf6', '#22c55e', '#f59e0b', '#ec4899'],
+          borderRadius: 6,
+          barPercentage: 0.55
+        }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { 
+          x: { min: 0, max: 20, grid: { color: '#f1f5f9' } }, 
+          y: { grid: { display: false } } 
+        }
+      }
+    });
+  }
+
+  // Grades Trend
+  const ctxGrades = document.getElementById('gradesTrend');
+  if(ctxGrades) {
+    let pending_grading = {{ pending_grading|default:3 }};
+    new Chart(ctxGrades, {
+      type: 'line',
+      data: {
+        labels: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'],
+        datasets: [{
+          label: 'Notes Soumises',
+          data: [5, 12, 8, 20, 16, pending_grading],
+          borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,0.1)',
+          fill: true, tension: 0.4, borderWidth: 3,
+          pointRadius: 4, pointBackgroundColor: '#f97316', pointBorderColor: '#fff', pointBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { 
+          x: { grid: { display: false } }, 
+          y: { beginAtZero: true, grid: { color: '#f1f5f9', borderDash: [4, 4] } } 
+        }
+      }
+    });
+  }
 });
 </script>
 {% endblock %}

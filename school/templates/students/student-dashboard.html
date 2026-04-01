@@ -1,188 +1,367 @@
 {% extends 'Home/base.html' %}
 {% block body %}
+<style>
+  .db-wrap { 
+    background: transparent; 
+    min-height: 100vh; 
+    padding-bottom: 1rem; 
+  }
+  
+  /* Modern soft shadows and rounded corners */
+  .kpi { 
+    border-radius: 12px; 
+    border: 1px solid #e2e8f0; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04); 
+    padding: 1rem; 
+    display: flex; 
+    align-items: center; 
+    gap: 0.8rem; 
+    background: #fff; 
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+  
+  .kpi-ico { 
+    width: 42px; height: 42px; 
+    border-radius: 10px; 
+    flex-shrink: 0; 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 1.2rem; color: #fff; 
+  }
+  
+  .kpi-val { font-size: 1.3rem; font-weight: 800; line-height: 1.1; color: #0f172a; margin-bottom: 0.1rem; }
+  .kpi-lbl { font-size: 0.7rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+  
+  /* Chart / Content cards */
+  .cc { 
+    background: #fff; 
+    border-radius: 12px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04); 
+    padding: 1.25rem; 
+    border: 1px solid #e2e8f0;
+    display: flex; flex-direction: column;
+  }
+  .cc-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; }
+  
+  /* Charts dynamic container */
+  .chart-container { position: relative; height: 210px; width: 100%; margin: 0 auto; flex-shrink: 0; }
+  .chart-container-sm { position: relative; height: 160px; width: 100%; max-width: 160px; margin: 0 auto; flex-shrink: 0; }
+  
+  /* Modern Badges */
+  .xbadge { display: inline-flex; align-items: center; padding: 0.25rem 0.8rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+  .xb-orange { background: #fff7ed; color: #ea580c; }
+  .xb-violet { background: #f5f3ff; color: #7c3aed; }
+  .xb-green  { background: #f0fdf4; color: #16a34a; }
+  .xb-blue   { background: #eff6ff; color: #3b82f6; }
+  .xb-pink   { background: #fdf2f8; color: #db2777; }
+  .xb-amber  { background: #fffbeb; color: #d97706; }
+  
+  /* Quick Actions & Elements */
+  .exam-row { 
+    border-radius: 12px; padding: 0.8rem 1rem; margin-bottom: 0.8rem; 
+    display: flex; align-items: center; gap: 1rem; background: #f8fafc;
+    transition: all 0.2s;
+  }
+  .exam-row:hover { background: #f1f5f9; }
+  
+  .slot2 { 
+    border-radius: 12px; padding: 0.8rem 1rem; margin-bottom: 0.6rem; 
+    border-left: 4px solid; background: #f8fafc;
+  }
+  
+  .quick-btn { 
+    border-radius: 12px; padding: 0.8rem; margin-bottom: 0.8rem; 
+    display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; font-weight: 600; 
+    text-decoration: none; border: none; width: 100%; color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  }
+  .quick-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-decoration: none; color: inherit; }
+</style>
 
+<div class="page-wrapper db-wrap">
+<div class="content container-fluid py-2">
 
-<div class="page-wrapper">
-    <div class="content container-fluid">
-        <div class="page-header">
-            <h3 class="page-title">Welcome {{ request.user.first_name }}!</h3>
-            <ul class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Dashboard</a></li>
-                <li class="breadcrumb-item active">Student Dashboard</li>
-            </ul>
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-1" style="font-size:1.5rem;font-weight:800;color:#0f172a;">
+        <i class="fas fa-user-graduate mr-2" style="color:#f97316;"></i>Espace Étudiant
+      </h2>
+      <p class="mb-0" style="font-size:.9rem;color:#64748b;">
+        Bienvenue, <strong>{{ request.user.first_name }}</strong>{% if student %} • Filière {{ student.student_class }}{% endif %} • 2025/2026
+      </p>
+    </div>
+    <div class="d-flex" style="gap:.8rem;">
+      <a href="{% url 'student_my_grades' %}" class="btn rounded-pill px-3 py-2 shadow-sm" style="background:#f5f3ff;color:#7c3aed;font-size:.85rem;font-weight:600;">
+        <i class="fas fa-chart-line mr-2"></i>Mes Résultats
+      </a>
+      <a href="{% url 'request_certificate' %}" class="btn rounded-pill px-3 py-2 shadow-sm" style="background:#f0fdf4;color:#16a34a;font-size:.85rem;font-weight:600;">
+        <i class="fas fa-certificate mr-2"></i>Attestation
+      </a>
+    </div>
+  </div>
+
+  <!-- ROW 1: KPIs -->
+  <div class="row mb-3" style="row-gap:1rem;">
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#f97316,#ea580c);"><i class="fas fa-book-open"></i></div>
+        <div><div class="kpi-val">{{ total_subjects }}</div><div class="kpi-lbl">Matières</div></div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);"><i class="fas fa-file-alt"></i></div>
+        <div><div class="kpi-val">{{ total_exams }}</div><div class="kpi-lbl">Examens</div></div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#22c55e,#16a34a);"><i class="fas fa-users"></i></div>
+        <div><div class="kpi-val">{{ student_count }}</div><div class="kpi-lbl">Camarades</div></div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);"><i class="fas fa-chalkboard-teacher"></i></div>
+        <div><div class="kpi-val">{{ teacher_count }}</div><div class="kpi-lbl">Professeurs</div></div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#14b8a6,#0d9488);"><i class="fas fa-calendar-check"></i></div>
+        <div><div class="kpi-val">{{ timetables|length }}</div><div class="kpi-lbl">Créneaux</div></div>
+      </div>
+    </div>
+    <div class="col-xl-2 col-lg-4 col-md-6 col-12">
+      <div class="kpi">
+        <div class="kpi-ico" style="background:linear-gradient(135deg,#ec4899,#db2777);"><i class="fas fa-umbrella-beach"></i></div>
+        <div><div class="kpi-val">{{ holidays|length }}</div><div class="kpi-lbl">Congés</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Charts -->
+  <div class="row mb-3" style="row-gap:1rem;">
+    <div class="col-lg-4">
+      <div class="cc">
+        <div class="cc-title"><i class="fas fa-bullseye mr-2 text-warning"></i>Radar Compétences</div>
+        <div class="chart-container" style="max-width:260px;"><canvas id="radarSkill"></canvas></div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="cc text-center">
+        <div class="cc-title text-center"><i class="fas fa-user-check mr-2 text-success"></i>Taux d'Assiduité</div>
+        <div class="chart-container-sm d-flex justify-content-center align-items-center" style="position:relative;">
+          <canvas id="attendanceDoughnut"></canvas>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
+            <div style="font-size:2rem;font-weight:800;color:#16a34a;line-height:1;">94%</div>
+            <div style="font-size:.8rem;color:#64748b;font-weight:600;margin-top:0.2rem;">Présence</div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-center mt-4" style="gap:1rem;">
+          <span class="xbadge xb-green"><i class="fas fa-check mr-1"></i>94% Présent</span>
+          <span class="xbadge xb-orange"><i class="fas fa-times mr-1"></i>6% Absent</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="cc">
+        <div class="cc-title"><i class="fas fa-chart-line mr-2 text-primary" style="color:#8b5cf6;"></i>Évolution Générale</div>
+        <div class="chart-container"><canvas id="progressLine"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Secondary Information Panels -->
+  <div class="row" style="row-gap:1rem;">
+    <!-- Timetable -->
+    <div class="col-lg-4">
+      <div class="cc">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="cc-title mb-0"><i class="fas fa-calendar-alt mr-2 text-primary"></i>Emploi du Temps</div>
+          <a href="{% url 'timetable_list' %}" class="btn btn-sm btn-light text-primary font-weight-bold rounded-pill px-3">Tout <i class="fas fa-arrow-right ml-1"></i></a>
         </div>
         
-        <!-- 4 Stat Cards -->
-        <div class="row">
-            <div class="col-xl-3 col-sm-6 col-12 d-flex">
-                <div class="card bg-nine w-100 text-white">
-                    <div class="card-body">
-                        <div class="db-widgets d-flex justify-content-between align-items-center">
-                            <div class="db-info"><h3>{{ total_subjects }}</h3><h6>Subjects in my Filière</h6></div>
-                            <div class="db-icon"><i class="fas fa-book-reader fa-2x"></i></div>
-                        </div>
-                    </div>
-                </div>
+        <div class="d-flex flex-column">
+          {% for slot in timetables %}
+          <div class="slot2" style="border-color:{% cycle '#3b82f6' '#22c55e' '#f97316' '#8b5cf6' '#06b6d4' %};">
+            <div style="font-weight:700; font-size:1rem; color:#0f172a;">{{ slot.subject.name }}</div>
+            <div style="color:#64748b;font-size:.85rem;margin-top:.2rem;">
+              <i class="far fa-clock mr-1"></i>{{ slot.day_of_week }} • {{ slot.start_time|time:"H:i" }}
             </div>
-            <div class="col-xl-3 col-sm-6 col-12 d-flex">
-                <div class="card bg-six w-100 text-white">
-                    <div class="card-body">
-                        <div class="db-widgets d-flex justify-content-between align-items-center">
-                            <div class="db-info"><h3>{{ teacher_count }}</h3><h6>Teachers in my Filière</h6></div>
-                            <div class="db-icon"><i class="fas fa-chalkboard-teacher fa-2x"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 col-12 d-flex">
-                <div class="card bg-primary w-100 text-white">
-                    <div class="card-body">
-                        <div class="db-widgets d-flex justify-content-between align-items-center">
-                            <div class="db-info"><h3>{{ student_count }}</h3><h6>Students in my Filière</h6></div>
-                            <div class="db-icon"><i class="fas fa-user-graduate fa-2x"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-sm-6 col-12 d-flex">
-                <div class="card bg-ten w-100 text-white">
-                    <div class="card-body">
-                        <div class="db-widgets d-flex justify-content-between align-items-center">
-                            <div class="db-info"><h3>{{ total_exams }}</h3><h6>Upcoming Exams</h6></div>
-                            <div class="db-icon"><i class="fas fa-clipboard-list fa-2x"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
+          {% empty %}
+          <div class="text-center text-muted py-5">
+            <i class="far fa-calendar-times fa-3x mb-3 opacity-25"></i>
+            <p>Aucun créneau affecté.</p>
+          </div>
+          {% endfor %}
         </div>
-
-        <!-- Charts Row -->
-        <div class="row">
-            <div class="col-md-12 col-lg-6">
-                <div class="card card-chart">
-                    <div class="card-header">
-                        <div class="row align-items-center">
-                            <div class="col-6"><h5 class="card-title">My Attendance (Visual Est.)</h5></div>
-                        </div>
-                    </div>
-                    <div class="card-body d-flex justify-content-center p-4">
-                        <canvas id="attendanceChart" style="max-height: 250px;"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-12 col-lg-6">
-                <div class="card card-chart">
-                    <div class="card-header">
-                        <div class="row align-items-center">
-                            <div class="col-6"><h5 class="card-title">Semester Progress</h5></div>
-                        </div>
-                    </div>
-                    <div class="card-body p-4">
-                        <canvas id="progressChart" style="max-height: 250px;"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tables Row -->
-        <div class="row">
-            <div class="col-md-6 d-flex">
-                <div class="card flex-fill">
-                    <div class="card-header"><h5 class="card-title">My Exams Schedule</h5></div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-center">
-                                <thead><tr><th>Exam Name</th><th>Subject</th><th>Date</th></tr></thead>
-                                <tbody>
-                                    {% for exam in upcoming_exams %}
-                                    <tr><td>{{exam.name}}</td><td>{{exam.subject.name}}</td><td>{{exam.date|date:"d M Y"}}</td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 d-flex">
-                <div class="card flex-fill">
-                    <div class="card-header"><h5 class="card-title">My Timetable (Preview)</h5></div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-center">
-                                <thead><tr><th>Day</th><th>Subject</th><th>Room</th></tr></thead>
-                                <tbody>
-                                    {% for t in timetables %}
-                                    <tr><td>{{t.day_of_week}}</td><td>{{t.subject.name}}</td><td>{{t.room_no}}</td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+
+    <!-- Upcoming Exams -->
+    <div class="col-lg-4">
+      <div class="cc">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="cc-title mb-0"><i class="fas fa-clipboard-list mr-2 text-primary" style="color:#8b5cf6;"></i>Examens à Venir</div>
+          <a href="{% url 'exam_list' %}" class="btn btn-sm btn-light text-primary font-weight-bold rounded-pill px-3" style="color:#7c3aed !important;">Tout <i class="fas fa-arrow-right ml-1"></i></a>
+        </div>
+        
+        <div class="d-flex flex-column">
+          {% for exam in upcoming_exams %}
+          <div class="exam-row">
+            <div style="width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,{% cycle '#8b5cf6' '#f97316' '#22c55e' '#3b82f6' '#ec4899' %},{% cycle '#7c3aed' '#ea580c' '#16a34a' '#1d4ed8' '#db2777' %});display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;flex-shrink:0;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+              <span style="font-weight:800;font-size:.9rem;line-height:1;">{{ exam.date|date:"d" }}</span>
+              <span style="font-size:.65rem;text-transform:uppercase;font-weight:600;">{{ exam.date|date:"M" }}</span>
+            </div>
+            <div class="flex-grow-1" style="overflow:hidden;">
+              <div style="font-weight:700;font-size:1rem;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ exam.name }}</div>
+              <div style="color:#64748b;font-size:.85rem;margin-top:.2rem;"><i class="fas fa-book mr-1"></i>{{ exam.subject.name }}</div>
+            </div>
+            <span class="xbadge xb-violet flex-shrink-0" style="padding:.4rem .8rem;">{{ exam.total_marks }} pts</span>
+          </div>
+          {% empty %}
+          <div class="text-center text-muted py-5">
+            <i class="fas fa-calendar-check fa-3x mb-3 opacity-25 d-block"></i>
+            <p>Aucun examen programmé.</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Sim & Quick Links & Holidays -->
+    <div class="col-lg-4 d-flex flex-column" style="gap:1.5rem;">
+      <div class="cc">
+        <div class="cc-title"><i class="fas fa-bolt mr-2 text-warning"></i>Accès Rapide</div>
+        <a href="{% url 'student_my_grades' %}" class="quick-btn" style="background:#f5f3ff;color:#7c3aed;">
+          <span><i class="fas fa-star mr-2"></i>Mes Notes & Bulletins</span>
+          <i class="fas fa-chevron-right opacity-50"></i>
+        </a>
+        <a href="{% url 'request_student_card' %}" class="quick-btn" style="background:#eff6ff;color:#2563eb;">
+          <span><i class="fas fa-id-card mr-2"></i>Carte d'Étudiant</span>
+          <i class="fas fa-chevron-right opacity-50"></i>
+        </a>
+        <a href="{% url 'request_certificate' %}" class="quick-btn mb-0" style="background:#f0fdf4;color:#16a34a;">
+          <span><i class="fas fa-certificate mr-2"></i>Demander un Certificat</span>
+          <i class="fas fa-chevron-right opacity-50"></i>
+        </a>
+      </div>
+      
+      <div class="cc flex-grow-1">
+        <div class="cc-title"><i class="fas fa-holly-berry mr-2 text-pink" style="color:#ec4899;"></i>Calendrier des Congés</div>
+        <div class="d-flex flex-column mt-2" style="gap:1rem;">
+          {% for h in holidays|slice:":3" %}
+          <div class="d-flex align-items-start p-3 bg-light rounded" style="border: 1px solid #f1f5f9;">
+            <div style="width:12px;height:12px;border-radius:50%;background:#ec4899;margin-top:4px;flex-shrink:0;" class="mr-3 shadow-sm"></div>
+            <div>
+              <div style="font-size:1rem;font-weight:700;color:#0f172a;">{{ h.name }}</div>
+              <div style="font-size:.85rem;color:#64748b;margin-top:.2rem;"><i class="far fa-calendar-alt mr-1"></i>À partir du {{ h.start_date }}</div>
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-muted text-center py-4">Aucun congé dans la période actuelle.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    var lang = 'en';
-    var match = document.cookie.match(/googtrans=\/en\/([a-z]{2})/);
-    if (match) lang = match[1];
-
-    var tDict = {
-        'Present': {'fr': 'Présent', 'es': 'Presente', 'ar': 'حاضر'},
-        'Absent': {'fr': 'Absent', 'es': 'Ausente', 'ar': 'غائب'},
-        'Week 1': {'fr': 'Semaine 1', 'es': 'Semana 1', 'ar': 'الأسبوع 1'},
-        'Week 2': {'fr': 'Semaine 2', 'es': 'Semana 2', 'ar': 'الأسبوع 2'},
-        'Week 3': {'fr': 'Semaine 3', 'es': 'Semana 3', 'ar': 'الأسبوع 3'},
-        'Week 4': {'fr': 'Semaine 4', 'es': 'Semana 4', 'ar': 'الأسبوع 4'},
-        'Week 5': {'fr': 'Semaine 5', 'es': 'Semana 5', 'ar': 'الأسبوع 5'},
-        'Grades Trend': {'fr': 'Tendance des notes', 'es': 'Tendencia de Notas', 'ar': 'اتجاه الدرجات'}
-    };
-    function tr(text) { return (tDict[text] && tDict[text][lang]) ? tDict[text][lang] : text; }
-
-    var ctx1 = document.getElementById('attendanceChart').getContext('2d');
-    var attendanceChart = new Chart(ctx1, {
-        type: 'doughnut',
-        data: {
-            labels: [tr('Present'), tr('Absent')],
-            datasets: [{
-                data: [92, 8],
-                backgroundColor: ['#28a745', '#ef4444'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            cutout: '75%',
-            responsive: true,
-            maintainAspectRatio: false
-        }
+document.addEventListener('DOMContentLoaded', function() {
+  Chart.defaults.font.size = 12;
+  Chart.defaults.font.family = "'Inter', 'Poppins', sans-serif";
+  Chart.defaults.color = '#64748b';
+  
+  // Radar Skill
+  const ctxRadar = document.getElementById('radarSkill');
+  if(ctxRadar) {
+    new Chart(ctxRadar, {
+      type: 'radar',
+      data: {
+        labels: ['Maths', 'Physique', 'Info', 'Anglais', 'SVT', 'Algo'],
+        datasets: [
+          {
+            label: 'Mes Notes',
+            data: [18, 14, 19, 16, 13, 15],
+            backgroundColor: 'rgba(249,115,22,0.15)',
+            borderColor: '#f97316', borderWidth: 2,
+            pointBackgroundColor: '#f97316', pointRadius: 3
+          },
+          {
+            label: 'Moyenne Promotion',
+            data: [14, 13, 15, 14, 12, 12],
+            backgroundColor: 'rgba(139,92,246,0.1)',
+            borderColor: '#8b5cf6', borderWidth: 2, borderDash: [5, 4],
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { r: { min: 0, max: 20, ticks: { display: false } } },
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } } }
+      }
     });
+  }
 
-    var ctx2 = document.getElementById('progressChart').getContext('2d');
-    var progressChart = new Chart(ctx2, {
-        type: 'line',
-        data: {
-            labels: [tr('Week 1'), tr('Week 2'), tr('Week 3'), tr('Week 4'), tr('Week 5')],
-            datasets: [{
-                label: tr('Grades Trend'),
-                data: [70, 75, 74, 85, 90],
-                borderColor: '#18aefa',
-                backgroundColor: 'rgba(24, 174, 250, 0.2)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: { min: 40, max: 100 }
-            }
-        }
+  // Attendance Doughnut
+  const ctxAttendance = document.getElementById('attendanceDoughnut');
+  if(ctxAttendance) {
+    new Chart(ctxAttendance, {
+      type: 'doughnut',
+      data: {
+        labels: ['Présent', 'Absent'],
+        datasets: [{
+          data: [94, 6],
+          backgroundColor: ['#22c55e', '#f97316'],
+          borderWidth: 0, hoverOffset: 8
+        }]
+      },
+      options: { cutout: '80%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
+  }
+
+  // Progress Line
+  const ctxProgress = document.getElementById('progressLine');
+  if(ctxProgress) {
+    new Chart(ctxProgress, {
+      type: 'line',
+      data: {
+        labels: ['S1','S2','Part.','S3','S4','Final'],
+        datasets: [
+          {
+            label: 'Ma Moyenne',
+            data: [13, 14.5, 15, 14.8, 16, 17],
+            borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.1)',
+            fill: true, tension: 0.4, borderWidth: 3,
+            pointBackgroundColor: '#8b5cf6', pointRadius: 4, pointBorderColor: '#fff', pointBorderWidth: 2
+          },
+          {
+            label: 'Objectif',
+            data: [14, 14, 14, 14, 14, 14],
+            borderColor: '#cbd5e1', borderWidth: 2, borderDash: [6, 4],
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 10 } } },
+        scales: { 
+          x: { grid: { display: false } }, 
+          y: { min: 10, max: 20, grid: { color: '#f1f5f9', borderDash: [4, 4] } } 
+        }
+      }
+    });
+  }
 });
 </script>
 {% endblock %}
