@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .models import Teacher, Department, Subject
 from home_auth.models import CustomUser
 from student.models import Student, Exam, Holiday, TimeTable
@@ -67,12 +68,24 @@ def teacher_list(request):
 def add_teacher(request):
     departments = Department.objects.all()
     if request.method == 'POST':
+        email = request.POST.get('email')
+        teacher_id = request.POST.get('teacher_id')
+        
+        if CustomUser.objects.filter(email=email).exists():
+            messages.error(request, 'Cet email est déjà utilisé par un autre compte.')
+            return render(request, 'faculty/add-teacher.html', {'departments': departments})
+            
+        if Teacher.objects.filter(teacher_id=teacher_id).exists():
+            messages.error(request, 'Cet identifiant de formateur (ID) existe déjà.')
+            return render(request, 'faculty/add-teacher.html', {'departments': departments})
+
         dept = Department.objects.get(department_id=request.POST.get('department_id'))
         user = CustomUser.objects.create_user(
-            username=request.POST.get('email'),
-            email=request.POST.get('email'),
+            username=email,
+            email=email,
             password=request.POST.get('password'),
-            is_teacher=True
+            is_teacher=True,
+            is_authorized=True
         )
         Teacher.objects.create(
             user=user,

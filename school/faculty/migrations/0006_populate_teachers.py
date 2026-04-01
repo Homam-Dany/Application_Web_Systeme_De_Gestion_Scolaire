@@ -22,9 +22,29 @@ def create_teachers(apps, schema_editor):
         except Department.DoesNotExist:
             dept = None
             
+        from django.contrib.auth.hashers import make_password
+        CustomUser = apps.get_model('home_auth', 'CustomUser')
+        
+        email = f"{t['id'].lower()}@uni.ma"
+        
+        # Create standard user entry for auth
+        user, created = CustomUser.objects.get_or_create(
+            username=email,
+            email=email,
+            defaults={
+                'first_name': t['first_name'],
+                'last_name': t['last_name'],
+                'password': make_password('1234'),
+                'is_teacher': True,
+                'is_active': True,
+                'is_authorized': True
+            }
+        )
+            
         Teacher.objects.get_or_create(
             teacher_id=t['id'],
             defaults={
+                'user': user,
                 'first_name': t['first_name'],
                 'last_name': t['last_name'],
                 'gender': t['gender'],
@@ -42,6 +62,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('faculty', '0005_populate_departments'),
+        ('home_auth', '0001_initial'),
     ]
 
     operations = [

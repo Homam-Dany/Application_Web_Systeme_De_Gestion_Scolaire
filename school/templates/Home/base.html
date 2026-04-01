@@ -349,28 +349,30 @@ body > .skiptranslate { display: none !important; }
                     <ul>
                         <li><a href="{% url 'teacher_list' %}" class="{% if request.resolver_match.url_name == 'teacher_list' %}active{% endif %}">Teacher List</a></li>
                         {% if request.user.is_admin %}
-                        <li><a href="{% url 'add_teacher' %}" class="{% if request.resolver_match.url_name == 'add_student' %}active{% endif %}">Teacher Add</a></li>
+                        <li><a href="{% url 'add_teacher' %}" class="{% if request.resolver_match.url_name == 'add_teacher' %}active{% endif %}">Teacher Add</a></li>
                         {% endif %}
                     </ul>
                 </li>
 
                 {% if request.user.is_admin %}
-                <li class="{% if request.resolver_match.url_name == 'department_list' %}active{% endif %}">
-                    <a href="{% url 'department_list' %}"><i class="fas fa-building"></i> <span> Department List</span></a>
-                </li>
-                <li class="{% if request.resolver_match.url_name == 'add_department' %}active{% endif %}">
-                    <a href="{% url 'add_department' %}"><i class="fas fa-plus-square"></i> <span> Add Department</span></a>
+                <li class="submenu {% if 'department' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="#"><i class="fas fa-building"></i> <span> Departments</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{% url 'department_list' %}" class="{% if request.resolver_match.url_name == 'department_list' %}active{% endif %}">Department List</a></li>
+                        <li><a href="{% url 'add_department' %}" class="{% if request.resolver_match.url_name == 'add_department' %}active{% endif %}">Department Add</a></li>
+                    </ul>
                 </li>
                 {% endif %}
 
-                <li class="{% if request.resolver_match.url_name == 'subject_list' %}active{% endif %}">
-                    <a href="{% url 'subject_list' %}"><i class="fas fa-book-reader"></i> <span> Subject List</span></a>
+                <li class="submenu {% if 'subject' in request.resolver_match.url_name %}active{% endif %}">
+                    <a href="#"><i class="fas fa-book-reader"></i> <span> Subjects</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{% url 'subject_list' %}" class="{% if request.resolver_match.url_name == 'subject_list' %}active{% endif %}">Subject List</a></li>
+                        {% if request.user.is_admin %}
+                        <li><a href="{% url 'add_subject' %}" class="{% if request.resolver_match.url_name == 'add_subject' %}active{% endif %}">Subject Add</a></li>
+                        {% endif %}
+                    </ul>
                 </li>
-                {% if request.user.is_admin %}
-                <li class="{% if request.resolver_match.url_name == 'add_subject' %}active{% endif %}">
-                    <a href="{% url 'add_subject' %}"><i class="fas fa-plus-circle"></i> <span> Add Subject</span></a>
-                </li>
-                {% endif %}
                 
                 <li class="menu-title mt-2">
                     <span>Management</span>
@@ -460,6 +462,20 @@ body > .skiptranslate { display: none !important; }
     </div>
 </div>
 
+
+         {% if messages %}
+         <div class="container-fluid mt-3" style="position: absolute; z-index: 9999; right: 0; max-width: 400px;">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+               <strong>{% if message.tags == 'error' %}<i class="fas fa-exclamation-triangle mr-1"></i> Erreur!{% elif message.tags == 'success' %}<i class="fas fa-check-circle mr-1"></i> Succès!{% endif %}</strong> 
+               <br>{{ message }}
+               <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="top: 5px;">
+                  <span aria-hidden="true">&times;</span>
+               </button>
+            </div>
+            {% endfor %}
+         </div>
+         {% endif %}
 
          {% block body %}
             
