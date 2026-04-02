@@ -22,6 +22,7 @@ urlpatterns = [
     path('timetable/', views.timetable_list, name='timetable_list'),
     path('api/timetable/', views.api_timetable, name='api_timetable'),
     path('timetable/add/', views.add_timetable, name='add_timetable'),
+    path('timetable/import-xml/', views.import_timetable_xml, name='import_timetable_xml'),
     path('timetable/delete/<int:tt_id>/', views.delete_timetable, name='delete_timetable'),
     path('id/<str:student_id>/', views.generate_id_card, name='generate_id_card'),
     path('my-grades/', views.student_my_grades, name='student_my_grades'),

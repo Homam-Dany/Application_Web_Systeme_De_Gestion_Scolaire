@@ -727,8 +727,41 @@ def request_student_card(request):
             from django.contrib import messages
             messages.success(request, "Votre demande de carte d'étudiant a été envoyée avec succès.")
             return redirect('request_student_card')
-            
+    
     return render(request, 'student/request_student_card.html', {
         'student': student,
         'card_req': card_req
     })
+
+@login_required
+def import_timetable_xml(request):
+    if not request.user.is_admin:
+        messages.error(request, "Accès refusé.")
+        return redirect('timetable_list')
+        
+    if request.method == 'POST' and request.FILES.get('xml_file'):
+        xml_file = request.FILES['xml_file']
+        from .importers import XMLTimetableImporter
+        
+        try:
+            importer = XMLTimetableImporter(xml_file)
+            results = importer.run()
+            
+            if results['success']:
+                messages.success(request, f"Importation réussie : {results['imported_count']} créneaux ajoutés.")
+            else:
+                messages.warning(request, "L'importation n'a ajouté aucun créneau. Vérifiez le format du fichier.")
+            
+            if results['errors']:
+                for err in results['errors']:
+                    messages.error(request, f"Erreur: {err}")
+            if results['warnings']:
+                 for warn in results['warnings']:
+                    messages.warning(request, f"Attention: {warn}")
+                    
+        except Exception as e:
+            messages.error(request, f"Erreur critique lors de l'importation : {str(e)}")
+            
+        return redirect('timetable_list')
+        
+    return render(request, 'student/import-timetable.html')

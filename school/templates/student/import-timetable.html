@@ -1,0 +1,74 @@
+{% extends 'Home/base.html' %}
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <!-- Breadcrumb -->
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title">Importer l'Emploi du Temps</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'timetable_list' %}">Emploi du Temps</a></li>
+                        <li class="breadcrumb-item active">Import XML</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow-sm border-0" style="border-radius: 15px;">
+                    <div class="card-header bg-primary text-white" style="border-radius: 15px 15px 0 0;">
+                        <h5 class="card-title mb-0"><i class="fas fa-file-import mr-2"></i>Charger un fichier XML</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-info-circle mr-2"></i>Instructions</h5>
+                            <p>Veuillez sélectionner le fichier XML généré par votre logiciel de planification (ex: Visual Timetabling ou Untis).</p>
+                             <ul class="mb-0">
+                                <li>Le format recommandé est le standard XML avec les balises <code>&lt;lesson&gt;</code>.</li>
+                                <li>Les noms des sujets et professeurs doivent correspondre à ceux de la base de données.</li>
+                                <li>L'importation ajoutera les nouveaux créneaux sans supprimer les anciens.</li>
+                            </ul>
+                        </div>
+
+                        <form action="{% url 'import_timetable_xml' %}" method="POST" enctype="multipart/form-data" class="mt-4">
+                            {% csrf_token %}
+                            <div class="form-group mb-4">
+                                <label class="font-weight-bold">Fichier XML (.xml)</label>
+                                <div class="custom-file">
+                                    <input type="file" name="xml_file" class="custom-file-input" id="xmlFile" accept=".xml" required>
+                                    <label class="custom-file-label" for="xmlFile">Choisir le fichier...</label>
+                                </div>
+                            </div>
+
+                            <div class="text-right">
+                                <a href="{% url 'timetable_list' %}" class="btn btn-light px-4 mr-2">Annuler</a>
+                                <button type="submit" class="btn btn-primary px-5 shadow-sm">
+                                    <i class="fas fa-upload mr-2"></i>Lancer l'Importation
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer bg-light text-muted small">
+                        <i class="fas fa-shield-alt mr-1"></i> Intégration Visual Timetabling &copy; 2026
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <p class="text-muted">Besoin d'aide ? Consultez la documentation de <a href="https://www.visual-timetabling.be/" target="_blank">Visual Timetabling</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show filename on select
+    document.querySelector('.custom-file-input').addEventListener('change', function(e) {
+        var fileName = document.getElementById("xmlFile").files[0].name;
+        var nextSibling = e.target.nextElementSibling;
+        nextSibling.innerText = fileName;
+    });
+</script>
+{% endblock %}
