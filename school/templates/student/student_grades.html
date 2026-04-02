@@ -28,9 +28,9 @@
                                         <td class="font-weight-bold text-secondary text-left align-middle" style="font-size: 16px; letter-spacing: 1px;">
                                             SEMESTRE : {{ cname|upper }}
                                         </td>
-                                        <td class="font-weight-bold text-center align-middle" style="font-size: 16px; color: #495057;">
+                                        <td class="font-weight-bold text-center align-middle notranslate" style="font-size: 16px; color: #495057;">
                                             {% if data.is_ready %}
-                                                {{ data.average|stringformat:".3f" }}
+                                                {{ data.average|floatformat:3 }}
                                             {% else %}
                                                 -
                                             {% endif %}
@@ -58,11 +58,11 @@
                                             {{ res.element }} <br>
                                             <small class="text-muted font-weight-normal"><i class="fas fa-caret-right"></i> {{ res.exam_name }}</small>
                                         </td>
-                                        <td class="text-center align-middle" style="font-size: 15px;">
-                                            {% if res.note != None %}{{ res.note|stringformat:".2f" }}{% else %}-{% endif %}
+                                        <td class="text-center align-middle notranslate" style="font-size: 15px;">
+                                            {% if res.note != None %}{{ res.note|floatformat:2 }}{% else %}-{% endif %}
                                         </td>
-                                        <td class="text-center align-middle font-weight-bold" style="font-size: 15px; color: #d35400;">
-                                            {% if res.note_rattrapage != None %}{{ res.note_rattrapage|stringformat:".2f" }}{% else %}-{% endif %}
+                                        <td class="text-center align-middle font-weight-bold notranslate" style="font-size: 15px; color: #d35400;">
+                                            {% if res.note_rattrapage != None %}{{ res.note_rattrapage|floatformat:2 }}{% else %}-{% endif %}
                                         </td>
                                         <td class="text-center align-middle font-weight-bold" style="font-size: 14px;">
                                             {% if res.status == 'V' %}
