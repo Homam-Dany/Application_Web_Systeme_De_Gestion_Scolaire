@@ -6,7 +6,7 @@
 [![AI-Powered](https://img.shields.io/badge/AI-Chatbot%20Assistant-orange.svg)](#)
 [![Identity](https://img.shields.io/badge/Feature-QR%20Code%20Attendance-blue.svg)](#)
 
-**Smart Campus** est une plateforme ERP/LMS scolaires de nouvelle génération. Ce projet transforme l'expérience académique traditionnelle en un environnement numérique **Premium**, **Intelligent** et **Collaboratif**. 
+**PreSkool** est une plateforme ERP/LMS scolaires de nouvelle génération. Ce projet transforme l'expérience académique traditionnelle en un environnement numérique **Premium**, **Intelligent** et **Collaboratif**. 
 
 ---
 
