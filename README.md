@@ -1,4 +1,4 @@
-# 🎓 SMART CAMPUS - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
+# 🎓 PRESKOOL - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
 
 [![Django](https://img.shields.io/badge/Framework-Django%204.2-green.svg)](https://www.djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
@@ -6,7 +6,7 @@
 [![AI-Powered](https://img.shields.io/badge/AI-Chatbot%20Assistant-orange.svg)](#)
 [![Identity](https://img.shields.io/badge/Feature-QR%20Code%20Attendance-blue.svg)](#)
 
-**Smart Campus** est une plateforme ERP/LMS scolaires de nouvelle génération. Ce projet transforme l'expérience académique traditionnelle en un environnement numérique **Premium**, **Intelligent** et **Collaboratif**. 
+**PreSkool** est une plateforme ERP/LMS scolaires de nouvelle génération. Ce projet transforme l'expérience académique traditionnelle en un environnement numérique **Premium**, **Intelligent** et **Collaboratif**. 
 
 ---
 
@@ -46,45 +46,6 @@
 
 ---
 
-## 🏗️ ARCHITECTURE TECHNIQUE (UML)
-
-```mermaid
-classDiagram
-    class CustomUser {
-        +String username
-        +Boolean is_admin
-        +Boolean is_teacher
-        +Boolean is_student
-    }
-    class Student {
-        +String student_id
-        +Image student_image
-        +ForeignKey user
-    }
-    class Subject {
-        +String name
-        +ForeignKey department
-        +ForeignKey teacher
-    }
-    class Assignment {
-        +String title
-        +DateTime due_date
-        +File attachment
-    }
-    class AttendanceRecord {
-        +String status
-        +DateTime timestamp
-        +Token QRCode
-    }
-
-    CustomUser "1" -- "0..1" Student : Role
-    Subject "1" -- "*" Assignment : Pédagogie
-    Student "1" -- "*" AttendanceRecord : Assiduité
-    Assignment "1" -- "*" Submission : Rendu
-```
-
----
-
 ## 🚀 INSTALLATION RAPIDE
 
 1.  **Clonage & Environnement** :
@@ -113,4 +74,4 @@ Accès : `http://127.0.0.1:8000/`
 - **Services** : Génération PDF (ReportLab), i18n (Google Translate).
 
 ---
-*Projet réalisé avec passion pour le module PFM - Smart Campus Edition.*
+*Projet réalisé avec passion pour le module PFM - PreSkool Edition.*
