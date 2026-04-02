@@ -1,4 +1,4 @@
-# 🎓 SMART CAMPUS - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
+# 🎓 PreSkool - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
 
 [![Django](https://img.shields.io/badge/Framework-Django%204.2-green.svg)](https://www.djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
