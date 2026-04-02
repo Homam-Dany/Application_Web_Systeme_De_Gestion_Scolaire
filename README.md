@@ -1,5 +1,8 @@
 # 🎓 PreSkool Academy - Système de Gestion Scolaire
 
+### 🎥 Vidéo démonstrative de l'application PreSkool :
+[Regarder la vidéo sur Google Drive](https://drive.google.com/file/d/1saSIO2ln1FB_4yTbg6IYaVRwVOJb25t2/view?usp=drive_link)
+
 ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![Django Version](https://img.shields.io/badge/django-4.0%2B-green)

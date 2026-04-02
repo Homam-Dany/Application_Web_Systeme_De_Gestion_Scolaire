@@ -138,8 +138,9 @@ def add_holiday(request):
 def exam_list(request):
     from django.utils import timezone
     from django.db.models import Q
-    today = timezone.now().date()
-    now_time = timezone.now().time()
+    now = timezone.localtime(timezone.now())
+    today = now.date()
+    now_time = now.time()
 
     exams_qs = Exam.objects.all().select_related('subject').order_by('-date', '-start_time')
     
