@@ -46,16 +46,14 @@ def signup_view(request):
             extra_info=extra_info
         )
 
-        # Notify all admins
-        admins = CustomUser.objects.filter(is_admin=True)
-        for admin in admins:
-            Notification.objects.create(
-                user=admin,
-                title=f"👤 Nouvelle demande de compte",
-                message=f"Rôle '{role}' demandé par {first_name} {last_name}.",
-                notification_type='warning',
-                link='/review-requests/'
-            )
+        # Notify all admins (Phase 5)
+        from .utils import notify_all_admins
+        notify_all_admins(
+            title=f"👤 Nouvelle demande de compte",
+            message=f"Rôle '{role}' demandé par {first_name} {last_name}.",
+            notification_type='warning',
+            link='/faculty/review-requests/'
+        )
 
         messages.success(request, 'Inscription réussie ! Votre compte est en attente de validation par un administrateur.')
         return redirect('login')

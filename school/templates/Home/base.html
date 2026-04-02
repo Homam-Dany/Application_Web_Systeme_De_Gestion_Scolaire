@@ -378,6 +378,9 @@ body > .skiptranslate { display: none !important; }
                     <span>Management</span>
                 </li>
                 {% if request.user.is_admin %}
+                <li class="{% if request.resolver_match.url_name == 'admin_analytics' %}active{% endif %}">
+                    <a href="{% url 'admin_analytics' %}"><i class="fas fa-chart-pie text-cyan"></i> <span class="text-cyan font-weight-bold">Analytics Pro</span></a>
+                </li>
                 <li>
                     <a href="{% url 'review_requests' %}"><i class="fas fa-user-check text-warning"></i> <span class="text-warning">Account Requests</span></a>
                 </li>
@@ -434,6 +437,9 @@ body > .skiptranslate { display: none !important; }
                 {% endif %}
                 
                 {% if request.user.is_student %}
+                <li class="{% if request.resolver_match.url_name == 'student_assignments' %}active{% endif %}">
+                    <a href="{% url 'student_assignments' %}"><i class="fas fa-book-reader text-success"></i> <span> Mes Devoirs</span></a>
+                </li>
                 <li class="{% if request.resolver_match.url_name == 'student_my_grades' %}active{% endif %}">
                     <a href="{% url 'student_my_grades' %}"><i class="fas fa-graduation-cap text-primary"></i> <span> My Grades</span></a>
                 </li>

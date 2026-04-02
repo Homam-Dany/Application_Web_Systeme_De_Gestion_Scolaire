@@ -31,4 +31,17 @@ urlpatterns = [
     path('review_modifications/', views.teacher_review_grades, name='teacher_review_grades'),
     path('activities_board/', views.activities_board, name='activities_board'),
     path('admin-cards/', views.admin_manage_cards, name='admin_cards'),
+    
+    # Subject Resources (Phase 2)
+    path('subjects/resources/manage/<str:subject_id>/', views.manage_subject_resources, name='manage_subject_resources'),
+    path('subjects/resources/view/<str:subject_id>/', views.subject_resources, name='subject_resources'),
+    path('subjects/resources/delete/<int:res_id>/', views.delete_resource, name='delete_resource'),
+    path('analytics/', views.admin_advanced_analytics, name='admin_analytics'),
+    
+    # Assignments (Phase 4)
+    path('subjects/assignments/manage/<str:subject_id>/', views.manage_assignments, name='manage_assignments'),
+    path('student/assignments/', views.student_assignments, name='student_assignments'),
+    path('student/assignments/submit/<int:assignment_id>/', views.submit_assignment, name='submit_assignment'),
+    path('assignments/submissions/<int:assignment_id>/', views.view_submissions, name='view_submissions'),
+    path('assignments/grade/<int:submission_id>/', views.grade_submission, name='grade_submission'),
 ]

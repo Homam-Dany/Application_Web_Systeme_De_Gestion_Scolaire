@@ -1,0 +1,91 @@
+{% extends 'Home/base.html' %}
+{% load static %}
+
+{% block body %}
+<div class="page-wrapper" style="background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%); min-height: 100vh;">
+    <div class="content container-fluid">
+        <!-- En-tête Médiums -->
+        <div class="page-header mb-5">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title text-primary font-weight-bold" style="font-size: 28px;">
+                        <i class="fas fa-university mr-2"></i>Bibliothèque : {{ subject.name }}
+                    </h3>
+                    <p class="text-muted mt-1" style="font-size: 16px;">
+                        Tous vos supports de cours, TD et projets GitHub centralisés.
+                    </p>
+                </div>
+                <div class="col-auto">
+                    {% if request.user.is_admin or subject.teacher.user == request.user %}
+                    <a href="{% url 'manage_subject_resources' subject.subject_id %}" class="btn btn-primary px-4 py-2 shadow-sm" style="border-radius: 12px; font-weight: 600;">
+                        <i class="fas fa-cog mr-2"></i> Gérer
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            {% for res in resources %}
+            <div class="col-md-4 col-sm-6 mb-4">
+                <div class="card resource-card h-100 border-0 shadow-sm" style="border-radius: 20px; transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="resource-icon d-flex align-items-center justify-content-center" 
+                                 style="width: 55px; height: 55px; border-radius: 15px; background: {% if res.resource_type == 'GitHub' %}#333{% else %}#eff6ff{% endif %}; color: {% if res.resource_type == 'GitHub' %}white{% else %}#2563eb{% endif %}; font-size: 24px;">
+                                {% if res.resource_type == 'Cours' %}<i class="fas fa-file-alt"></i>
+                                {% elif res.resource_type == 'TD' %}<i class="fas fa-pencil-alt"></i>
+                                {% elif res.resource_type == 'TP' %}<i class="fas fa-flask"></i>
+                                {% elif res.resource_type == 'GitHub' %}<i class="fab fa-github"></i>
+                                {% else %}<i class="fas fa-graduation-cap"></i>{% endif %}
+                            </div>
+                            <span class="badge badge-pill {% if res.resource_type == 'GitHub' %}badge-dark{% else %}badge-primary{% endif %} px-3 py-1" style="font-size: 11px;">
+                                {{ res.resource_type|upper }}
+                            </span>
+                        </div>
+
+                        <h5 class="card-title font-weight-bold mb-2" style="color: #1e293b; line-height: 1.4;">{{ res.name }}</h5>
+                        
+                        <p class="card-text text-muted small mb-4">
+                            Ajouté par Pr. {{ res.uploaded_by.last_name|default:"Admin" }} le {{ res.created_at|date:"d F Y" }}
+                        </p>
+
+                        <div class="mt-auto">
+                            {% if res.file %}
+                            <a href="{{ res.file.url }}" class="btn btn-success btn-block py-2 mb-2 shadow-sm" style="border-radius: 12px; font-weight: 600;" download>
+                                <i class="fas fa-download mr-2"></i> Télécharger (.docx)
+                            </a>
+                            {% endif %}
+                            
+                            {% if res.github_url %}
+                            <a href="{{ res.github_url }}" target="_blank" class="btn btn-dark btn-block py-2 shadow-sm" style="border-radius: 12px; font-weight: 600;">
+                                <i class="fab fa-github mr-2"></i> Voir sur GitHub
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="empty-state animate__animated animate__fadeIn">
+                    <i class="fas fa-folder-open text-muted mb-4" style="font-size: 80px; opacity: 0.2;"></i>
+                    <h4 class="text-muted">Aucune ressource pour le moment</h4>
+                    <p class="text-muted">Votre professeur publiera bientôt les supports de cours ici.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .resource-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08) !important;
+    }
+    .text-primary { color: #2563eb !important; }
+    .btn-primary { background-color: #2563eb; border-color: #2563eb; }
+    .btn-success { background-color: #10b981; border-color: #10b981; }
+</style>
+{% endblock %}

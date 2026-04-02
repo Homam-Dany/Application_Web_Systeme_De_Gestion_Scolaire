@@ -403,8 +403,14 @@ def delete_timetable(request, tt_id):
 
 @login_required
 def generate_id_card(request, student_id):
+    from .models import StudentCardRequest
     student = get_object_or_404(Student, student_id=student_id)
-    return render(request, 'student/id_card.html', {'student': student})
+    # Fetch the latest card request to get the photo
+    card_request = StudentCardRequest.objects.filter(student=student).order_by('-request_date').first()
+    return render(request, 'student/id_card.html', {
+        'student': student,
+        'card_request': card_request
+    })
 
 from .models import ExamResult, CertificateRequest
 
@@ -523,16 +529,13 @@ def request_certificate(request):
         cert_type = request.POST.get('certificate_type')
         if cert_type and student:
             CertificateRequest.objects.create(student=student, certificate_type=cert_type)
-            from home_auth.models import Notification, CustomUser
-            admins = CustomUser.objects.filter(is_admin=True)
-            for a in admins:
-                Notification.objects.create(
-                    user=a,
-                    title="📜 Demande d'attestation",
-                    message=f"{student.first_name} demande: {cert_type}.",
-                    notification_type='warning',
-                    link='/student/admin-certificates/'
-                )
+            from home_auth.utils import notify_all_admins
+            notify_all_admins(
+                title="📜 Demande d'attestation",
+                message=f"L'étudiant {student.first_name} {student.last_name} demande : {cert_type}.",
+                notification_type='warning',
+                link='/faculty/certificates/manage/'
+            )
             messages.success(request, f"Votre demande de '{cert_type}' a été envoyée à l'administration.")
             return redirect('request_certificate')
             
@@ -570,16 +573,14 @@ def request_temporary_class(request):
             custom_reason=custom_reason if reason == 'Autre' else ''
         )
         
-        # Notify Admins
-        admins = CustomUser.objects.filter(is_admin=True)
-        for admin in admins:
-            Notification.objects.create(
-                user=admin,
-                title="📅 Nouvelle demande de séance",
-                message=f"Le Pr. {teacher.last_name} demande une séance de {reason} pour {subject.class_name}.",
-                notification_type='warning',
-                link='/student/timetable/manage-temp/'
-            )
+        # Notify Admins (Phase 5)
+        from home_auth.utils import notify_all_admins
+        notify_all_admins(
+            title="📅 Nouvelle demande de séance",
+            message=f"Le Pr. {teacher.last_name} demande une séance de {reason} pour {subject.class_name}.",
+            notification_type='warning',
+            link='/faculty/timetable/manage-temp/'
+        )
             
         messages.success(request, "Votre demande a été envoyée avec succès et est en attente de validation.")
         return redirect('timetable_list')
@@ -718,11 +719,18 @@ def request_student_card(request):
         blood_type = request.POST.get('blood_type')
         
         if photo:
+            from home_auth.utils import notify_all_admins
             StudentCardRequest.objects.create(
                 student=student,
                 photo=photo,
                 blood_type=blood_type,
                 status='En attente'
+            )
+            notify_all_admins(
+                title="🪪 Nouvelle demande de carte",
+                message=f"L'étudiant {student.first_name} {student.last_name} a soumis une demande de carte ID.",
+                notification_type='info',
+                link='/faculty/cards/manage/'
             )
             from django.contrib import messages
             messages.success(request, "Votre demande de carte d'étudiant a été envoyée avec succès.")
@@ -765,3 +773,92 @@ def import_timetable_xml(request):
         return redirect('timetable_list')
         
     return render(request, 'student/import-timetable.html')
+
+import secrets
+from django.utils import timezone
+from datetime import timedelta
+from django.http import JsonResponse
+from .models import AttendanceSession, AttendanceRecord
+
+@login_required
+def start_attendance_session(request, tt_id):
+    if not request.user.is_teacher and not request.user.is_admin:
+        messages.error(request, "Accès refusé.")
+        return redirect('timetable_list')
+        
+    tt = get_object_or_404(TimeTable, id=tt_id)
+    
+    # Check if a session already exists for today/this slot
+    session = AttendanceSession.objects.filter(
+        timetable=tt, 
+        session_date=timezone.now().date(),
+        is_active=True
+    ).first()
+    
+    if not session:
+        # Create new session
+        token = secrets.token_urlsafe(32)
+        session = AttendanceSession.objects.create(
+            timetable=tt,
+            token=token,
+            expires_at=timezone.now() + timedelta(minutes=60) # Main session expires in 1h
+        )
+        
+    return render(request, 'student/attendance_qr.html', {
+        'session': session,
+        'tt': tt
+    })
+
+@login_required
+def get_current_attendance_token(request, session_id):
+    session = get_object_or_404(AttendanceSession, id=session_id)
+    
+    if not session.is_active or session.expires_at < timezone.now():
+        return JsonResponse({'status': 'expired'})
+        
+    # Generate a new token for rotation (every 15s handled by frontend polling)
+    # We update the session token
+    new_token = secrets.token_urlsafe(32)
+    session.token = new_token
+    session.save()
+    
+    return JsonResponse({
+        'status': 'success',
+        'token': new_token
+    })
+
+@login_required
+def mark_attendance(request, token):
+    if not request.user.is_student:
+        messages.error(request, "Seuls les étudiants peuvent émarger.")
+        return redirect('dashboard')
+        
+    student = get_object_or_404(Student, user=request.user)
+    session = AttendanceSession.objects.filter(token=token, is_active=True).first()
+    
+    if not session:
+        messages.error(request, "Le code QR est invalide ou a expiré. Veuillez scanner le nouveau code affiché.")
+        return redirect('dashboard')
+        
+    if session.expires_at < timezone.now():
+        session.is_active = False
+        session.save()
+        messages.error(request, "Cette session d'émargement est terminée.")
+        return redirect('dashboard')
+        
+    # Check if student is already marked
+    record, created = AttendanceRecord.objects.get_or_create(
+        student=student,
+        session=session,
+        defaults={'status': 'Présent'}
+    )
+    
+    if created:
+        messages.success(request, f"Votre présence pour {session.timetable.subject.name} a été enregistrée.")
+    else:
+        messages.info(request, "Votre présence est déjà enregistrée pour ce cours.")
+        
+    return render(request, 'student/attendance_success.html', {
+        'session': session,
+        'student': student
+    })

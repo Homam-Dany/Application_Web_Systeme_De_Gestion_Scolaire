@@ -1,0 +1,46 @@
+{% extends 'Home/base.html' %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+        <div class="col-md-6 col-lg-5 text-center">
+            <div class="card shadow-lg border-0 animate__animated animate__zoomIn" style="border-radius: 25px; overflow: hidden;">
+                <div class="card-header bg-success text-white p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle" style="font-size: 80px;"></i>
+                    </div>
+                    <h2 class="font-weight-bold">Présence Confirmée !</h2>
+                    <p class="mb-0 opacity-75">Bienvenue en cours, {{ student.first_name }} !</p>
+                </div>
+                <div class="card-body p-5">
+                    <div class="mb-5">
+                        <h4 class="text-primary font-weight-bold mb-1">{{ session.timetable.subject.name|upper }}</h4>
+                        <p class="text-muted"><i class="fas fa-chalkboard-teacher mr-1"></i> Pr. {{ session.timetable.teacher.last_name }}</p>
+                    </div>
+
+                    <div class="d-flex justify-content-around mb-4">
+                        <div class="text-center">
+                            <h6 class="text-muted small text-uppercase">Heure d'arrivée</h6>
+                            <h5 class="font-weight-bold">{{ now|date:"H:i" }}</h5>
+                        </div>
+                        <div class="text-center">
+                            <h6 class="text-muted small text-uppercase">Statut</h6>
+                            <span class="badge badge-success px-3 py-1">PRÉSENT</span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="alert alert-light border-0 py-3" style="background: #f0fdf4; color: #15803d; border-radius: 12px;">
+                        <p class="mb-0 small"><i class="fas fa-shield-alt mr-1"></i> Validation sécurisée par QR Code dynamique.</p>
+                    </div>
+
+                    <a href="{% url 'dashboard' %}" class="btn btn-success btn-lg btn-block shadow-sm py-3" style="border-radius: 15px; font-weight: 700;">
+                        RETOURNER AU DASHBOARD
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

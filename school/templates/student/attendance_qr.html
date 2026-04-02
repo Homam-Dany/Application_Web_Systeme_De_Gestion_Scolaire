@@ -1,0 +1,122 @@
+{% extends 'Home/base.html' %}
+{% load static %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title">Émargement en cours</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'timetable_list' %}">Emploi du temps</a></li>
+                        <li class="breadcrumb-item active">QR Code</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5 text-center">
+                <div class="card shadow-lg border-0" style="border-radius: 20px; overflow: hidden;">
+                    <div class="card-header bg-primary text-white p-4">
+                        <h4 class="mb-1">{{ tt.subject.name|upper }}</h4>
+                        <p class="mb-0 opacity-75">{{ tt.class_name }} | Pr. {{ tt.teacher.last_name }}</p>
+                    </div>
+                    <div class="card-body p-5">
+                        <div id="qrcode-container" class="d-flex justify-content-center mb-4 p-3 bg-white shadow-sm" style="border-radius: 15px; display: inline-block;">
+                            <div id="qrcode"></div>
+                        </div>
+                        
+                        <div class="timer-section mt-3">
+                            <p class="text-muted mb-2">Le code se renouvelle dans :</p>
+                            <div class="progress mb-2" style="height: 10px; border-radius: 5px;">
+                                <div id="timer-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                            </div>
+                            <h3 id="timer-text" class="font-weight-bold text-primary">15s</h3>
+                        </div>
+
+                        <div class="alert alert-info mt-4" style="border-radius: 12px; border: none;">
+                            <i class="fas fa-info-circle mr-2"></i> Les étudiants doivent scanner ce code avec leur application pour valider leur présence.
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <a href="{% url 'timetable_list' %}" class="btn btn-outline-secondary px-4">Arrêter l'émargement</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+    const sessionId = {{ session.id }};
+    const baseUrl = window.location.origin;
+    let currentToken = "{{ session.token }}";
+    
+    // Initialize QR Code
+    const qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: `${baseUrl}/student/attendance/scan/${currentToken}/`,
+        width: 250,
+        height: 250,
+        colorDark : "#1e3a8a",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+
+    let timeLeft = 15;
+    const timerBar = document.getElementById('timer-bar');
+    const timerText = document.getElementById('timer-text');
+
+    function updateTimer() {
+        timeLeft--;
+        if (timeLeft <= 0) {
+            rotateToken();
+            timeLeft = 15;
+        }
+        
+        const percentage = (timeLeft / 15) * 100;
+        timerBar.style.width = percentage + '%';
+        timerText.innerText = timeLeft + 's';
+        
+        // Color Change
+        if (timeLeft <= 5) {
+            timerBar.classList.remove('bg-primary');
+            timerBar.classList.add('bg-danger');
+        } else {
+            timerBar.classList.remove('bg-danger');
+            timerBar.classList.add('bg-primary');
+        }
+    }
+
+    function rotateToken() {
+        console.log("Rotating token...");
+        fetch(`/student/attendance/token/${sessionId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    currentToken = data.token;
+                    qrcode.clear();
+                    qrcode.makeCode(`${baseUrl}/student/attendance/scan/${currentToken}/`);
+                } else if (data.status === 'expired') {
+                    window.location.href = "{% url 'timetable_list' %}";
+                }
+            })
+            .catch(error => console.error('Error rotating token:', error));
+    }
+
+    setInterval(updateTimer, 1000);
+</script>
+
+<style>
+    #qrcode img {
+        margin: auto;
+    }
+    .progress-bar {
+        transition: width 1s linear;
+    }
+</style>
+{% endblock %}

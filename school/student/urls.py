@@ -36,4 +36,8 @@ urlpatterns = [
     path('timetable/request-temp/', views.request_temporary_class, name='request_temporary_class'),
     path('timetable/manage-temp/', views.admin_manage_temp_classes, name='admin_manage_temp_classes'),
     path('timetable/process-temp/<int:req_id>/', views.process_temp_class_request, name='process_temp_class_request'),
+    # Attendance (QR Code)
+    path('attendance/start/<int:tt_id>/', views.start_attendance_session, name='start_attendance_session'),
+    path('attendance/token/<int:session_id>/', views.get_current_attendance_token, name='get_current_attendance_token'),
+    path('attendance/scan/<str:token>/', views.mark_attendance, name='mark_attendance'),
 ]

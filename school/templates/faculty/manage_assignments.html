@@ -1,0 +1,134 @@
+{% extends 'Home/base.html' %}
+{% load static %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h3 class="page-title"><i class="fas fa-tasks mr-2 text-primary"></i>Gestion des Devoirs : {{ subject.name }}</h3>
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'subject_list' %}">Matières</a></li>
+                        <li class="breadcrumb-item active">Devoirs</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow-sm" style="border-radius: 15px; border: none;">
+                    <div class="card-header bg-primary text-white" style="border-radius: 15px 15px 0 0;">
+                        <h5 class="card-title mb-0"><i class="fas fa-plus-circle mr-2"></i>Nouveau Devoir</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label class="font-weight-bold">Titre du Devoir</label>
+                                <input type="text" name="title" class="form-control" placeholder="ex: TP n°3 - Algorithmique" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Consignes / Description</label>
+                                <textarea name="description" class="form-control" rows="4" placeholder="Détaillez les attentes ici..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Date de Remise</label>
+                                <input type="datetime-local" name="due_date" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Fichier Joint (Sujet)</label>
+                                <div class="custom-file">
+                                    <input type="file" name="file" class="custom-file-input" id="customFile">
+                                    <label class="custom-file-label" for="customFile">Choisir un fichier</label>
+                                </div>
+                                <small class="text-muted">Format PDF, DOCX ou ZIP recommandé.</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold">Lien GitHub (Optionnel)</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fab fa-github"></i></span>
+                                    </div>
+                                    <input type="url" name="github_url" class="form-control" placeholder="https://github.com/...">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold shadow-sm" style="border-radius: 10px;">
+                                <i class="fas fa-paper-plane mr-2"></i>Publier le Devoir
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow-sm" style="border-radius: 15px; border: none;">
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="card-title mb-0 text-dark">Devoirs Publiés</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Sujet</th>
+                                        <th>Date Limite</th>
+                                        <th>Rendus</th>
+                                        <th class="text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for assignment in assignments %}
+                                    <tr>
+                                        <td>
+                                            <div class="font-weight-bold text-dark">{{ assignment.title }}</div>
+                                            <small class="text-muted">Publié le {{ assignment.created_at|date:"d/m/Y" }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-pill {% if assignment.due_date > now %}badge-success{% else %}badge-danger{% endif %} py-2 px-3">
+                                                <i class="far fa-clock mr-1"></i> {{ assignment.due_date|date:"d/m/Y H:i" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-primary py-2 px-3">{{ assignment.submissions.count }} rendu(s)</span>
+                                        </td>
+                                        <td class="text-right">
+                                            <div class="btn-group">
+                                                {% if assignment.file %}
+                                                <a href="{{ assignment.file.url }}" class="btn btn-sm btn-outline-info" title="Télécharger le sujet"><i class="fas fa-download"></i></a>
+                                                {% endif %}
+                                                {% if assignment.github_url %}
+                                                <a href="{{ assignment.github_url }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Lien GitHub"><i class="fab fa-github"></i></a>
+                                                {% endif %}
+                                                <a href="{% url 'view_submissions' assignment.id %}" class="btn btn-sm btn-primary ml-2"><i class="fas fa-eye mr-1"></i> Voir Rendus</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5">
+                                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3 d-block"></i>
+                                            <p class="text-muted">Aucun devoir publié pour cette matière.</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Update labels for custom file input
+    document.querySelector('.custom-file-input').addEventListener('change',function(e){
+        var fileName = document.getElementById("customFile").files[0].name;
+        var nextSibling = e.target.nextElementSibling
+        nextSibling.innerText = fileName
+    })
+</script>
+{% endblock %}

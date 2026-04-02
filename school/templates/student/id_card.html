@@ -150,7 +150,13 @@
             <div class="subtitle">Carte d'Identité Étudiant</div>
         </div>
         <div class="photo-container">
-            <img src="{% if student.student_image %}{{ student.student_image.url }}{% else %}https://ui-avatars.com/api/?name={{ student.first_name }}+{{ student.last_name }}&background=2c5364&color=fff&size=200{% endif %}" class="photo" alt="Photo Étudiant">
+            {% if card_request.photo %}
+                <img src="{{ card_request.photo.url }}" class="photo" alt="Photo Étudiant">
+            {% elif student.student_image %}
+                <img src="{{ student.student_image.url }}" class="photo" alt="Photo Étudiant">
+            {% else %}
+                <img src="https://ui-avatars.com/api/?name={{ student.first_name }}+{{ student.last_name }}&background=2c5364&color=fff&size=200" class="photo" alt="Photo Étudiant">
+            {% endif %}
         </div>
         <div class="details">
             <h2 class="name">{{ student.first_name }}<br>{{ student.last_name }}</h2>

@@ -146,3 +146,29 @@ class TemporaryClassRequest(models.Model):
 
     def __str__(self):
         return f"{self.subject.name} ({self.date}) - {self.status}"
+
+class AttendanceSession(models.Model):
+    timetable = models.ForeignKey(TimeTable, on_delete=models.CASCADE)
+    session_date = models.DateField(auto_now_add=True)
+    token = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def __str__(self):
+        return f"Session: {self.timetable.subject.name} - {self.session_date}"
+
+class AttendanceRecord(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    session = models.ForeignKey(AttendanceSession, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default='Présent', choices=[
+        ('Présent', 'Présent'), 
+        ('En retard', 'En retard')
+    ])
+
+    class Meta:
+        unique_together = ('student', 'session')
+
+    def __str__(self):
+        return f"{self.student} - {self.session.timetable.subject.name} ({self.status})"

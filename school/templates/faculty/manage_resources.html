@@ -1,0 +1,151 @@
+{% extends 'Home/base.html' %}
+{% load static %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row align-items-center">
+               <div class="col">
+                  <h3 class="page-title">Gestion de Ressources : {{ subject.name }}</h3>
+                  <ul class="breadcrumb">
+                     <li class="breadcrumb-item"><a href="{% url 'subject_list' %}">Matières</a></li>
+                     <li class="breadcrumb-item active">Ressources</li>
+                  </ul>
+               </div>
+            </div>
+        </div>
+
+        <div class="row">
+           <!-- Formulaire d'Ajout -->
+           <div class="col-md-4">
+              <div class="card shadow-sm border-0" style="border-radius: 15px;">
+                 <div class="card-header bg-primary text-white" style="border-radius: 15px 15px 0 0;">
+                    <h5 class="card-title mb-0 text-white"><i class="fas fa-plus-circle mr-2"></i>Ajouter une Ressource</h5>
+                 </div>
+                 <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                       {% csrf_token %}
+                       <div class="form-group">
+                          <label class="font-weight-bold">Titre de la ressource *</label>
+                          <input type="text" name="name" class="form-control" placeholder="Ex: Cours Chapitre 1" required>
+                       </div>
+                       <div class="form-group">
+                          <label class="font-weight-bold">Type de contenu *</label>
+                          <select name="resource_type" class="form-control" required>
+                             <option value="Cours">Cours / Support</option>
+                             <option value="TD">Travaux Dirigés (TD)</option>
+                             <option value="TP">Travaux Pratiques (TP)</option>
+                             <option value="GitHub">Lien Projet GitHub</option>
+                             <option value="Examen">Annales d'Examen</option>
+                          </select>
+                       </div>
+                       
+                       <div class="form-group" id="file-group">
+                          <label class="font-weight-bold">Fichier (.docx) *</label>
+                          <div class="custom-file">
+                             <input type="file" name="file" class="custom-file-input" id="customFile" accept=".docx">
+                             <label class="custom-file-label" for="customFile">Choisir le docx</label>
+                          </div>
+                          <small class="text-info"><i class="fas fa-info-circle mr-1"></i> Max : 100 Mo</small>
+                       </div>
+
+                       <div class="form-group" id="github-group">
+                          <label class="font-weight-bold">Lien GitHub (Optionnel)</label>
+                          <div class="input-group">
+                             <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fab fa-github"></i></span>
+                             </div>
+                             <input type="url" name="github_url" class="form-control" placeholder="https://github.com/...">
+                          </div>
+                       </div>
+
+                       <button type="submit" class="btn btn-primary btn-block py-2 shadow-sm" style="border-radius: 10px; font-weight: 600;">
+                          <i class="fas fa-upload mr-2"></i>Publier la Ressource
+                       </button>
+                    </form>
+                 </div>
+              </div>
+           </div>
+
+           <!-- Liste des Ressources -->
+           <div class="col-md-8">
+              <div class="card shadow-sm border-0" style="border-radius: 15px;">
+                 <div class="card-body">
+                    <div class="table-responsive">
+                       <table class="table table-hover table-center mb-0">
+                          <thead class="thead-light">
+                             <tr>
+                                <th>Type</th>
+                                <th>Nom de la ressource</th>
+                                <th>Ajouté le</th>
+                                <th class="text-right">Action</th>
+                             </tr>
+                          </thead>
+                          <tbody>
+                             {% for res in resources %}
+                             <tr>
+                                <td>
+                                   {% if res.resource_type == 'Cours' %}
+                                   <span class="badge badge-pill badge-primary px-3">COURS</span>
+                                   {% elif res.resource_type == 'TD' %}
+                                   <span class="badge badge-pill badge-info px-3">TD</span>
+                                   {% elif res.resource_type == 'TP' %}
+                                   <span class="badge badge-pill badge-warning px-3">TP</span>
+                                   {% elif res.resource_type == 'GitHub' %}
+                                   <span class="badge badge-pill badge-dark px-3"><i class="fab fa-github mr-1"></i>GITHUB</span>
+                                   {% else %}
+                                   <span class="badge badge-pill badge-secondary px-3">EXAMEN</span>
+                                   {% endif %}
+                                </td>
+                                <td>
+                                   <h6 class="mb-0 font-weight-bold" style="color: #1e293b;">{{ res.name }}</h6>
+                                   {% if res.file %}
+                                   <small class="text-muted"><i class="far fa-file-word mr-1"></i> Document Word (.docx)</small>
+                                   {% endif %}
+                                </td>
+                                <td>{{ res.created_at|date:"d M Y" }}</td>
+                                <td class="text-right">
+                                   <div class="actions">
+                                      {% if res.file %}
+                                      <a href="{{ res.file.url }}" class="btn btn-sm bg-success-light mr-2" download>
+                                         <i class="fas fa-download"></i>
+                                      </a>
+                                      {% endif %}
+                                      {% if res.github_url %}
+                                      <a href="{{ res.github_url }}" target="_blank" class="btn btn-sm bg-dark text-white mr-2">
+                                         <i class="fab fa-github"></i>
+                                      </a>
+                                      {% endif %}
+                                      <a href="{% url 'delete_resource' res.id %}" class="btn btn-sm bg-danger-light" onclick="return confirm('Supprimer cette ressource ?');">
+                                         <i class="fas fa-trash"></i>
+                                      </a>
+                                   </div>
+                                </td>
+                             </tr>
+                             {% empty %}
+                             <tr>
+                                <td colspan="4" class="text-center py-5">
+                                   <img src="{% static 'assets/img/no-resource.png' %}" alt="" style="width: 80px; opacity: 0.3; filter: grayscale(1);">
+                                   <p class="text-muted mt-3">Aucune ressource disponible pour cette matière.</p>
+                                </td>
+                             </tr>
+                             {% endfor %}
+                          </tbody>
+                       </table>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelector('.custom-file-input').addEventListener('change',function(e){
+        var fileName = document.getElementById("customFile").files[0].name;
+        var nextSibling = e.target.nextElementSibling
+        nextSibling.innerText = fileName
+    })
+</script>
+{% endblock %}

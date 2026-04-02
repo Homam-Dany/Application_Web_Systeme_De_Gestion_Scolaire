@@ -5,11 +5,11 @@
       <div class="page-header">
          <div class="row align-items-center">
             <div class="col">
-               <h3 class="page-title">Subjects</h3>
+               <h3 class="page-title">Matières & Enseignements</h3>
             </div>
             {% if request.user.is_admin %}
             <div class="col-auto text-right float-right ml-auto">
-               <a href="{% url 'add_subject' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Subject</a>
+               <a href="{% url 'add_subject' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une Matière</a>
             </div>
             {% endif %}
          </div>
@@ -21,12 +21,10 @@
                   <thead>
                      <tr>
                         <th>ID</th>
-                        <th>Name</th>
-                        <th>Class</th>
-                        <th>Department</th>
-                        {% if request.user.is_admin %}
-                        <th class="text-right">Action</th>
-                        {% endif %}
+                        <th>Nom de la Matière</th>
+                        <th>Classe / Filière</th>
+                        <th>Département</th>
+                        <th class="text-right">Actions de Gestion</th>
                      </tr>
                   </thead>
                   <tbody>
@@ -36,19 +34,34 @@
                         <td>{{ sub.name }}</td>
                         <td>{{ sub.class_name }}</td>
                         <td>{{ sub.department.name }}</td>
-                        {% if request.user.is_admin %}
                         <td class="text-right">
                            <div class="actions">
+                              <!-- Resources Link (Available to all) -->
+                              <a href="{% url 'subject_resources' sub.subject_id %}" class="btn btn-sm btn-outline-info mr-2" title="Voir les ressources">
+                                 <i class="fas fa-book-open mr-1"></i> Ressources
+                              </a>
+
+                              <!-- Teacher/Admin Manage Link (Phase 6: Open for all dept teachers) -->
+                              {% if request.user.is_admin or request.user.is_teacher %}
+                              <a href="{% url 'manage_subject_resources' sub.subject_id %}" class="btn btn-sm btn-outline-primary mr-2" title="Gérer les cours">
+                                 <i class="fas fa-file-upload"></i>
+                              </a>
+                              <a href="{% url 'manage_assignments' sub.subject_id %}" class="btn btn-sm btn-outline-warning mr-2" title="Gérer les devoirs">
+                                 <i class="fas fa-tasks"></i>
+                              </a>
+                              {% endif %}
+
+                              {% if request.user.is_admin %}
                               <a href="{% url 'edit_subject' sub.subject_id %}" class="btn btn-sm bg-success-light mr-2"><i class="fas fa-pen"></i></a>
                               <form action="{% url 'delete_subject' sub.subject_id %}" method="POST" style="display:inline;">
                                  {% csrf_token %}
-                                 <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('Delete this subject?');">
+                                 <button type="submit" class="btn btn-sm bg-danger-light" onclick="return confirm('Supprimer cette matière ?');">
                                     <i class="fas fa-trash"></i>
-                                 </button>
+                                  </button>
                               </form>
+                              {% endif %}
                            </div>
                         </td>
-                        {% endif %}
                      </tr>
                      {% endfor %}
                   </tbody>

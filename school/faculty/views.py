@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Teacher, Department, Subject
+from .models import Teacher, Department, Subject, SubjectResource, Assignment, Submission
 from home_auth.models import CustomUser
-from student.models import Student, Exam, Holiday, TimeTable
+from home_auth.utils import send_notification
+from student.models import Student, Exam, Holiday, TimeTable, ExamResult
 
 def index(request):
     return render(request, 'authentication/login.html')
@@ -287,10 +288,30 @@ def review_requests(request):
             user.save()
             acc_req.save()
             
+            # NOTIFY USER (Phase 5)
+            from home_auth.utils import send_notification
+            send_notification(
+                user=user,
+                title="🎉 Bienvenue sur Smart Campus !",
+                message=f"Votre compte en tant que '{acc_req.requested_role}' a été approuvé. Connectez-vous maintenant !",
+                notification_type='success',
+                link='/login/'
+            )
+            
         elif action == 'reject':
             acc_req.status = 'Rejected'
             acc_req.justification = justification
             acc_req.save()
+            
+            # NOTIFY USER (Phase 5)
+            from home_auth.utils import send_notification
+            send_notification(
+                user=acc_req.user,
+                title="❌ Demande d'Inscription Refusée",
+                message=f"Votre demande a été refusée par l'admin. Motif : {justification}",
+                notification_type='danger',
+                link='/login/'
+            )
             
         return redirect('review_requests')
         
@@ -480,16 +501,15 @@ def activities_board(request):
         date = request.POST.get('date')
         if title and desc and loc and date:
             Activity.objects.create(title=title, description=desc, location=loc, date=date)
-            from home_auth.models import Notification, CustomUser
-            users = CustomUser.objects.filter(is_admin=False)
-            for u in users:
-                Notification.objects.create(
-                    user=u,
-                    title=f"📅 Activité : {title}",
-                    message=f"Rendez-vous à {loc}.",
-                    notification_type='info',
-                    link='/activities_board/'
-                )
+            
+            # Notify Everyone (Phase 5)
+            from home_auth.utils import notify_everyone
+            notify_everyone(
+                title=f"📅 Activité Campus : {title}",
+                message=f"Nouvel événement prévu à {loc}. Venez nombreux !",
+                notification_type='info',
+                link='/faculty/activities_board/'
+            )
             from django.contrib import messages
             messages.success(request, "Activité programmée avec succès !")
             return redirect('activities_board')
@@ -768,13 +788,26 @@ def admin_manage_cards(request):
         
         if action == 'reject':
             req.status = 'Refusée'
-            req.admin_notes = request.POST.get('rejection_reason', 'Non conforme')
+            reason = request.POST.get('rejection_reason', 'Non conforme')
+            req.admin_notes = reason
             req.save()
+            
+            # NOTIFY STUDENT
+            from home_auth.utils import send_notification
+            if req.student.user:
+                send_notification(
+                    user=req.student.user,
+                    title="❌ Carte Étudiante Refusée",
+                    message=f"Votre demande de carte a été refusée. Motif : {reason}",
+                    notification_type='danger',
+                    link='/student/cards/request/'
+                )
             messages.success(request, f"La demande de {req.student.first_name} a été refusée.")
             
         elif action == 'generate':
             from PIL import Image, ImageDraw, ImageFont
             try:
+                # ... [Keep previous PIL generation code exactly as is] ...
                 img = Image.new('RGB', (600, 380), color=(255, 255, 255))
                 draw = ImageDraw.Draw(img)
                 draw.rectangle([(0, 0), (600, 80)], fill=(0, 102, 204))
@@ -798,11 +831,13 @@ def admin_manage_cards(request):
                 
                 if req.photo:
                     try:
-                        student_photo = Image.open(req.photo.path)
-                        student_photo = student_photo.resize((150, 200)) 
+                        student_photo = Image.open(req.photo)
+                        if student_photo.mode in ("RGBA", "P"):
+                            student_photo = student_photo.convert("RGB")
+                        student_photo = student_photo.resize((150, 200), Image.Resampling.LANCZOS)
                         img.paste(student_photo, (20, 110))
                     except Exception as e:
-                        pass
+                        messages.warning(request, f"Note: La photo n'a pas pu être insérée ({str(e)}).")
                         
                 draw.rectangle([(0, 330), (600, 380)], fill=(240, 240, 240))
                 draw.text((20, 345), "Cette carte est strictement personnelle.", fill=(100,100,100), font=font_small)
@@ -816,6 +851,17 @@ def admin_manage_cards(request):
                 req.status = 'Générée'
                 req.save()
                 
+                # NOTIFY STUDENT
+                from home_auth.utils import send_notification
+                if req.student.user:
+                    send_notification(
+                        user=req.student.user,
+                        title="🪪 Carte Étudiante Disponible",
+                        message="Votre carte d'étudiant a été générée avec succès. Vous pouvez la consulter dans votre espace.",
+                        notification_type='success',
+                        link='/student/cards/request/'
+                    )
+                
                 messages.success(request, f"La carte de {s.first_name} a été générée avec succès.")
             except Exception as e:
                 import traceback
@@ -826,3 +872,375 @@ def admin_manage_cards(request):
 
     requests_list = StudentCardRequest.objects.all().select_related('student').order_by('-request_date')
     return render(request, 'faculty/admin_manage_cards.html', {'requests': requests_list})
+
+from .models import SubjectResource
+import os
+
+@login_required
+def manage_subject_resources(request, subject_id):
+    subject = get_object_or_404(Subject, subject_id=subject_id)
+    
+    # Check permissions (Admin or the Teacher assigned to this subject)
+    is_authorized = False
+    if request.user.is_admin:
+        is_authorized = True
+    elif request.user.is_teacher:
+        teacher = Teacher.objects.filter(user=request.user).first()
+        # Allow access if assigned teacher OR belongs to the same department (Phase 6)
+        if subject.teacher == teacher or (teacher and teacher.department == subject.department):
+            is_authorized = True
+            
+    if not is_authorized:
+        messages.error(request, "Vous n'avez pas l'autorisation de gérer les ressources de cette matière.")
+        return redirect('subject_list')
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        res_type = request.POST.get('resource_type')
+        github_url = request.POST.get('github_url')
+        file = request.FILES.get('file')
+        
+        if not name or not res_type:
+            messages.error(request, "Veuillez remplir tous les champs obligatoires.")
+        else:
+            teacher = Teacher.objects.filter(user=request.user).first()
+            
+            # Validation for File
+            if file:
+                # 1. Size Validation (100 MB)
+                if file.size > 100 * 1024 * 1024:
+                    messages.error(request, "Le fichier est trop volumineux (max 100 Mo).")
+                    return redirect('manage_subject_resources', subject_id=subject_id)
+                
+                # 2. Extension Validation (.docx only as requested)
+                ext = os.path.splitext(file.name)[1].lower()
+                if ext != '.docx':
+                    messages.error(request, "Seuls les fichiers .docx sont autorisés par votre professeur.")
+                    return redirect('manage_subject_resources', subject_id=subject_id)
+            
+            resource = SubjectResource.objects.create(
+                subject=subject,
+                name=name,
+                resource_type=res_type,
+                file=file,
+                github_url=github_url,
+                uploaded_by=teacher
+            )
+            
+            # --- NOTIFICATION (Phase 2 Fix) ---
+            # Notify all students in this class
+            target_students = Student.objects.filter(student_class=subject.class_name)
+            for s in target_students:
+                if s.user:
+                    send_notification(
+                        user=s.user,
+                        title=f"📚 Nouveau Cours : {subject.name}",
+                        message=f"Le support '{name}' ({res_type}) est disponible.",
+                        notification_type='info',
+                        link=f"/faculty/subject/{subject.subject_id}/resources/"
+                    )
+            
+            messages.success(request, f"La ressource '{name}' a été ajoutée. Les {target_students.count()} étudiants de la classe ont été notifiés.")
+            return redirect('manage_subject_resources', subject_id=subject_id)
+
+    resources = subject.resources.all().order_by('-created_at')
+    return render(request, 'faculty/manage_resources.html', {
+        'subject': subject,
+        'resources': resources
+    })
+
+@login_required
+def subject_resources(request, subject_id):
+    subject = get_object_or_404(Subject, subject_id=subject_id)
+    resources = subject.resources.all().order_by('-created_at')
+    
+    return render(request, 'faculty/subject_resources.html', {
+        'subject': subject,
+        'resources': resources
+    })
+
+@login_required
+def delete_resource(request, res_id):
+    resource = get_object_or_404(SubjectResource, id=res_id)
+    s_id = resource.subject.subject_id
+    
+    # Permission check
+    if not request.user.is_admin:
+        teacher = Teacher.objects.filter(user=request.user).first()
+        if resource.uploaded_by != teacher:
+            messages.error(request, "Action non autorisée.")
+            return redirect('subject_list')
+            
+    resource.delete()
+    messages.success(request, "Ressource supprimée.")
+    return redirect('manage_subject_resources', subject_id=s_id)
+
+@login_required
+def manage_assignments(request, subject_id):
+    subject = get_object_or_404(Subject, subject_id=subject_id)
+    
+    # Permission check
+    is_authorized = False
+    if request.user.is_admin:
+        is_authorized = True
+    elif request.user.is_teacher:
+        teacher = Teacher.objects.filter(user=request.user).first()
+        # Allow access if assigned teacher OR belongs to same department (Phase 6)
+        if subject.teacher == teacher or (teacher and teacher.department == subject.department):
+            is_authorized = True
+            
+    if not is_authorized:
+        messages.error(request, "Accès refusé.")
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        due_date = request.POST.get('due_date')
+        file = request.FILES.get('file')
+        github_url = request.POST.get('github_url')
+        
+        from django.utils import timezone
+        from datetime import datetime
+        
+        # Convert string due_date to datetime if it's a string
+        if due_date and isinstance(due_date, str):
+            due_date_obj = datetime.strptime(due_date, '%Y-%m-%dT%H:%M')
+            due_date_obj = timezone.make_aware(due_date_obj)
+        else:
+            due_date_obj = timezone.now() + timezone.timedelta(days=7) # Default if missing
+
+        assignment = Assignment.objects.create(
+            title=title,
+            description=description,
+            subject=subject,
+            teacher=teacher,
+            due_date=due_date_obj,
+            file=file,
+            github_url=github_url
+        )
+        
+        # --- NOTIFICATION ENRICHIE (Phase 4.2) ---
+        duration = assignment.due_date - timezone.now()
+        days = duration.days
+        hours = duration.seconds // 3600
+        duration_str = f"{days}j {hours}h" if days > 0 else f"{hours}h"
+
+        target_students = Student.objects.filter(student_class=subject.class_name)
+        for s in target_students:
+            if s.user:
+                send_notification(
+                    user=s.user,
+                    title=f"📝 Nouveau Devoir : {subject.name}",
+                    message=f"Sujet : {title}. Durée : {duration_str}. Date limite : {assignment.due_date.strftime('%d/%m %H:%M')}.",
+                    notification_type='warning',
+                    link="/student/assignments/"
+                )
+        
+        messages.success(request, f"Le devoir a été publié. Durée annoncée : {duration_str}. Les {target_students.count()} étudiants ont été alertés.")
+        return redirect('manage_assignments', subject_id=subject_id)
+
+    assignments = subject.assignments.all().order_by('-created_at')
+    return render(request, 'faculty/manage_assignments.html', {
+        'subject': subject,
+        'assignments': assignments
+    })
+
+@login_required
+def student_assignments(request):
+    student = Student.objects.filter(user=request.user).first()
+    if not student:
+        messages.error(request, "Accès réservé aux étudiants.")
+        return redirect('dashboard')
+    
+    # Get subjects for this student class
+    subjects = Subject.objects.filter(class_name=student.student_class)
+    assignments = Assignment.objects.filter(subject__in=subjects).order_by('due_date')
+    
+    # Add submission status to assignments
+    from django.utils import timezone
+    for a in assignments:
+        a.user_submission = Submission.objects.filter(assignment=a, student=student).first()
+
+    return render(request, 'student/student_assignments.html', {
+        'assignments': assignments,
+        'student': student,
+        'now': timezone.now()
+    })
+
+@login_required
+def submit_assignment(request, assignment_id):
+    from django.utils import timezone
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    student = Student.objects.filter(user=request.user).first()
+    
+    if request.method == 'POST':
+        # --- VERIFICATION DATE LIMITE ---
+        if timezone.now() > assignment.due_date:
+            messages.error(request, "La date limite de dépôt est dépassée. Vous ne pouvez plus soumettre ce devoir.")
+            return redirect('student_assignments')
+
+        file = request.FILES.get('file')
+        github_url = request.POST.get('github_url')
+        remarks = request.POST.get('remarks')
+        
+        # Check if already submitted
+        submission = Submission.objects.filter(assignment=assignment, student=student).first()
+        if submission:
+            submission.file = file or submission.file
+            submission.github_url = github_url or submission.github_url
+            submission.student_remarks = remarks
+            submission.save()
+            messages.success(request, "Votre rendu a été mis à jour.")
+        else:
+            Submission.objects.create(
+                assignment=assignment,
+                student=student,
+                file=file,
+                github_url=github_url,
+                student_remarks=remarks
+            )
+            
+            # NOTIFICATION for teacher
+            if assignment.teacher and assignment.teacher.user:
+                send_notification(
+                    user=assignment.teacher.user,
+                    title=f"📥 Nouveau Rendu : {assignment.title}",
+                    message=f"L'étudiant {student.first_name} {student.last_name} a déposé son travail.",
+                    notification_type='success',
+                    link=f"/faculty/assignments/manage/{assignment.subject.subject_id}/" # To be updated with submissions view
+                )
+            
+            messages.success(request, "Votre travail a été déposé avec succès !")
+            
+        return redirect('student_assignments')
+    
+    return redirect('student_assignments')
+
+from django.db.models import Count, Avg, Q
+from student.models import AttendanceRecord
+
+@login_required
+def admin_advanced_analytics(request):
+    if not request.user.is_admin:
+        return redirect('dashboard')
+        
+    # 1. Students per Department (Polar Area)
+    depts = Department.objects.all()
+    dept_stats = []
+    for d in depts:
+        # Link students to departments via their class_name (as defined in Subjects)
+        class_names = Subject.objects.filter(department=d).values_list('class_name', flat=True).distinct()
+        count = Student.objects.filter(student_class__in=class_names).count()
+        dept_stats.append({'name': d.name, 'count': count or 0})
+
+    # 2. Performance Radar (Spider) - Comparing Depts on 3 axes: Avg Grade, Attendance, Resource Count
+    radar_data = {
+        'labels': [d.name for d in depts[:6]], # Top 6 for readability
+        'grades': [],
+        'attendance': [],
+        'resources': []
+    }
+    
+    for d in depts[:6]:
+        # Avg Grade
+        avg_g = ExamResult.objects.filter(exam__subject__department=d).aggregate(Avg('marks_obtained'))['marks_obtained__avg'] or 12
+        radar_data['grades'].append(round(float(avg_g), 1))
+        
+        # Attendance % (Mock/Simple calculation)
+        att_count = AttendanceRecord.objects.filter(session__timetable__subject__department=d).count()
+        radar_data['attendance'].append(min(100, (att_count * 2) + 70)) # Scaling for demo
+        
+        # Resources count
+        res_count = SubjectResource.objects.filter(subject__department=d).count()
+        radar_data['resources'].append(res_count * 10 or 20) # Scaling for radar (max 100)
+
+    # 3. Success / Failure (Doughnut)
+    total_res = ExamResult.objects.count()
+    success = ExamResult.objects.filter(marks_obtained__gte=10).count()
+    failure = total_res - success if total_res > 0 else 5
+
+    # 4. UI Stats Items (for Glassmorphism design)
+    stats_items = [
+        ("Étudiants Inscrits", Student.objects.count(), "fa-users", "#22d3ee"),
+        ("Corps Professoral", Teacher.objects.count(), "fa-user-tie", "#10b981"),
+        ("Taux de Réussite", success, "fa-check-double", "#f59e0b"),
+        ("Alertes de Risque", failure, "fa-exclamation-triangle", "#f43f5e"),
+    ]
+
+    return render(request, 'faculty/admin_analytics.html', {
+        'dept_stats': dept_stats,
+        'radar_data': radar_data,
+        'success_count': success or 15,
+        'failure_count': failure or 5,
+        'total_students': Student.objects.count(),
+        'total_teachers': Teacher.objects.count(),
+        'stats_items': stats_items
+    })
+
+@login_required
+def view_submissions(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    # Permission check
+    is_authorized = False
+    if request.user.is_admin:
+        is_authorized = True
+    elif request.user.is_teacher:
+        teacher = Teacher.objects.filter(user=request.user).first()
+        # Allow access if assigned teacher OR belongs to same dept (Phase 6)
+        if assignment.subject.teacher == teacher or (teacher and teacher.department == assignment.subject.department):
+            is_authorized = True
+            
+    if not is_authorized:
+        messages.error(request, "Accès refusé.")
+        return redirect('dashboard')
+        
+    submissions = assignment.submissions.all().select_related('student')
+    
+    # --- STATISTIQUES DE PARTICIPATION (Phase 4.2) ---
+    total_students = Student.objects.filter(student_class=assignment.subject.class_name).count()
+    submitted_count = submissions.count()
+    missing_count = total_students - submitted_count
+    participation_rate = round((submitted_count / total_students * 100), 1) if total_students > 0 else 0
+
+    return render(request, 'faculty/view_submissions.html', {
+        'assignment': assignment,
+        'submissions': submissions,
+        'stats': {
+            'total': total_students,
+            'submitted': submitted_count,
+            'missing': missing_count,
+            'rate': participation_rate
+        }
+    })
+
+@login_required
+def grade_submission(request, submission_id):
+    submission = get_object_or_404(Submission, id=submission_id)
+    
+    if request.method == 'POST':
+        grade = request.POST.get('grade')
+        feedback = request.POST.get('feedback')
+        
+        try:
+            submission.grade = grade
+            submission.teacher_feedback = feedback
+            submission.is_graded = True
+            submission.save()
+            
+            # NOTIFICATION for student
+            if submission.student.user:
+                send_notification(
+                    user=submission.student.user,
+                    title=f"⭐ Note Disponible : {submission.assignment.title}",
+                    message=f"Votre travail a été corrigé. Note : {grade}/20.",
+                    notification_type='success',
+                    link="/student/assignments/"
+                )
+            
+            messages.success(request, f"Note enregistrée pour {submission.student.first_name}.")
+        except Exception as e:
+            messages.error(request, f"Erreur lors de l'enregistrement : {str(e)}")
+            
+    return redirect('view_submissions', assignment_id=submission.assignment.id)

@@ -241,6 +241,14 @@
                                                 <span class="badge badge-pill text-white mb-2 py-1 px-2 room-badge {% if ev.status == 'Pending' %}is-pending{% endif %}" style="--badge-bg: {{ ev.colors.main|default:'#2563eb' }};"><i class="fas fa-door-open mr-1"></i>{{ ev.room_no }}</span><br>
                                                 <small class="text-muted font-weight-bold"><i class="fas fa-chalkboard-teacher text-secondary mr-1"></i>Pr. {{ ev.teacher.last_name }}</small>
                                                 {% if ev.is_temporary %}<br><small class="text-info font-weight-bold" style="font-size: 9px;">({{ ev.reason }})</small>{% endif %}
+                                                
+                                                {% if is_admin or ev.teacher.user == request.user %}
+                                                <div class="mt-2 pt-2 border-top" style="border-top-color: rgba(0,0,0,0.05) !important;">
+                                                    <a href="{% url 'start_attendance_session' ev.id %}" class="btn btn-primary btn-sm btn-block shadow-sm" style="font-size: 10px; border-radius: 8px; background: {{ ev.colors.main|default:'#2563eb' }}; border: none;">
+                                                        <i class="fas fa-qrcode mr-1"></i>ÉMARGEMENT
+                                                    </a>
+                                                </div>
+                                                {% endif %}
                                             </div>
                                             {% endfor %}
                                             {% else %}
@@ -309,6 +317,12 @@
                                         <small class="font-weight-bold class-info"
                                             style="--text-color: {{ ev.colors.border|default:'#ef4444' }};"><i
                                                 class="fas fa-users mr-1"></i>{{ ev.class_name }}</small>
+                                        
+                                        <div class="mt-2 pt-2 border-top" style="border-top-color: rgba(0,0,0,0.05) !important;">
+                                            <a href="{% url 'start_attendance_session' ev.id %}" class="btn btn-primary btn-sm btn-block shadow-sm" style="font-size: 10px; border-radius: 8px; background: {{ ev.colors.main|default:'#2563eb' }}; border: none;">
+                                                <i class="fas fa-qrcode mr-1"></i>ÉMARGEMENT
+                                            </a>
+                                        </div>
                                         {% else %}
                                         <small class="text-muted font-weight-bold"><i
                                                 class="fas fa-chalkboard-teacher text-secondary mr-1"></i>Pr. {{ ev.teacher.last_name }}</small>
