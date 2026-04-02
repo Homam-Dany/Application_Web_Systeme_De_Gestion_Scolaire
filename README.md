@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-# 🎓 PreSkool - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
+
 =======
 
 # 🎓 PRESKOOL - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
