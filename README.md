@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # 🎓 PRESKOOL - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
+=======
+# 🎓 PreSkool - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
+>>>>>>> 2bd2ae2c975dd2d5922430d4a59de3fd4d32ed14
 
 [![Django](https://img.shields.io/badge/Framework-Django%204.2-green.svg)](https://www.djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
