@@ -8,16 +8,13 @@
 
 **PreSkool** est une plateforme complète d'apprentissage en ligne (LMS) et de gestion scolaire (ERP) de nouvelle génération. Ce projet transforme l'expérience académique traditionnelle en un environnement numérique **Premium**, **Intelligent** et **Collaboratif**.
 
-> [!NOTE]
-> *L'ensemble des visuels et captures d'écran de l'interface graphique est disponible en haute résolution dans notre [Dossier Drive Principale du Projet](https://drive.google.com/drive/u/0/folders/1dMC407iPSG4S3uP4X1ZCLTAdBlkRav79).*
-
 ---
 
 ## 🎥 Démonstration Vidéo
 
 Découvrez l'application en action à travers notre vidéo de démonstration complète, présentant l'interface utilisateur, le parcours étudiant, le parcours professeur et l'interface administrateur :
 
-▶️ **[Voir la vidéo de présentation (Lien Google Drive)](https://drive.google.com/drive/folders/1fB2lloK0bYfbs3QJr7CCFwb-uTgFxcIs?usp=drive_link)**
+▶️ **[Voir la vidéo de présentation (Lien Google Drive)](https://drive.google.com/file/d/1uAXzynpPjorvJnpC_m9ijB3-THTm4V_T/view?usp=drive_link)**
 
 ---
 
