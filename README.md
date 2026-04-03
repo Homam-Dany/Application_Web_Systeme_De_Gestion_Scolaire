@@ -1,35 +1,36 @@
-<<<<<<< HEAD
 # 🎓 PreSkool - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
-=======
 
-# 🎓 PRESKOOL - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
-
-
->>>>>>> 85cad740a9d035b4daafca70798d85353fcf50cb
-
-[![Django](https://img.shields.io/badge/Framework-Django%204.2-green.svg)](https://www.djangoproject.com/)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Framework-Django%206.0-green.svg)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.14%2B-blue.svg)](https://www.python.org/)
 [![UI/UX](https://img.shields.io/badge/UI-Premium%20Glassmorphism-purple.svg)](#)
 [![AI-Powered](https://img.shields.io/badge/AI-Chatbot%20Assistant-orange.svg)](#)
 [![Security](https://img.shields.io/badge/Security-QR%20Code%20Attendance-blue.svg)](#)
 
-**PreSkool** est une plateforme complète de gestion scolaire (ERP) et d'apprentissage en ligne (LMS) de nouvelle génération. Ce projet transforme l'expérience académique traditionnelle en un environnement numérique **Premium**, **Intelligent** et **Collaboratif**. 
+**PreSkool** est une plateforme complète d'apprentissage en ligne (LMS) et de gestion scolaire (ERP) de nouvelle génération. Ce projet transforme l'expérience académique traditionnelle en un environnement numérique **Premium**, **Intelligent** et **Collaboratif**.
 
 > [!NOTE]
-> *L'ensemble des visuels et captures d'écran de l'interface graphique est disponible en haute résolution dans notre [Dossier Drive du Projet](https://drive.google.com/drive/u/0/folders/1dMC407iPSG4S3uP4X1ZCLTAdBlkRav79).*
+> *L'ensemble des visuels et captures d'écran de l'interface graphique est disponible en haute résolution dans notre [Dossier Drive Principale du Projet](https://drive.google.com/drive/u/0/folders/1dMC407iPSG4S3uP4X1ZCLTAdBlkRav79).*
+
+---
+
+## 🎥 Démonstration Vidéo
+
+Découvrez l'application en action à travers notre vidéo de démonstration complète, présentant l'interface utilisateur, le parcours étudiant, professeur et administrateur, ainsi que toutes les fonctionnalités phares :
+
+▶️ **[Voir la vidéo de démonstration de l'application](https://drive.google.com/drive/folders/1fB2lloK0bYfbs3QJr7CCFwb-uTgFxcIs?usp=sharing)**
 
 ---
 
 ## ✨ Fonctionnalités Phares & Innovations
 
 *   🤖 **Assistant IA (Chatbot)** : Un chatbot intelligent intégré pour accompagner et guider les utilisateurs au quotidien.
-*   🌓 **Premium Dark/Light Mode** : Un design moderne, élégant et ergonomique, avec un support complet du mode sombre pour le confort visuel.
+*   🌓 **Premium Dark/Light Mode** : Un design moderne, élégant et ergonomique, avec un support complet du mode sombre pour un confort visuel optimal.
 *   🌍 **Traduction Intégrée (i18n)** : Support multilingue instantané grâce à l'intégration de Google Translate.
-*   📲 **Présence par QR Code Dynamique** : Un système de pointage innovant et ultra-sécurisé avec un QR Code qui s'actualise de façon périodique.
-*   🪪 **Cartes Étudiantes Digitales** : Génération automatique de cartes d'identité numériques esthétiques, incluant la photo et le groupe sanguin de l'étudiant.
-*   📄 **Générateur de Documents Officiels** : Création automatisée et export au format PDF d'attestations et de certificats de scolarité.
-*   📊 **Tableaux de Bord Analytics** : Graphiques interactifs (via Chart.js) pour visualiser les performances, les présences et les statistiques globales.
-*   🔍 **OmniSearch** : Un moteur de recherche global ultra-rapide pour naviguer facilement dans l'application.
+*   📲 **Présence par QR Code Dynamique** : Un système de pointage innovant et ultra-sécurisé via un QR Code qui s'actualise périodiquement.
+*   🪪 **Cartes Étudiantes Digitales** : Génération automatique de cartes d'identité numériques esthétiques, incluant la photo et le groupe sanguin.
+*   📄 **Générateur de Documents Officiels** : Création automatisée et export au format PDF pour les attestations et certificats de scolarité.
+*   📊 **Tableaux de Bord Analytics** : Graphiques avancés et interactifs (via Chart.js) pour visualiser les performances académiques, les taux de présence et les statistiques administratives.
+*   🔍 **OmniSearch** : Un moteur de recherche global ultra-rapide pour naviguer instantanément au sein de l'application.
 
 ---
 
@@ -37,67 +38,67 @@
 
 ### 👑 Espace Administrateur (Direction / HOD)
 Un centre de contrôle complet pour piloter l'établissement de bout en bout.
-*   **Tableau de Bord 360°** : Vue d'ensemble des effectifs, statistiques financières et académiques.
-*   **Gestion des Utilisateurs** : Création et gestion complète des profils (Étudiants, Professeurs, Staff).
-*   **Architecture Académique** : Gestion des classes, des matières, des sessions scolaires et des départements.
-*   **Supervision des Présences** : Suivi global, génération de rapports et gestion des statistiques d'absence.
-*   **Gestion des Congés** : Validation ou refus des demandes de congés du personnel et des étudiants.
-*   **Import/Export de Données** : Synchronisation de masse (ex: emplois du temps) via des fichiers XML.
-*   **Gestion des Résultats** : Supervision globale des notes, des rattrapages et des validations de semestres.
+*   **Tableau de Bord 360°** : Vue d'ensemble des effectifs, statistiques financières et performances globales de l'établissement.
+*   **Gestion des Identités** : Création, validation et administration complète des profils (Étudiants, Professeurs, Staff).
+*   **Architecture Académique** : Gestion structurée des classes, matières, sessions scolaires et départements.
+*   **Supervision des Présences** : Suivi global, génération de rapports d'assiduité et alertes d'absentéisme.
+*   **Gestion des Flux Administratifs** : Approbation des demandes de congés, de cartes étudiantes et de salles temporaires.
+*   **Gestion des Résultats** : Supervision sécurisée des notes, gestion des procès-verbaux (rattrapages, compensations) et publication officielle des semestres.
 
-### 👩‍🏫 Espace Professeur (Staff)
-Des outils pensés pour faciliter l'enseignement et le suivi des élèves.
-*   **Tableau de Bord Pédagogique** : Statistiques de ses propres classes, taux de présence des élèves, etc.
-*   **Gestion des Présences** : Appel numérique ultra-rapide via QR Code ou saisie manuelle traditionnelle.
-*   **Évaluations & Notes** : Saisie sécurisée des notes, gestion des étudiants en rattrapage et publication des résultats.
-*   **Ressources Pédagogiques** : Partage de supports de cours, de devoirs et de liens éducatifs (ex: dépôt GitHub).
-*   **Communication** : Envoi de notifications ciblées aux étudiants.
+### 👩‍🏫 Espace Professeur
+Des outils pensés avec soin pour faciliter l'enseignement numérique et le suivi des élèves.
+*   **Tableau de Bord Pédagogique** : Statistiques personnelles, emploi du temps dynamique et alertes rapides.
+*   **Gestion Technologique des Présences** : Appel numérique ultra-rapide via session QR Code ou pointage manuel.
+*   **Évaluations & Notes** : Saisie sécurisée et centralisée des résultats d'examens avec calcul automatisé pour la plateforme.
+*   **Ressources Pédagogiques** : Centralisation et partage des supports de cours, de devoirs et de liens éducatifs (tels que des dépôts GitHub).
+*   **Communication Directe** : Envoi de notifications ciblées et messages d'alerte aux étudiants.
 
 ### 🎓 Espace Étudiant
-Un portail personnel intuitif pour suivre sa scolarité en toute autonomie.
-*   **Dashboard Analytique** : Suivi global de la progression, statistiques de présence, et visualisation via un "Radar de Compétences".
-*   **Dossier Scolaire** : Consultation sécurisée des notes, des statuts de validation (Validé, Non Validé, Rattrapage, Compensation) et de la moyenne générale.
-*   **Emploi du Temps** : Accès direct au planning des cours.
-*   **E-Learning** : Consultation et téléchargement des supports de cours et autres ressources partagées par les professeurs.
-*   **Services Administratifs** : Soumission de demandes de congés, accès à la carte étudiante digitale et téléchargement direct de diverses attestations.
+Un portail personnel ultra-intuitif pour un suivi proactif de sa scolarité.
+*   **Dashboard Analytique** : Suivi de la progression, statistiques de présence, et visualisation du profil via un radar de compétences.
+*   **Dossier Scolaire & Notes** : Consultation des notes, des statuts de validation (Validé, Non Validé, Rattrapage) et calcul en temps réel de la moyenne.
+*   **Planning & Cours** : Accès direct à l'emploi du temps actualisé et aux alertes de changements de salles.
+*   **E-Learning Actif** : Téléchargement instantané des supports de cours et des travaux partagés par les professeurs.
+*   **Guichet Administratif Numérique** : Interface en un clic pour soumettre des demandes (carte étudiante, attestations de scolarité, réclamations).
 
 ---
 
 ## 🛠️ Stack Technologique
 
 **Backend**
-*   Python 3.10+
-*   Django 4.2+
-*   SQLite (Base de données par défaut, facilement extensible vers PostgreSQL/MySQL)
+*   Python 3.14+
+*   Django 6.0+
+*   SQLite (Base de données configurée par défaut, évolutive vers PostgreSQL/MySQL)
 
 **Frontend**
 *   HTML5 / CSS3 / JavaScript (ES6+)
-*   Bootstrap (Thème Premium avec éléments de Glassmorphism)
-*   **Chart.js** (Visualisation de données et graphiques radar)
-*   **Toastify.js** (Notifications et alertes non intrusives)
+*   Vue & Conception UI (Thème Premium avec composants *Glassmorphism*)
+*   **Chart.js** (Visualisation de données et algorithmes de rendus graphiques)
+*   **Toastify.js** (Notifications contextuelles en temps réel)
 
-**Outils & Librairies**
-*   **ReportLab** (Génération robuste de PDF)
-*   **QRCode.js / qrcode** (Génération de QR codes pour l'Attendance)
+**Outils & Génération**
+*   **ReportLab** (Production et manipulation avancée de PDFs)
+*   **QRCode.js** (Cryptographie et génération de QR Codes pour l'Attendance Tracker)
 
 ---
 
 ## 🚀 Guide d'Installation
 
 ### 1. Prérequis
-*   Python 3.8 ou supérieur installé sur votre machine.
-*   Git.
+*   Python 3.10 ou supérieur installé sur votre machine.
+*   Git installé pour le clonage du projet.
 
 ### 2. Clonage du dépôt
 ```bash
 git clone https://github.com/Homam-Dany/Application_Web_Systeme_De_Gestion_Scolaire.git
 cd Application_Web_Systeme_De_Gestion_Scolaire
+cd school
 ```
 
 ### 3. Configuration de l'Environnement Virtuel
-Il est fortement recommandé d'utiliser un environnement virtuel pour isoler les dépendances.
+Il est fortement recommandé d'utiliser un environnement virtuel python pour isoler les dépendances.
 ```bash
-# Création de l'environnement
+# Création de l'environnement virtuel
 python -m venv venv
 
 # Activation (Windows)
@@ -112,22 +113,24 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 5. Base de données et Migrations
+### 5. Configurer la base de données (Migrations)
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 6. Lancement du serveur
+### 6. Lancement du serveur de développement
 ```bash
 python manage.py runserver
 ```
-📍 L'application sera accessible dans votre navigateur à l'adresse : `http://127.0.0.1:8000/`
+
+📍 L'application sera alors accessible localement dans votre navigateur informatique : `http://127.0.0.1:8000/`
 
 ---
 
 ## 💡 À Propos
-Ce projet a été développé dans le cadre du module **PFM**, avec une attention toute particulière portée sur :
-- L'**Expérience Utilisateur** (UX/UI de haute qualité).
-- L'**Optimisation des processus administratifs** scolaires.
-- L'intégration de **fonctionnalités modernes** offrant une réelle valeur ajoutée (Mode Sombre, Multilingue, IA, QR Code).
+
+Ce projet a été développé dans le cadre du projet **PFM**, avec trois axes d'attention prioritaires :
+- L'**Expérience Utilisateur** (Conception UI/UX de pointe).
+- La **Digitalisation et l'Optimisation** de l'ensemble des processus administratifs et pédagogiques de l'établissement.
+- L'intégration de **technologies de pointe** offrant une expérience enrichissante (Mode Sombre global, Assistant Virtuel IA, Architecture Multilingue).

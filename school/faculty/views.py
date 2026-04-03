@@ -937,7 +937,7 @@ def manage_subject_resources(request, subject_id):
                         title=f"📚 Nouveau Cours : {subject.name}",
                         message=f"Le support '{name}' ({res_type}) est disponible.",
                         notification_type='info',
-                        link=f"/faculty/subject/{subject.subject_id}/resources/"
+                        link=f"/subjects/resources/view/{subject.subject_id}/"
                     )
             
             messages.success(request, f"La ressource '{name}' a été ajoutée. Les {target_students.count()} étudiants de la classe ont été notifiés.")

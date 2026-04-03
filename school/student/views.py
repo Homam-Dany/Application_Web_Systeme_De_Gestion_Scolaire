@@ -534,7 +534,7 @@ def request_certificate(request):
                 title="📜 Demande d'attestation",
                 message=f"L'étudiant {student.first_name} {student.last_name} demande : {cert_type}.",
                 notification_type='warning',
-                link='/faculty/certificates/manage/'
+                link='/student/admin-certificates/'
             )
             messages.success(request, f"Votre demande de '{cert_type}' a été envoyée à l'administration.")
             return redirect('request_certificate')
@@ -579,7 +579,7 @@ def request_temporary_class(request):
             title="📅 Nouvelle demande de séance",
             message=f"Le Pr. {teacher.last_name} demande une séance de {reason} pour {subject.class_name}.",
             notification_type='warning',
-            link='/faculty/timetable/manage-temp/'
+            link='/student/timetable/manage-temp/'
         )
             
         messages.success(request, "Votre demande a été envoyée avec succès et est en attente de validation.")
@@ -730,7 +730,7 @@ def request_student_card(request):
                 title="🪪 Nouvelle demande de carte",
                 message=f"L'étudiant {student.first_name} {student.last_name} a soumis une demande de carte ID.",
                 notification_type='info',
-                link='/faculty/cards/manage/'
+                link='/admin-cards/'
             )
             from django.contrib import messages
             messages.success(request, "Votre demande de carte d'étudiant a été envoyée avec succès.")
