@@ -17,7 +17,7 @@
 
 Découvrez l'application en action à travers notre vidéo de démonstration complète, présentant l'interface utilisateur, le parcours étudiant, le parcours professeur et l'interface administrateur :
 
-▶️ **[Voir la vidéo de présentation (Lien Google Drive)](https://drive.google.com/drive/folders/1fB2lloK0bYfbs3QJr7CCFwb-uTgFxcIs?usp=sharing)**
+▶️ **[Voir la vidéo de présentation (Lien Google Drive)](https://drive.google.com/drive/folders/1fB2lloK0bYfbs3QJr7CCFwb-uTgFxcIs?usp=drive_link)**
 
 ---
 
