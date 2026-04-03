@@ -8,6 +8,8 @@
 
 **PreSkool** est une plateforme complète d'apprentissage en ligne (LMS) et de gestion scolaire (ERP) de nouvelle génération. Ce projet transforme l'expérience académique traditionnelle en un environnement numérique **Premium**, **Intelligent** et **Collaboratif**.
 
+![PreSkool Academy - Architecture et Vue d'ensemble](assets/preskool_infographic.png)
+
 ---
 
 ## 🎥 Démonstration Vidéo
