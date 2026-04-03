@@ -1,7 +1,20 @@
+<<<<<<< HEAD
 # 🎓 PreSkool - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
 
 [![Django](https://img.shields.io/badge/Framework-Django%206.0-green.svg)](https://www.djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.14%2B-blue.svg)](https://www.python.org/)
+=======
+
+=======
+
+# 🎓 PRESKOOL - Système de Gestion Scolaire Intelligent (LMS/ERP) 🚀
+
+
+>>>>>>> 
+
+[![Django](https://img.shields.io/badge/Framework-Django%204.2-green.svg)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+>>>>>>> d6bbccfee6f38255109679ad2ea1223626d2b3d3
 [![UI/UX](https://img.shields.io/badge/UI-Premium%20Glassmorphism-purple.svg)](#)
 [![AI-Powered](https://img.shields.io/badge/AI-Chatbot%20Assistant-orange.svg)](#)
 [![Security](https://img.shields.io/badge/Security-QR%20Code%20Attendance-blue.svg)](#)
